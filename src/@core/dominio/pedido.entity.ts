@@ -1,8 +1,7 @@
-import { ProdutoCardapio } from './produto-cardapio.entity';
 export class Pedido {
   id: string;
   mesa: string;
-  horaAbertura: string; //-----------------
+  horaAbertura: Date;
   valorConta: number;
-  produtosVendidos: Map<ProdutoCardapio, number>;
+  produtosVendidos: Map<string, number>; //idProdutoCardapio, quantidade
 }

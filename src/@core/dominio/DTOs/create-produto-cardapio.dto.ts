@@ -1,7 +1,6 @@
-import { CATEGORIAS } from './enums/categorias.enum';
+import { CATEGORIAS } from '../enums/categorias.enum';
 
-export class ProdutoCardapio {
-  id: string;
+export class CreateProdutoCardapioDto {
   nomeProduto: string;
   categoria: CATEGORIAS;
   descricao: string;

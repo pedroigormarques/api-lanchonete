@@ -9,10 +9,4 @@ export interface IProdutosCardapioRepository {
     produto: ProdutoCardapio,
   ): Promise<ProdutoCardapio>;
   removerProduto(id: string): Promise<void>;
-
-  /*insert(todo: TodoM): Promise<void>;
-  findAll(): Promise<TodoM[]>;
-  findById(id: number): Promise<TodoM>;
-  updateContent(id: number, isDone: boolean): Promise<void>;
-  deleteById(id: number): Promise<void>;*/
 }

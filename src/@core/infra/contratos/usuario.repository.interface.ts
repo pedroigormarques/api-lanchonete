@@ -1,13 +1,12 @@
-import { Usuario } from 'src/@core/dominio/user.entity';
+import { UpdateUsuarioDto } from 'src/@core/dominio/DTOs/update-usuario.dto';
+import { CreateUsuarioDto } from 'src/@core/dominio/DTOs/create-usuario.dto';
+import { GetUsuarioDto } from 'src/@core/dominio/DTOs/get-usuario.dto';
 
-export interface IUserRepository {
-  validarUsuario(email: string, senha: string): Promise<Usuario>;
-  registrarUsuario(usuario: Usuario): Promise<Usuario>;
-  atualizarUsuario(id: string, usuario: Usuario): Promise<Usuario>;
-
-  /*insert(todo: TodoM): Promise<void>;
-  findAll(): Promise<TodoM[]>;
-  findById(id: number): Promise<TodoM>;
-  updateContent(id: number, isDone: boolean): Promise<void>;
-  deleteById(id: number): Promise<void>;*/
+export interface IUsuarioRepository {
+  validarUsuario(email: string, senha: string): Promise<GetUsuarioDto>;
+  registrarUsuario(usuario: CreateUsuarioDto): Promise<GetUsuarioDto>;
+  atualizarUsuario(
+    id: string,
+    usuario: UpdateUsuarioDto,
+  ): Promise<GetUsuarioDto>;
 }
