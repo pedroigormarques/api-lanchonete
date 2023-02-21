@@ -1,5 +1,3 @@
-import { UpdatePedidoDto } from './../../../../dominio/DTOs/update-pedido.dto';
-import { CreatePedidoDto } from './../../../../dominio/DTOs/create-pedido.dto';
 import { Pedido } from 'src/@core/dominio/pedido.entity';
 import { IPedidosRepository } from './../../../contratos/pedidos.repository.interface';
 import { randomUUID } from 'crypto';
@@ -7,19 +5,19 @@ import { randomUUID } from 'crypto';
 export class PedidosRepository implements IPedidosRepository {
   private pedidos = new Map<string, Pedido>();
 
-  async cadastrarPedido(createPedidoDto: CreatePedidoDto): Promise<Pedido> {
+  async cadastrarPedido(pedido: Pedido): Promise<Pedido> {
     const id = randomUUID();
 
-    const pedido = new Pedido();
+    const pedidoCadastrado = new Pedido();
 
-    pedido.id = id;
-    pedido.horaAbertura = new Date();
-    pedido.mesa = createPedidoDto.mesa;
-    pedido.produtosVendidos = new Map<string, number>();
-    pedido.valorConta = 0;
+    pedidoCadastrado.id = id;
+    pedidoCadastrado.horaAbertura = new Date();
+    pedidoCadastrado.mesa = pedido.mesa;
+    pedidoCadastrado.produtosVendidos = new Map<string, number>();
+    pedidoCadastrado.valorConta = 0;
 
-    this.pedidos.set(id, pedido);
-    return { ...pedido };
+    this.pedidos.set(id, pedidoCadastrado);
+    return { ...pedidoCadastrado };
   }
 
   async carregarPedidos(): Promise<Pedido[]> {
@@ -36,23 +34,19 @@ export class PedidosRepository implements IPedidosRepository {
     return { ...pedido };
   }
 
-  async atualizarPedido(
-    id: string,
-    updatePedidoDto: UpdatePedidoDto,
-  ): Promise<Pedido> {
-    const pedido = this.pedidos.get(id);
+  async atualizarPedido(id: string, pedido: Pedido): Promise<Pedido> {
+    const pedidoAtualizado = this.pedidos.get(id);
 
-    if (!pedido) {
+    if (!pedidoAtualizado) {
       throw new Error('Pedido não encontrado');
     }
 
-    if (updatePedidoDto.mesa) pedido.mesa = updatePedidoDto.mesa;
-    if (updatePedidoDto.produtosVendidos)
-      pedido.produtosVendidos = updatePedidoDto.produtosVendidos;
-    if (updatePedidoDto.valorConta)
-      pedido.valorConta = updatePedidoDto.valorConta;
+    if (pedido.mesa) pedidoAtualizado.mesa = pedido.mesa;
+    if (pedido.produtosVendidos)
+      pedidoAtualizado.produtosVendidos = pedido.produtosVendidos;
+    if (pedido.valorConta) pedidoAtualizado.valorConta = pedido.valorConta;
 
-    return { ...pedido };
+    return { ...pedidoAtualizado };
   }
 
   async removerPedido(id: string): Promise<void> {

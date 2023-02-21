@@ -1,31 +1,34 @@
-import { UpdateProdutoEstoqueDto } from './../../../../dominio/DTOs/update-produto-estoque.dto';
-import { CreateProdutoEstoqueDto } from './../../../../dominio/DTOs/create-produto-estoque.dto';
+import { randomUUID } from 'crypto';
 import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from 'src/@core/infra/contratos/produtos-estoque.repository.interface';
-
-import { randomUUID } from 'crypto';
 
 export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
   private produtos = new Map<string, ProdutoEstoque>();
 
-  async cadastrarProduto(
-    createProdutoEstoqueDto: CreateProdutoEstoqueDto,
-  ): Promise<ProdutoEstoque> {
+  async cadastrarProduto(produto: ProdutoEstoque): Promise<ProdutoEstoque> {
     const id = randomUUID();
 
-    const produto = new ProdutoEstoque();
+    const produtoCadastrado = new ProdutoEstoque();
 
-    produto.id = id;
-    produto.descricao = createProdutoEstoqueDto.descricao;
-    produto.nomeProduto = createProdutoEstoqueDto.nomeProduto;
-    produto.quantidade = createProdutoEstoqueDto.quantidade;
-    produto.unidade = createProdutoEstoqueDto.unidade;
+    produtoCadastrado.id = id;
+    produtoCadastrado.descricao = produto.descricao;
+    produtoCadastrado.nomeProduto = produto.nomeProduto;
+    produtoCadastrado.quantidade = produto.quantidade;
+    produtoCadastrado.unidade = produto.unidade;
 
-    this.produtos.set(id, produto);
-    return { ...produto };
+    this.produtos.set(id, produtoCadastrado);
+    return { ...produtoCadastrado };
   }
 
-  async carregarProdutos(): Promise<ProdutoEstoque[]> {
+  async carregarProdutos(listaIds?: string[]): Promise<ProdutoEstoque[]> {
+    if (listaIds) {
+      const lista = [] as ProdutoEstoque[];
+      listaIds.forEach((l) => {
+        lista.push(this.produtos.get(l));
+      });
+      return lista;
+    }
+
     return [...this.produtos.values()];
   }
 
@@ -41,27 +44,16 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
 
   async atualizarProduto(
     id: string,
-    updateProdutoEstoqueDto: UpdateProdutoEstoqueDto,
+    produto: ProdutoEstoque,
   ): Promise<ProdutoEstoque> {
-    const produto = this.produtos.get(id);
+    const produtoAtualizado = this.produtos.get(id);
 
-    if (!produto) {
-      throw new Error('produto não encontrado');
-    }
+    produtoAtualizado.nomeProduto = produto.nomeProduto;
+    produtoAtualizado.descricao = produto.descricao;
+    produtoAtualizado.quantidade = produto.quantidade;
+    produtoAtualizado.unidade = produto.unidade;
 
-    if (updateProdutoEstoqueDto.nomeProduto)
-      produto.nomeProduto = updateProdutoEstoqueDto.nomeProduto;
-
-    if (updateProdutoEstoqueDto.descricao)
-      produto.descricao = updateProdutoEstoqueDto.descricao;
-
-    if (updateProdutoEstoqueDto.quantidade)
-      produto.quantidade = updateProdutoEstoqueDto.quantidade;
-
-    if (updateProdutoEstoqueDto.unidade)
-      produto.unidade = updateProdutoEstoqueDto.unidade;
-
-    return { ...produto };
+    return { ...produtoAtualizado };
   }
 
   async removerProduto(id: string): Promise<void> {

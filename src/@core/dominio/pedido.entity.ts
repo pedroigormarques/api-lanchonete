@@ -1,7 +1,7 @@
 export class Pedido {
-  id: string;
+  id?: string;
   mesa: string;
-  horaAbertura: Date;
-  valorConta: number;
-  produtosVendidos: Map<string, number>; //idProdutoCardapio, quantidade
+  horaAbertura?: Date;
+  valorConta?: number;
+  produtosVendidos?: Map<string, number>; //idProdutoCardapio, quantidade
 }

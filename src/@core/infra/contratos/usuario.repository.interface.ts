@@ -1,12 +1,8 @@
-import { UpdateUsuarioDto } from 'src/@core/dominio/DTOs/update-usuario.dto';
-import { CreateUsuarioDto } from 'src/@core/dominio/DTOs/create-usuario.dto';
-import { GetUsuarioDto } from 'src/@core/dominio/DTOs/get-usuario.dto';
+import { Usuario } from 'src/@core/dominio/usuario.entity';
 
 export interface IUsuarioRepository {
-  validarUsuario(email: string, senha: string): Promise<GetUsuarioDto>;
-  registrarUsuario(usuario: CreateUsuarioDto): Promise<GetUsuarioDto>;
-  atualizarUsuario(
-    id: string,
-    usuario: UpdateUsuarioDto,
-  ): Promise<GetUsuarioDto>;
+  validarUsuario(email: string, senha: string): Promise<Usuario>;
+  registrarUsuario(usuario: Usuario): Promise<Usuario>;
+  atualizarUsuario(id: string, usuario: Usuario): Promise<Usuario>;
+  carregarUsuario(id: string): Promise<Usuario>;
 }

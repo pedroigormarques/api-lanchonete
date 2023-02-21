@@ -1,7 +1,7 @@
 export class Usuario {
-  id: string;
+  id?: string;
   email: string;
-  senha: string;
+  senha?: string;
   endereco: string;
   nomeLanchonete: string;
 }

@@ -1,7 +1,7 @@
 import { CATEGORIAS } from './enums/categorias.enum';
 
 export class ProdutoCardapio {
-  id: string;
+  id?: string;
   nomeProduto: string;
   categoria: CATEGORIAS;
   descricao: string;

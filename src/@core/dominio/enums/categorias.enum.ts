@@ -1,5 +1,5 @@
 export enum CATEGORIAS {
-  'bebidas',
-  'lanches',
-  'sobremesas',
+  bebidas = 'bebidas',
+  lanches = 'lanches',
+  sobremesas = 'sobremesas',
 }

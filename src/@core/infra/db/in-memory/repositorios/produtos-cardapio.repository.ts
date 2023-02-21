@@ -1,31 +1,35 @@
-import { UpdateProdutoCardapioDto } from './../../../../dominio/DTOs/update-produto-cardapio.dto';
-import { CreateProdutoCardapioDto } from './../../../../dominio/DTOs/create-produto-cardapio.dto';
+import { randomUUID } from 'crypto';
 import { ProdutoCardapio } from 'src/@core/dominio/produto-cardapio.entity';
 import { IProdutosCardapioRepository } from 'src/@core/infra/contratos/produtos-cardapio.repository.interface';
-import { randomUUID } from 'crypto';
 
 export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
   private produtos = new Map<string, ProdutoCardapio>();
 
-  async cadastrarProduto(
-    createProdutoCardapioDto: CreateProdutoCardapioDto,
-  ): Promise<ProdutoCardapio> {
+  async cadastrarProduto(produto: ProdutoCardapio): Promise<ProdutoCardapio> {
     const id = randomUUID();
 
-    const produto = new ProdutoCardapio();
+    const produtoCadastrado = new ProdutoCardapio();
 
-    produto.id = id;
-    produto.descricao = createProdutoCardapioDto.descricao;
-    produto.nomeProduto = createProdutoCardapioDto.nomeProduto;
-    produto.categoria = createProdutoCardapioDto.categoria;
-    produto.composicao = createProdutoCardapioDto.composicao;
-    produto.preco = createProdutoCardapioDto.preco;
+    produtoCadastrado.id = id;
+    produtoCadastrado.descricao = produto.descricao;
+    produtoCadastrado.nomeProduto = produto.nomeProduto;
+    produtoCadastrado.categoria = produto.categoria;
+    produtoCadastrado.composicao = produto.composicao;
+    produtoCadastrado.preco = produto.preco;
 
-    this.produtos.set(id, produto);
-    return { ...produto };
+    this.produtos.set(id, produtoCadastrado);
+    return { ...produtoCadastrado };
   }
 
-  async carregarProdutos(): Promise<ProdutoCardapio[]> {
+  async carregarProdutos(listaIds?: string[]): Promise<ProdutoCardapio[]> {
+    if (listaIds) {
+      const lista = [] as ProdutoCardapio[];
+      listaIds.forEach((l) => {
+        lista.push(this.produtos.get(l));
+      });
+      return lista;
+    }
+
     return [...this.produtos.values()];
   }
 
@@ -41,30 +45,17 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
 
   async atualizarProduto(
     id: string,
-    updateProdutoCardapioDto: UpdateProdutoCardapioDto,
+    produto: ProdutoCardapio,
   ): Promise<ProdutoCardapio> {
-    const produto = this.produtos.get(id);
+    const produtoAtualizado = this.produtos.get(id);
 
-    if (!produto) {
-      throw new Error('produto não encontrado');
-    }
+    produtoAtualizado.nomeProduto = produto.nomeProduto;
+    produtoAtualizado.descricao = produto.descricao;
+    produtoAtualizado.categoria = produto.categoria;
+    produtoAtualizado.composicao = produto.composicao;
+    produtoAtualizado.preco = produto.preco;
 
-    if (updateProdutoCardapioDto.nomeProduto)
-      produto.nomeProduto = updateProdutoCardapioDto.nomeProduto;
-
-    if (updateProdutoCardapioDto.descricao)
-      produto.descricao = updateProdutoCardapioDto.descricao;
-
-    if (updateProdutoCardapioDto.categoria)
-      produto.categoria = updateProdutoCardapioDto.categoria;
-
-    if (updateProdutoCardapioDto.composicao)
-      produto.composicao = updateProdutoCardapioDto.composicao;
-
-    if (updateProdutoCardapioDto.preco)
-      produto.preco = updateProdutoCardapioDto.preco;
-
-    return { ...produto };
+    return { ...produtoAtualizado };
   }
 
   async removerProduto(id: string): Promise<void> {
@@ -72,4 +63,35 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       throw new Error('produto não encontrado');
     }
   }
+
+  /*private async carregarComposicao(
+    produtosCardapio: ProdutoCardapio[],
+  ): Promise<ProdutoCardapio[]> {
+    const produtosCardapioCopia = [...produtosCardapio];
+    const listaIds = [];
+
+    produtosCardapioCopia.forEach((pc) =>
+      listaIds.push(
+        [...pc.composicao.keys()].filter(
+          (idProduto) => !listaIds.includes(idProduto),
+        ),
+      ),
+    );
+
+    const produtosEstoque = await this.estoqueRepositorio.carregarProdutos(
+      listaIds,
+    );
+
+    const produtosEstoqueMap = new Map<string, ProdutoEstoque>();
+
+    produtosEstoque.forEach((pe) => produtosEstoqueMap.set(pe.id, pe));
+
+    produtosCardapioCopia.forEach((pc) => {
+      pc.composicao.forEach(
+        (v, k) => (k = produtosEstoqueMap.get(k as string)),
+      );
+    });
+
+    return produtosCardapioCopia;
+  }*/
 }

@@ -1,9 +1,9 @@
 export enum UNIDADES {
-  'kg',
-  'g',
-  'L',
-  'ml',
-  'un',
-  'pc',
-  'lt',
+  kg = 'kg',
+  g = 'g',
+  L = 'L',
+  ml = 'ml',
+  un = 'un',
+  pc = 'pc',
+  lt = 'lt',
 }
