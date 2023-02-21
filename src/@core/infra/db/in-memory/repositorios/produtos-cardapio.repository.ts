@@ -1,46 +1,48 @@
-import { randomUUID } from 'crypto';
 import { ProdutoCardapio } from 'src/@core/dominio/produto-cardapio.entity';
 import { IProdutosCardapioRepository } from 'src/@core/infra/contratos/produtos-cardapio.repository.interface';
 
+import { ProdutoCardapioDB } from './../modelos/produto-cardapio.db-entity';
+import { ProdutosEstoqueRepository } from './produtos-estoque.repository';
+
 export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
-  private produtos = new Map<string, ProdutoCardapio>();
+  constructor(private estoqueRepository: ProdutosEstoqueRepository) {}
+
+  private produtos = new Map<string, ProdutoCardapioDB>();
 
   async cadastrarProduto(produto: ProdutoCardapio): Promise<ProdutoCardapio> {
-    const id = randomUUID();
+    const produtoCadastrado = new ProdutoCardapioDB(produto);
+    const id = produtoCadastrado.id;
 
-    const produtoCadastrado = new ProdutoCardapio();
-
-    produtoCadastrado.id = id;
-    produtoCadastrado.descricao = produto.descricao;
-    produtoCadastrado.nomeProduto = produto.nomeProduto;
-    produtoCadastrado.categoria = produto.categoria;
-    produtoCadastrado.composicao = produto.composicao;
-    produtoCadastrado.preco = produto.preco;
+    const listaUsoAtual = [...produto.composicao.keys()];
+    this.estoqueRepository.marcarRelacoes(id, listaUsoAtual);
 
     this.produtos.set(id, produtoCadastrado);
-    return { ...produtoCadastrado };
+
+    return produtoCadastrado.paraProdutoCardapio();
   }
 
   async carregarProdutos(listaIds?: string[]): Promise<ProdutoCardapio[]> {
-    if (listaIds) {
-      const lista = [] as ProdutoCardapio[];
-      listaIds.forEach((l) => {
-        lista.push(this.produtos.get(l));
-      });
-      return lista;
-    }
+    const lista = listaIds ?? [...this.produtos.keys()];
 
-    return [...this.produtos.values()];
+    const listaProdutos = [] as ProdutoCardapio[];
+    lista.forEach((idProduto) => {
+      const produto = this.produtos.get(idProduto);
+      if (!produto) {
+        throw this.erroProdutoNaoEncontrado(idProduto);
+      }
+      listaProdutos.push(produto.paraProdutoCardapio());
+    });
+    return listaProdutos;
   }
 
   async carregarProduto(id: string): Promise<ProdutoCardapio> {
     const produto = this.produtos.get(id);
 
     if (!produto) {
-      throw new Error('produto não encontrado');
+      throw this.erroProdutoNaoEncontrado(id);
     }
 
-    return { ...produto };
+    return produto.paraProdutoCardapio();
   }
 
   async atualizarProduto(
@@ -48,50 +50,60 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
     produto: ProdutoCardapio,
   ): Promise<ProdutoCardapio> {
     const produtoAtualizado = this.produtos.get(id);
+    if (!produtoAtualizado) {
+      throw this.erroProdutoNaoEncontrado(id);
+    }
 
-    produtoAtualizado.nomeProduto = produto.nomeProduto;
-    produtoAtualizado.descricao = produto.descricao;
-    produtoAtualizado.categoria = produto.categoria;
-    produtoAtualizado.composicao = produto.composicao;
-    produtoAtualizado.preco = produto.preco;
+    const listaUsoAnterior = [...produtoAtualizado.composicao.keys()];
+    this.estoqueRepository.removerRelacoes(id, listaUsoAnterior);
+    const listaUsoAtual = [...produto.composicao.keys()];
+    this.estoqueRepository.marcarRelacoes(id, listaUsoAtual);
 
-    return { ...produtoAtualizado };
+    produtoAtualizado.carregarDadosBase(produto);
+
+    return produtoAtualizado.paraProdutoCardapio();
   }
 
   async removerProduto(id: string): Promise<void> {
-    if (!this.produtos.delete(id)) {
-      throw new Error('produto não encontrado');
+    const produto = this.produtos.get(id);
+    if (!produto) {
+      throw this.erroProdutoNaoEncontrado(id);
     }
+
+    if (produto.usadoPor.size > 0) {
+      throw this.erroProdutoSendoUtilizado(id);
+    }
+
+    this.produtos.delete(id);
   }
 
-  /*private async carregarComposicao(
-    produtosCardapio: ProdutoCardapio[],
-  ): Promise<ProdutoCardapio[]> {
-    const produtosCardapioCopia = [...produtosCardapio];
-    const listaIds = [];
-
-    produtosCardapioCopia.forEach((pc) =>
-      listaIds.push(
-        [...pc.composicao.keys()].filter(
-          (idProduto) => !listaIds.includes(idProduto),
-        ),
-      ),
-    );
-
-    const produtosEstoque = await this.estoqueRepositorio.carregarProdutos(
-      listaIds,
-    );
-
-    const produtosEstoqueMap = new Map<string, ProdutoEstoque>();
-
-    produtosEstoque.forEach((pe) => produtosEstoqueMap.set(pe.id, pe));
-
-    produtosCardapioCopia.forEach((pc) => {
-      pc.composicao.forEach(
-        (v, k) => (k = produtosEstoqueMap.get(k as string)),
-      );
+  async marcarRelacoes(idPedido: string, idProdutos: string[]) {
+    idProdutos.forEach((idProduto) => {
+      const produto = this.produtos.get(idProduto);
+      if (!produto) {
+        throw this.erroProdutoNaoEncontrado(idProduto);
+      }
+      produto.usadoPor.add(idPedido);
     });
+  }
 
-    return produtosCardapioCopia;
-  }*/
+  async removerRelacoes(idPedido: string, idProdutos: string[]) {
+    idProdutos.forEach((idProduto) => {
+      const produto = this.produtos.get(idProduto);
+      if (!produto) {
+        throw this.erroProdutoNaoEncontrado(idProduto);
+      }
+      produto.usadoPor.delete(idPedido);
+    });
+  }
+
+  private erroProdutoNaoEncontrado(id: string) {
+    return new Error(`produto de id ${id} não encontrado`);
+  }
+
+  private erroProdutoSendoUtilizado(id: string) {
+    return new Error(
+      `produto de id ${id} está sendo utilizado em algum pedido aberto`,
+    );
+  }
 }

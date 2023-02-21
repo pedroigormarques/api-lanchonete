@@ -120,27 +120,20 @@ export class EstoqueService {
     return;
   }
 
-  async recalcularQuantidadeProdutosEstoque(
-    composicaoProdutoCardapio: Map<string, number>,
-    quantidadeConsumida: number,
-  ): Promise<ProdutoEstoque[]> {
-    const listaIdsUnicos = [...composicaoProdutoCardapio.keys()];
-    const produtosEstoque = await this.carregarProdutosEstoques(listaIdsUnicos);
+  async atualizarProdutosComGastos(gastosProdutosEstoque: Map<string, number>) {
+    const produtosEstoque = await this.carregarProdutosEstoques([
+      ...gastosProdutosEstoque.keys(),
+    ]);
 
-    const produtosEstoqueMap = new Map<string, ProdutoEstoque>();
-    produtosEstoque.forEach((pe) => produtosEstoqueMap.set(pe.id, pe));
-
-    composicaoProdutoCardapio.forEach((qtdProducao, idProduto) => {
-      const p = produtosEstoqueMap.get(idProduto);
-      p.quantidade = p.quantidade - quantidadeConsumida * qtdProducao;
-      if (p.quantidade < 0)
+    produtosEstoque.forEach((pe) => {
+      pe.quantidade -= gastosProdutosEstoque.get(pe.id);
+      if (pe.quantidade < 0) {
         throw new Error(
-          `Quantidade insuficiente do produto ${p.nomeProduto} no estoque`,
+          `Quantidade insuficiente do produto ${pe.nomeProduto} no estoque`,
         );
+      }
     });
 
-    return await this.atualizarProdutosEstoque([
-      ...produtosEstoqueMap.values(),
-    ]);
+    await this.atualizarProdutosEstoque(produtosEstoque);
   }
 }

@@ -1,3 +1,3 @@
 export class CreatePedidoDto {
-  mesa: string;
+  mesa: number;
 }

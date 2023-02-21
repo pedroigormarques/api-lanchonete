@@ -1,5 +1,5 @@
 export class UpdatePedidoDto {
-  mesa?: string;
+  mesa?: number;
   valorConta?: number;
   produtosVendidos?: Map<string, number>; //idProdutoCardapio, quantidade
 }

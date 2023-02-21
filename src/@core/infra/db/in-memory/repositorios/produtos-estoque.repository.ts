@@ -1,45 +1,42 @@
-import { randomUUID } from 'crypto';
 import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from 'src/@core/infra/contratos/produtos-estoque.repository.interface';
 
+import { ProdutoEstoqueDB } from '../modelos/produto-estoque.db-entity';
+
 export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
-  private produtos = new Map<string, ProdutoEstoque>();
+  private produtos = new Map<string, ProdutoEstoqueDB>();
 
   async cadastrarProduto(produto: ProdutoEstoque): Promise<ProdutoEstoque> {
-    const id = randomUUID();
-
-    const produtoCadastrado = new ProdutoEstoque();
-
-    produtoCadastrado.id = id;
-    produtoCadastrado.descricao = produto.descricao;
-    produtoCadastrado.nomeProduto = produto.nomeProduto;
-    produtoCadastrado.quantidade = produto.quantidade;
-    produtoCadastrado.unidade = produto.unidade;
-
+    const produtoCadastrado = new ProdutoEstoqueDB(produto);
+    const id = produtoCadastrado.id;
     this.produtos.set(id, produtoCadastrado);
-    return { ...produtoCadastrado };
+
+    return produtoCadastrado.paraProdutoEstoque();
   }
 
   async carregarProdutos(listaIds?: string[]): Promise<ProdutoEstoque[]> {
-    if (listaIds) {
-      const lista = [] as ProdutoEstoque[];
-      listaIds.forEach((l) => {
-        lista.push(this.produtos.get(l));
-      });
-      return lista;
-    }
+    const lista: string[] = listaIds ?? [...this.produtos.keys()];
 
-    return [...this.produtos.values()];
+    const listaProdutos = [] as ProdutoEstoque[];
+    lista.forEach((idProduto) => {
+      const produto = this.produtos.get(idProduto);
+      if (!produto) {
+        throw this.erroProdutoNaoEncontrado(idProduto);
+      }
+
+      listaProdutos.push(produto.paraProdutoEstoque());
+    });
+    return listaProdutos;
   }
 
   async carregarProduto(id: string): Promise<ProdutoEstoque> {
     const produto = this.produtos.get(id);
 
     if (!produto) {
-      throw new Error('produto não encontrado');
+      throw this.erroProdutoNaoEncontrado(id);
     }
 
-    return { ...produto };
+    return produto.paraProdutoEstoque();
   }
 
   async atualizarProduto(
@@ -47,18 +44,55 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     produto: ProdutoEstoque,
   ): Promise<ProdutoEstoque> {
     const produtoAtualizado = this.produtos.get(id);
+    if (!produtoAtualizado) {
+      throw this.erroProdutoNaoEncontrado(id);
+    }
 
-    produtoAtualizado.nomeProduto = produto.nomeProduto;
-    produtoAtualizado.descricao = produto.descricao;
-    produtoAtualizado.quantidade = produto.quantidade;
-    produtoAtualizado.unidade = produto.unidade;
+    produtoAtualizado.carregarDadosBase(produto);
 
-    return { ...produtoAtualizado };
+    return produtoAtualizado.paraProdutoEstoque();
   }
 
   async removerProduto(id: string): Promise<void> {
-    if (!this.produtos.delete(id)) {
-      throw new Error('produto não encontrado');
+    const produto = this.produtos.get(id);
+    if (!produto) {
+      throw this.erroProdutoNaoEncontrado(id);
     }
+
+    if (produto.usadoPor.size > 0) {
+      throw this.erroProdutoSendoUtilizado(id);
+    }
+
+    this.produtos.delete(id);
+  }
+
+  async marcarRelacoes(idProdutoCardapio: string, idProdutos: string[]) {
+    idProdutos.forEach((idProduto) => {
+      const produto = this.produtos.get(idProduto);
+      if (!produto) {
+        throw this.erroProdutoNaoEncontrado(idProduto);
+      }
+      produto.usadoPor.add(idProdutoCardapio);
+    });
+  }
+
+  async removerRelacoes(idProdutoCardapio: string, idProdutos: string[]) {
+    idProdutos.forEach((idProduto) => {
+      const produto = this.produtos.get(idProduto);
+      if (!produto) {
+        throw this.erroProdutoNaoEncontrado(idProduto);
+      }
+      produto.usadoPor.delete(idProdutoCardapio);
+    });
+  }
+
+  private erroProdutoNaoEncontrado(id: string) {
+    return new Error(`produto de id ${id} não encontrado`);
+  }
+
+  private erroProdutoSendoUtilizado(id: string) {
+    return new Error(
+      `produto de id ${id} está sendo utilizado por algum produto do cardápio`,
+    );
   }
 }
