@@ -74,6 +74,9 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       throw this.erroProdutoSendoUtilizado(id);
     }
 
+    const listaUsoAnterior = [...produto.composicao.keys()];
+    this.estoqueRepository.removerRelacoes(id, listaUsoAnterior);
+
     this.produtos.delete(id);
   }
 

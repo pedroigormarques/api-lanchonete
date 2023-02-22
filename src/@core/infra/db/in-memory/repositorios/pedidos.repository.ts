@@ -1,7 +1,7 @@
-import { PedidoDB } from './../modelos/pedido.db-entity';
 import { Pedido } from 'src/@core/dominio/pedido.entity';
 
 import { IPedidosRepository } from './../../../contratos/pedidos.repository.interface';
+import { PedidoDB } from './../modelos/pedido.db-entity';
 import { ProdutosCardapioRepository } from './produtos-cardapio.repository';
 
 export class PedidosRepository implements IPedidosRepository {
@@ -30,7 +30,7 @@ export class PedidosRepository implements IPedidosRepository {
     const pedido = this.pedidos.get(id);
 
     if (!pedido) {
-      throw new Error('Pedido não encontrado');
+      throw this.erroProdutoNaoEncontrado(id);
     }
 
     return pedido.paraPedido();
@@ -40,7 +40,7 @@ export class PedidosRepository implements IPedidosRepository {
     const pedidoAtualizado = this.pedidos.get(id);
 
     if (!pedidoAtualizado) {
-      throw new Error('Pedido não encontrado');
+      throw this.erroProdutoNaoEncontrado(id);
     }
 
     const listaUsoAnterior = [...pedidoAtualizado.produtosVendidos.keys()];
@@ -54,8 +54,19 @@ export class PedidosRepository implements IPedidosRepository {
   }
 
   async removerPedido(id: string): Promise<void> {
-    if (!this.pedidos.delete(id)) {
-      throw new Error('Pedido não encontrado');
+    const pedido = this.pedidos.get(id);
+    if (!pedido) {
+      throw this.erroProdutoNaoEncontrado(id);
     }
+
+    const listaUsoAnterior = [...pedido.produtosVendidos.keys()];
+    this.cardapioRepositorio.removerRelacoes(id, listaUsoAnterior);
+
+    this.pedidos.delete(id);
+    return;
+  }
+
+  private erroProdutoNaoEncontrado(id: string) {
+    return new Error(`Pedido de id ${id} não encontrado`);
   }
 }
