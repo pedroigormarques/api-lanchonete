@@ -1,5 +1,5 @@
-import { ProdutoCardapio } from 'src/@core/dominio/produto-cardapio.entity';
-import { IProdutosCardapioRepository } from 'src/@core/infra/contratos/produtos-cardapio.repository.interface';
+import { ProdutoCardapio } from './../../../../dominio/produto-cardapio.entity';
+import { IProdutosCardapioRepository } from './../../../contratos/produtos-cardapio.repository.interface';
 
 import { ProdutoCardapioDB } from './../modelos/produto-cardapio.db-entity';
 import { ProdutosEstoqueRepository } from './produtos-estoque.repository';

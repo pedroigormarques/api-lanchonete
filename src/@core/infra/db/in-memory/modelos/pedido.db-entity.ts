@@ -1,6 +1,6 @@
+import { criarObjetoComCopiaProfunda } from './../../../../helper/criador-copia-profunda.function';
+import { Pedido } from './../../../../dominio/pedido.entity';
 import { randomUUID } from 'crypto';
-import { Pedido } from 'src/@core/dominio/pedido.entity';
-import { criarObjetoComCopiaProfunda } from 'src/@core/helper/criador-copia-profunda.function';
 
 export class PedidoDB extends Pedido {
   constructor(mesa: number) {

@@ -1,4 +1,4 @@
-import { ProdutoCardapio } from 'src/@core/dominio/produto-cardapio.entity';
+import { ProdutoCardapio } from './../../dominio/produto-cardapio.entity';
 
 export interface IProdutosCardapioRepository {
   cadastrarProduto(produto: ProdutoCardapio): Promise<ProdutoCardapio>;

@@ -1,10 +1,10 @@
 import { DocChangeEvent } from './../dominio/doc-change-event.entity';
 import { tipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 import { Subject } from 'rxjs';
-import { CreateProdutoEstoqueDto } from 'src/@core/dominio/DTOs/create-produto-estoque.dto';
-import { UpdateProdutoEstoqueDto } from 'src/@core/dominio/DTOs/update-produto-estoque.dto';
-import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
-import { IProdutosEstoqueRepository } from 'src/@core/infra/contratos/produtos-estoque.repository.interface';
+import { CreateProdutoEstoqueDto } from '../dominio/DTOs/create-produto-estoque.dto';
+import { UpdateProdutoEstoqueDto } from '../dominio/DTOs/update-produto-estoque.dto';
+import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
+import { IProdutosEstoqueRepository } from '../infra/contratos/produtos-estoque.repository.interface';
 
 import { ListaEvento } from '../dominio/lista-evento.entity';
 

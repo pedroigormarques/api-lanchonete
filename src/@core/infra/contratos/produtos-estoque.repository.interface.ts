@@ -1,4 +1,4 @@
-import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
+import { ProdutoEstoque } from './../../dominio/produto-estoque.entity';
 
 export interface IProdutosEstoqueRepository {
   cadastrarProduto(produto: ProdutoEstoque): Promise<ProdutoEstoque>;

@@ -1,6 +1,6 @@
 import { randomUUID } from 'crypto';
-import { PedidoFechado } from 'src/@core/dominio/pedido-fechado.entity';
-import { IPedidosFechadosRepository } from 'src/@core/infra/contratos/pedidos-fechados.repository.interface';
+import { PedidoFechado } from './../../../../dominio/pedido-fechado.entity';
+import { IPedidosFechadosRepository } from './../../../contratos/pedidos-fechados.repository.interface';
 
 export class PedidosFechadosRepository implements IPedidosFechadosRepository {
   private pedidosFechados = new Map<string, PedidoFechado>();

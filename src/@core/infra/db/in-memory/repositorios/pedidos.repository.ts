@@ -1,4 +1,4 @@
-import { Pedido } from 'src/@core/dominio/pedido.entity';
+import { Pedido } from './../../../../dominio/pedido.entity';
 
 import { IPedidosRepository } from './../../../contratos/pedidos.repository.interface';
 import { PedidoDB } from './../modelos/pedido.db-entity';

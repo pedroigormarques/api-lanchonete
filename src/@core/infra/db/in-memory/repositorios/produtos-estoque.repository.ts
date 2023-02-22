@@ -1,5 +1,5 @@
-import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
-import { IProdutosEstoqueRepository } from 'src/@core/infra/contratos/produtos-estoque.repository.interface';
+import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
+import { IProdutosEstoqueRepository } from './../../../contratos/produtos-estoque.repository.interface';
 
 import { ProdutoEstoqueDB } from '../modelos/produto-estoque.db-entity';
 

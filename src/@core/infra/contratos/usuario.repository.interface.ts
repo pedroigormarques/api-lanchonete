@@ -1,4 +1,4 @@
-import { Usuario } from 'src/@core/dominio/usuario.entity';
+import { Usuario } from './../../dominio/usuario.entity';
 
 export interface IUsuarioRepository {
   validarUsuario(email: string, senha: string): Promise<Usuario>;

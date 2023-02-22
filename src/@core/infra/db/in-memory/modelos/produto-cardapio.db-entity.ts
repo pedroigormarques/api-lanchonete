@@ -1,6 +1,7 @@
-import { criarObjetoComCopiaProfunda } from 'src/@core/helper/criador-copia-profunda.function';
+import { criarObjetoComCopiaProfunda } from './../../../../helper/criador-copia-profunda.function';
+import { ProdutoCardapio } from './../../../../dominio/produto-cardapio.entity';
+
 import { randomUUID } from 'crypto';
-import { ProdutoCardapio } from 'src/@core/dominio/produto-cardapio.entity';
 
 export class ProdutoCardapioDB extends ProdutoCardapio {
   usadoPor = new Set<string>();

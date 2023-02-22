@@ -1,6 +1,7 @@
-import { criarObjetoComCopiaProfunda } from 'src/@core/helper/criador-copia-profunda.function';
+import { criarObjetoComCopiaProfunda } from './../../../../helper/criador-copia-profunda.function';
+import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
+
 import { randomUUID } from 'crypto';
-import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
 
 export class ProdutoEstoqueDB extends ProdutoEstoque {
   usadoPor = new Set<string>();

@@ -1,5 +1,5 @@
-import { ProdutoCardapio } from 'src/@core/dominio/produto-cardapio.entity';
-import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
+import { ProdutoCardapio } from './../produto-cardapio.entity';
+import { ProdutoEstoque } from './../produto-estoque.entity';
 
 export class CreatePedidoFechadoDto {
   mesa: number;

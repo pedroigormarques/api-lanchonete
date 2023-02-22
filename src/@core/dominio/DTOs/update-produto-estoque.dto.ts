@@ -1,4 +1,4 @@
-import { UNIDADES } from 'src/@core/dominio/enums/unidades.enum';
+import { UNIDADES } from './../enums/unidades.enum';
 
 export class UpdateProdutoEstoqueDto {
   descricao?: string;

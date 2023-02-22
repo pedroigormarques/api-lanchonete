@@ -1,7 +1,7 @@
 import { ListaEvento } from './../dominio/lista-evento.entity';
 import { Subject } from 'rxjs';
-import { ProdutoCardapio } from 'src/@core/dominio/produto-cardapio.entity';
-import { IProdutosCardapioRepository } from 'src/@core/infra/contratos/produtos-cardapio.repository.interface';
+import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
+import { IProdutosCardapioRepository } from '../infra/contratos/produtos-cardapio.repository.interface';
 import { DocChangeEvent } from '../dominio/doc-change-event.entity';
 import { tipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 

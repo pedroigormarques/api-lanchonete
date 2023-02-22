@@ -1,7 +1,7 @@
-import { Usuario } from 'src/@core/dominio/usuario.entity';
-import { CreateUsuarioDto } from 'src/@core/dominio/DTOs/create-usuario.dto';
-import { UpdateUsuarioDto } from 'src/@core/dominio/DTOs/update-usuario.dto';
-import { IUsuarioRepository } from 'src/@core/infra/contratos/usuario.repository.interface';
+import { Usuario } from './../dominio/usuario.entity';
+import { CreateUsuarioDto } from './../dominio/DTOs/create-usuario.dto';
+import { UpdateUsuarioDto } from './../dominio/DTOs/update-usuario.dto';
+import { IUsuarioRepository } from './../../../dist/@core/infra/contratos/usuario.repository.interface.d';
 
 export class UsuarioService {
   constructor(private usuarioRepositorio: IUsuarioRepository) {}

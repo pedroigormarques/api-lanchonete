@@ -1,4 +1,4 @@
-import { Pedido } from 'src/@core/dominio/pedido.entity';
+import { Pedido } from './../../dominio/pedido.entity';
 
 export interface IPedidosRepository {
   cadastrarPedido(pedido: Pedido): Promise<Pedido>;

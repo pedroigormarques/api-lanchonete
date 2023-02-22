@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Usuario } from 'src/@core/dominio/usuario.entity';
-import { IUsuarioRepository } from 'src/@core/infra/contratos/usuario.repository.interface';
+import { Usuario } from './../../../../dominio/usuario.entity';
+import { IUsuarioRepository } from './../../../contratos/usuario.repository.interface';
 
 import { randomUUID } from 'crypto';
 

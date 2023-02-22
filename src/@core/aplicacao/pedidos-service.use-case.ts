@@ -1,14 +1,14 @@
-import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
+import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { CardapioService } from './cardapio-service.use-case';
 import { EstoqueService } from './estoque-service.use-case';
-import { PedidoFechado } from 'src/@core/dominio/pedido-fechado.entity';
+import { PedidoFechado } from '../dominio/pedido-fechado.entity';
 import { CreatePedidoDto } from './../dominio/DTOs/create-pedido.dto';
-import { Pedido } from 'src/@core/dominio/pedido.entity';
+import { Pedido } from '../dominio/pedido.entity';
 import { ListaEvento } from './../dominio/lista-evento.entity';
 import { tipoManipulacaoDado } from './../dominio/enums/tipo-manipulacao-dado.enum';
 import { DocChangeEvent } from './../dominio/doc-change-event.entity';
-import { IPedidosFechadosRepository } from 'src/@core/infra/contratos/pedidos-fechados.repository.interface';
-import { IPedidosRepository } from 'src/@core/infra/contratos/pedidos.repository.interface';
+import { IPedidosFechadosRepository } from '../infra/contratos/pedidos-fechados.repository.interface';
+import { IPedidosRepository } from '../infra/contratos/pedidos.repository.interface';
 import { Subject } from 'rxjs';
 import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
 
