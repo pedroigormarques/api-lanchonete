@@ -1,3 +1,4 @@
+import { criarObjetoComCopiaProfunda } from 'src/@core/helper/criador-copia-profunda.function';
 import { randomUUID } from 'crypto';
 import { ProdutoEstoque } from 'src/@core/dominio/produto-estoque.entity';
 
@@ -18,12 +19,10 @@ export class ProdutoEstoqueDB extends ProdutoEstoque {
   }
 
   paraProdutoEstoque(): ProdutoEstoque {
-    const produto = new ProdutoEstoque();
-    produto.id = this.id;
-    produto.descricao = this.descricao;
-    produto.nomeProduto = this.nomeProduto;
-    produto.quantidade = this.quantidade;
-    produto.unidade = this.unidade;
-    return produto;
+    return criarObjetoComCopiaProfunda<ProdutoEstoqueDB, ProdutoEstoque>(
+      this,
+      ProdutoEstoque,
+      ['usadoPor'],
+    );
   }
 }
