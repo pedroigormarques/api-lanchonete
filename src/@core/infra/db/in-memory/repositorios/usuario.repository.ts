@@ -44,10 +44,10 @@ export class UsuarioRepositorio implements IUsuarioRepository {
 
   async carregarUsuario(id: string): Promise<Usuario> {
     const usuario = this.usuarios.get(id);
-    if (usuario) {
-      return usuario.paraUsuario();
+    if (!usuario) {
+      throw new Error('usuário não encontrado');
     }
-    return null;
+    return usuario.paraUsuario();
   }
 
   private validarEmail(email: string) {

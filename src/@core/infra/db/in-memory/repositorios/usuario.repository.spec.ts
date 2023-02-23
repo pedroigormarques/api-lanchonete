@@ -111,9 +111,10 @@ describe('Usuario Repositorio', () => {
       expect(resposta).toEqual(esperado);
     });
 
-    it('Null ao passar id de usuario inválido', async () => {
-      const retorno = await usuarioRepositorio.carregarUsuario('a');
-      expect(retorno).toBeNull();
+    it('Erro ao passar id de usuario inválido', async () => {
+      await expect(
+        usuarioRepositorio.carregarUsuario('a'),
+      ).rejects.toThrowError();
     });
   });
 });
