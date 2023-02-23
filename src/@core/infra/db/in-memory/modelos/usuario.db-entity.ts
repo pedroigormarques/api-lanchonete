@@ -13,20 +13,21 @@ export class UsuarioDB extends Usuario {
 
   private validarDadosCriacao(usuario: Usuario): void {
     if (
-      !usuario.nomeLanchonete ||
-      !usuario.email ||
-      !usuario.senha ||
-      !usuario.endereco
+      typeof usuario.nomeLanchonete !== 'string' ||
+      typeof usuario.email !== 'string' ||
+      typeof usuario.senha !== 'string' ||
+      typeof usuario.endereco !== 'string'
     ) {
       throw new Error('Dados insuficientes');
     }
   }
 
   atualizarDadosBase(usuario: Usuario): void {
-    if (usuario.email) this.email = usuario.email;
-    if (usuario.senha) this.senha = usuario.senha;
-    if (usuario.endereco) this.endereco = usuario.endereco;
-    if (usuario.nomeLanchonete) this.nomeLanchonete = usuario.nomeLanchonete;
+    if (typeof usuario.email === 'string') this.email = usuario.email;
+    if (typeof usuario.senha === 'string') this.senha = usuario.senha;
+    if (typeof usuario.endereco === 'string') this.endereco = usuario.endereco;
+    if (typeof usuario.nomeLanchonete === 'string')
+      this.nomeLanchonete = usuario.nomeLanchonete;
   }
 
   paraUsuario(): Usuario {

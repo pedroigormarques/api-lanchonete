@@ -3,6 +3,7 @@ import { faker } from '@faker-js/faker';
 import { UNIDADES } from './../src/@core/dominio/enums/unidades.enum';
 import { ProdutoEstoque } from './../src/@core/dominio/produto-estoque.entity';
 import { Usuario } from './../src/@core/dominio/usuario.entity';
+import { geraValorEnumAleatorio } from './../src/@core/helper/manipular-enum.function';
 
 export class GeradorObjetos {
   static criarUsuario(comId = false): Usuario {
@@ -24,14 +25,8 @@ export class GeradorObjetos {
     produtoEstoque.descricao = faker.commerce.productDescription();
     produtoEstoque.nomeProduto = faker.commerce.productName();
     produtoEstoque.quantidade = faker.datatype.number();
-    produtoEstoque.unidade = this.randomEnumValue(UNIDADES);
+    produtoEstoque.unidade = geraValorEnumAleatorio(UNIDADES);
 
     return produtoEstoque;
-  }
-
-  private static randomEnumValue(enumeration) {
-    const values = Object.keys(enumeration);
-    const enumKey = values[Math.floor(Math.random() * values.length)];
-    return enumeration[enumKey];
   }
 }

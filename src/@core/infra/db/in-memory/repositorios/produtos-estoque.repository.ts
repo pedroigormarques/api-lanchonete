@@ -67,22 +67,34 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
   }
 
   async marcarRelacoes(idProdutoCardapio: string, idProdutos: string[]) {
+    const produtosDB: ProdutoEstoqueDB[] = [];
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
         throw this.erroProdutoNaoEncontrado(idProduto);
+      } else {
+        produtosDB.push(produto);
       }
-      produto.usadoPor.add(idProdutoCardapio);
+    });
+
+    produtosDB.forEach((produtoDB) => {
+      produtoDB.usadoPor.add(idProdutoCardapio);
     });
   }
 
   async removerRelacoes(idProdutoCardapio: string, idProdutos: string[]) {
+    const produtosDB: ProdutoEstoqueDB[] = [];
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
         throw this.erroProdutoNaoEncontrado(idProduto);
+      } else {
+        produtosDB.push(produto);
       }
-      produto.usadoPor.delete(idProdutoCardapio);
+    });
+
+    produtosDB.forEach((produtoDB) => {
+      produtoDB.usadoPor.delete(idProdutoCardapio);
     });
   }
 
