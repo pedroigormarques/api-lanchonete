@@ -74,6 +74,8 @@ describe('Produto Cardapio Repositorio', () => {
       await expect(
         cardapioRepositorio.cadastrarProduto(produto),
       ).rejects.toThrowError();
+
+      expect((cardapioRepositorio as any).produtos.size).toEqual(1); //1 do criado para auxilio dos teste
     });
 
     it('Erro ao passar composicao com id errado', async () => {
@@ -101,6 +103,8 @@ describe('Produto Cardapio Repositorio', () => {
       ).rejects.toThrowError();
 
       expect(estoqueRepositorio.marcarRelacoes).toBeCalledTimes(0);
+
+      expect((cardapioRepositorio as any).produtos.size).toEqual(1); //1 do criado para auxilio dos teste
     });
   });
 
@@ -256,6 +260,8 @@ describe('Produto Cardapio Repositorio', () => {
       await expect(
         cardapioRepositorio.removerProduto('a'),
       ).rejects.toThrowError();
+
+      expect((cardapioRepositorio as any).produtos.size).toEqual(1);
     });
 
     it('Erro ao tentar remover produto sendo utilizado', async () => {
@@ -264,6 +270,17 @@ describe('Produto Cardapio Repositorio', () => {
       await expect(
         cardapioRepositorio.removerProduto(produto1.id),
       ).rejects.toThrowError();
+    });
+
+    it('Erro ao tentar remover relacao de produto da composição', async () => {
+      jest
+        .spyOn(estoqueRepositorio, 'removerRelacoes')
+        .mockImplementation(mockErroRelacao);
+
+      await expect(
+        cardapioRepositorio.removerProduto(produto1.id),
+      ).rejects.toThrowError();
+      expect((cardapioRepositorio as any).produtos.size).toEqual(1);
     });
   });
 
@@ -328,13 +345,13 @@ describe('Produto Cardapio Repositorio', () => {
 });
 
 function registrarProdutoDeTeste(
-  estoqueRepositorio: ProdutosCardapioRepository,
+  cardapioRepositorio: ProdutosCardapioRepository,
 ): { produtoRegistrado: ProdutoCardapio; produtoBanco: ProdutoCardapioDB } {
   const produtoRegistrado = GeradorDeObjetos.criarProdutoCardapio();
   const produtoBanco = new ProdutoCardapioDB(produtoRegistrado);
   produtoRegistrado.id = produtoBanco.id;
 
-  (estoqueRepositorio as any).produtos //pela quebra de proteção "private"
+  (cardapioRepositorio as any).produtos //pela quebra de proteção "private"
     .set(produtoBanco.id, produtoBanco);
   return { produtoRegistrado, produtoBanco };
 }

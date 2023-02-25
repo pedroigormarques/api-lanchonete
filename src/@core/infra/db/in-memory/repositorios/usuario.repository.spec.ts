@@ -92,6 +92,19 @@ describe('Usuario Repositorio', () => {
       expect(resposta).toEqual(esperado);
     });
 
+    it('Erro ao passar dados inválidos inválido', async () => {
+      const usuario = new Usuario();
+      usuario.id = usuario1.id;
+
+      await expect(
+        usuarioRepositorio.atualizarUsuario(usuario.id, usuario),
+      ).rejects.toThrowError();
+
+      expect((usuarioRepositorio as any).usuarios.get(usuario1.id)).toEqual(
+        usuario1,
+      );
+    });
+
     it('Erro ao passar id de usuario inválido', async () => {
       await expect(
         usuarioRepositorio.atualizarUsuario('a', usuario1),
@@ -100,11 +113,16 @@ describe('Usuario Repositorio', () => {
 
     it('Erro ao tentar atualizar com outro email em uso', async () => {
       const usuario2 = registrarUsuarioDeTeste(usuarioRepositorio);
+      const esperado = { ...usuario2 };
       usuario2.email = usuario1.email;
 
       await expect(
         usuarioRepositorio.atualizarUsuario(usuario2.id, usuario2),
       ).rejects.toThrowError();
+
+      expect((usuarioRepositorio as any).usuarios.get(usuario2.id)).toEqual(
+        esperado,
+      );
     });
   });
 

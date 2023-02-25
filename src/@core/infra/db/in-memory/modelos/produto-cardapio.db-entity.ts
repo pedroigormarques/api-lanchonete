@@ -10,39 +10,36 @@ export class ProdutoCardapioDB extends ProdutoCardapio {
 
   constructor(produto: ProdutoCardapio) {
     super();
-    this.validarDadosCriacao(produto);
+    ProdutoCardapioDB.validarDados(produto);
+
     this.id = randomUUID();
-    this.carregarDadosBase(produto);
+    this.descricao = produto.descricao;
+    this.nomeProduto = produto.nomeProduto;
+    this.composicao = new Map(produto.composicao.entries());
+    this.preco = produto.preco;
+    this.categoria = produto.categoria;
   }
 
-  private validarDadosCriacao(produto: ProdutoCardapio): void {
+  static validarDados(produto: ProdutoCardapio): void {
     if (
       typeof produto.descricao !== 'string' ||
       typeof produto.nomeProduto !== 'string' ||
       typeof produto.preco !== 'number' ||
       !possuiUmValorValidoParaOEnum(produto.categoria, CATEGORIAS) ||
-      !(produto.composicao instanceof Map)
+      !(produto.composicao instanceof Map) ||
+      produto.composicao.size === 0
     ) {
       throw new Error('Dados insuficientes/incorretos');
     }
   }
 
   carregarDadosBase(produto: ProdutoCardapio) {
-    if (typeof produto.descricao === 'string')
-      this.descricao = produto.descricao;
-
-    if (typeof produto.nomeProduto === 'string')
-      this.nomeProduto = produto.nomeProduto;
-
-    if (produto.composicao instanceof Map)
-      if (produto.composicao.size > 0)
-        this.composicao = new Map(produto.composicao.entries());
-      else throw new Error('Composição não inserida');
-
-    if (typeof produto.preco === 'number') this.preco = produto.preco;
-
-    if (possuiUmValorValidoParaOEnum(produto.categoria, CATEGORIAS))
-      this.categoria = produto.categoria;
+    ProdutoCardapioDB.validarDados(produto);
+    this.descricao = produto.descricao;
+    this.nomeProduto = produto.nomeProduto;
+    this.composicao = new Map(produto.composicao.entries());
+    this.preco = produto.preco;
+    this.categoria = produto.categoria;
   }
 
   paraProdutoCardapio(): ProdutoCardapio {

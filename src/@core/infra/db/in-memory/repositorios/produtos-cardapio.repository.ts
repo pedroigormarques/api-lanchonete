@@ -53,13 +53,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
-    if (produto.composicao instanceof Map) {
-      if (produto.composicao.size === 0) {
-        throw new Error('Composição não inserida (composição vazia)');
-      }
-    } else {
-      throw new Error('Erro no formato da composição');
-    }
+    ProdutoCardapioDB.validarDados(produto);
 
     const listaUsoAtual: string[] = [...produto.composicao.keys()];
     await this.estoqueRepository.validarListaIds(listaUsoAtual);

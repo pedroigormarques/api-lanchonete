@@ -34,6 +34,8 @@ export class UsuarioRepositorio implements IUsuarioRepository {
       throw new Error('usuário não encontrado');
     }
 
+    UsuarioDB.validarDadosAtualizacao(usuario);
+
     if (usuario.email !== usuarioAtualizado.email)
       this.validarEmail(usuario.email);
 

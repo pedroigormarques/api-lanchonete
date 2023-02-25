@@ -1,6 +1,6 @@
-import { UNIDADES } from './../../../../dominio/enums/unidades.enum';
 import { randomUUID } from 'crypto';
 
+import { UNIDADES } from './../../../../dominio/enums/unidades.enum';
 import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
 import { criarObjetoComCopiaProfunda } from './../../../../helper/criador-copia-profunda.function';
 import { possuiUmValorValidoParaOEnum } from './../../../../helper/manipular-enum.function';
@@ -10,17 +10,21 @@ export class ProdutoEstoqueDB extends ProdutoEstoque {
 
   constructor(produto: ProdutoEstoque) {
     super();
-    this.validarDadosCriacao(produto);
+    this.validarDados(produto);
 
     this.id = randomUUID();
-    this.carregarDadosBase(produto);
+    this.unidade = produto.unidade;
+    this.quantidade = produto.quantidade;
+    this.descricao = produto.descricao;
+    this.nomeProduto = produto.nomeProduto;
   }
 
-  private validarDadosCriacao(produto: ProdutoEstoque): void {
+  private validarDados(produto: ProdutoEstoque): void {
     if (
       typeof produto.descricao !== 'string' ||
       typeof produto.nomeProduto !== 'string' ||
       typeof produto.quantidade !== 'number' ||
+      produto.quantidade < 0 ||
       !possuiUmValorValidoParaOEnum(produto.unidade, UNIDADES)
     ) {
       throw new Error('Dados insuficientes/incorretos');
@@ -28,24 +32,18 @@ export class ProdutoEstoqueDB extends ProdutoEstoque {
   }
 
   carregarDadosBase(produto: ProdutoEstoque) {
-    if (typeof produto.descricao === 'string')
-      this.descricao = produto.descricao;
+    this.validarDados(produto);
 
-    if (typeof produto.nomeProduto === 'string')
-      this.nomeProduto = produto.nomeProduto;
-
-    if (typeof produto.quantidade === 'number') {
-      this.atualizarQuantidade(produto.quantidade);
+    if (this.usadoPor.size === 0) {
+      this.unidade = produto.unidade;
+    } else {
+      throw new Error(
+        'Produto sendo utilizado. Não é possível alterar a unidade',
+      );
     }
-
-    if (possuiUmValorValidoParaOEnum(produto.unidade, UNIDADES))
-      if (this.usadoPor.size === 0) {
-        this.unidade = produto.unidade;
-      } else {
-        throw new Error(
-          'Produto sendo utilizado. Não é possível alterar a quantidade',
-        );
-      }
+    this.quantidade = produto.quantidade;
+    this.descricao = produto.descricao;
+    this.nomeProduto = produto.nomeProduto;
   }
 
   paraProdutoEstoque(): ProdutoEstoque {
@@ -54,13 +52,5 @@ export class ProdutoEstoqueDB extends ProdutoEstoque {
       ProdutoEstoque,
       ['usadoPor'],
     );
-  }
-
-  private atualizarQuantidade(qtd: number): void {
-    if (qtd >= 0) {
-      this.quantidade = qtd;
-    } else {
-      throw new Error('Quantidade invalida passado para o produto');
-    }
   }
 }

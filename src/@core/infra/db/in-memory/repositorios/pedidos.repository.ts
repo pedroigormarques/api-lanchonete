@@ -1,5 +1,4 @@
 import { Pedido } from './../../../../dominio/pedido.entity';
-
 import { IPedidosRepository } from './../../../contratos/pedidos.repository.interface';
 import { PedidoDB } from './../modelos/pedido.db-entity';
 import { ProdutosCardapioRepository } from './produtos-cardapio.repository';
@@ -12,9 +11,6 @@ export class PedidosRepository implements IPedidosRepository {
   async cadastrarPedido(pedido: Pedido): Promise<Pedido> {
     const pedidoCadastrado = new PedidoDB(pedido.mesa);
     const id = pedidoCadastrado.id;
-
-    const listaUsoAtual = [...pedido.produtosVendidos.keys()];
-    this.cardapioRepositorio.marcarRelacoes(id, listaUsoAtual);
 
     this.pedidos.set(id, pedidoCadastrado);
     return pedidoCadastrado.paraPedido();
@@ -43,10 +39,16 @@ export class PedidosRepository implements IPedidosRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
-    const listaUsoAnterior = [...pedidoAtualizado.produtosVendidos.keys()];
-    this.cardapioRepositorio.removerRelacoes(id, listaUsoAnterior);
+    PedidoDB.validarDadosAtualizacao(pedido);
+
     const listaUsoAtual = [...pedido.produtosVendidos.keys()];
-    this.cardapioRepositorio.marcarRelacoes(id, listaUsoAtual);
+    await this.cardapioRepositorio.validarListaIds(listaUsoAtual);
+
+    if (pedidoAtualizado.produtosVendidos.size !== 0) {
+      const listaUsoAnterior = [...pedidoAtualizado.produtosVendidos.keys()];
+      await this.cardapioRepositorio.removerRelacoes(id, listaUsoAnterior);
+    }
+    await this.cardapioRepositorio.marcarRelacoes(id, listaUsoAtual);
 
     pedidoAtualizado.carregarDadosBase(pedido);
 
@@ -60,7 +62,7 @@ export class PedidosRepository implements IPedidosRepository {
     }
 
     const listaUsoAnterior = [...pedido.produtosVendidos.keys()];
-    this.cardapioRepositorio.removerRelacoes(id, listaUsoAnterior);
+    await this.cardapioRepositorio.removerRelacoes(id, listaUsoAnterior);
 
     this.pedidos.delete(id);
     return;

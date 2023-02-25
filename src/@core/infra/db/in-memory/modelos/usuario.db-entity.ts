@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
-import { criarObjetoComCopiaProfunda } from './../../../../helper/criador-copia-profunda.function';
+
 import { Usuario } from './../../../../dominio/usuario.entity';
+import { criarObjetoComCopiaProfunda } from './../../../../helper/criador-copia-profunda.function';
 
 export class UsuarioDB extends Usuario {
   constructor(usuario: Usuario) {
@@ -8,26 +9,45 @@ export class UsuarioDB extends Usuario {
     this.validarDadosCriacao(usuario);
 
     this.id = randomUUID();
-    this.atualizarDadosBase(usuario);
+    this.email = usuario.email;
+    this.endereco = usuario.endereco;
+    this.nomeLanchonete = usuario.nomeLanchonete;
+    this.senha = usuario.senha;
   }
 
   private validarDadosCriacao(usuario: Usuario): void {
     if (
-      typeof usuario.nomeLanchonete !== 'string' ||
-      typeof usuario.email !== 'string' ||
-      typeof usuario.senha !== 'string' ||
-      typeof usuario.endereco !== 'string'
+      !UsuarioDB.dadosGeraisValidos(usuario) ||
+      typeof usuario.senha !== 'string'
     ) {
-      throw new Error('Dados insuficientes');
+      throw new Error('Dados insuficientes/incorretos');
     }
   }
 
+  static validarDadosAtualizacao(usuario: Usuario): void {
+    if (
+      (typeof usuario.senha !== 'string' &&
+        typeof usuario.senha !== 'undefined') ||
+      !UsuarioDB.dadosGeraisValidos(usuario)
+    ) {
+      throw new Error('Dados insuficientes/incorretos');
+    }
+  }
+
+  private static dadosGeraisValidos(usuario: Usuario): boolean {
+    return (
+      typeof usuario.nomeLanchonete === 'string' &&
+      typeof usuario.email === 'string' &&
+      typeof usuario.endereco === 'string'
+    );
+  }
+
   atualizarDadosBase(usuario: Usuario): void {
-    if (typeof usuario.email === 'string') this.email = usuario.email;
+    UsuarioDB.validarDadosAtualizacao(usuario);
+    this.email = usuario.email;
+    this.endereco = usuario.endereco;
+    this.nomeLanchonete = usuario.nomeLanchonete;
     if (typeof usuario.senha === 'string') this.senha = usuario.senha;
-    if (typeof usuario.endereco === 'string') this.endereco = usuario.endereco;
-    if (typeof usuario.nomeLanchonete === 'string')
-      this.nomeLanchonete = usuario.nomeLanchonete;
   }
 
   paraUsuario(): Usuario {

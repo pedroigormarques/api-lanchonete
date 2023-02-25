@@ -5,6 +5,7 @@ import { ProdutoEstoque } from '../@core/dominio/produto-estoque.entity';
 import { Usuario } from '../@core/dominio/usuario.entity';
 import { geraValorEnumAleatorio } from '../@core/helper/manipular-enum.function';
 import { CATEGORIAS } from './../@core/dominio/enums/categorias.enum';
+import { Pedido } from './../@core/dominio/pedido.entity';
 import { ProdutoCardapio } from './../@core/dominio/produto-cardapio.entity';
 
 export class GeradorDeObjetos {
@@ -53,6 +54,23 @@ export class GeradorDeObjetos {
     produtoCardapio.composicao = this.gerarMapStringNumberAleatorio();
 
     return produtoCardapio;
+  }
+
+  static criarPedido(id: boolean | string = false): Pedido {
+    const pedido = new Pedido();
+
+    if (id) {
+      if (typeof id === 'boolean') pedido.id = faker.datatype.uuid();
+      else pedido.id = id;
+    }
+    pedido;
+
+    pedido.horaAbertura = new Date();
+    pedido.mesa = faker.datatype.number({ min: 1, max: 10 });
+    pedido.valorConta = +faker.commerce.price();
+    pedido.produtosVendidos = this.gerarMapStringNumberAleatorio();
+
+    return pedido;
   }
 
   private static gerarMapStringNumberAleatorio() {
