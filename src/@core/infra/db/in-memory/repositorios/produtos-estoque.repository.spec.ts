@@ -1,5 +1,7 @@
+import { Test } from '@nestjs/testing';
+
+import { GeradorDeObjetos } from '../../../../../test/gerador-objetos.faker';
 import { UNIDADES } from './../../../../dominio/enums/unidades.enum';
-import { GeradorObjetos } from './../../../../../../test/gerador-objetos.faker';
 import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
 import { ProdutoEstoqueDB } from './../modelos/produto-estoque.db-entity';
 import { ProdutosEstoqueRepository } from './produtos-estoque.repository';
@@ -9,10 +11,16 @@ describe('Produto Estoque Repositorio', () => {
   let produto1: ProdutoEstoque;
   let produto1Banco: ProdutoEstoqueDB;
 
-  beforeEach(() => {
-    estoqueRepositorio = new ProdutosEstoqueRepository();
+  beforeEach(async () => {
+    const moduleRef = await Test.createTestingModule({
+      providers: [ProdutosEstoqueRepository],
+    }).compile();
 
-    //registrando ao menos um produto antes de cada de testes para os testes de validação, update e carregamento
+    estoqueRepositorio = moduleRef.get<ProdutosEstoqueRepository>(
+      ProdutosEstoqueRepository,
+    );
+
+    //registrando ao menos um produto antes de cada teste para os testes de update, carregamento e remoção
     const produtoCompleto = registrarProdutoDeTeste(estoqueRepositorio);
     produto1 = produtoCompleto.produtoRegistrado;
     produto1Banco = produtoCompleto.produtoBanco;
@@ -24,7 +32,7 @@ describe('Produto Estoque Repositorio', () => {
 
   describe('Cadastrar Produto', () => {
     it('Registro realizado com dados válidos', async () => {
-      const produto = GeradorObjetos.criarProdutoEstoque();
+      const produto = GeradorDeObjetos.criarProdutoEstoque();
 
       const resposta = await estoqueRepositorio.cadastrarProduto(produto);
 
@@ -48,7 +56,7 @@ describe('Produto Estoque Repositorio', () => {
     });
 
     it('Erro ao passar quantidade menor que 0 com dados válidos', async () => {
-      const produto = GeradorObjetos.criarProdutoEstoque();
+      const produto = GeradorDeObjetos.criarProdutoEstoque();
       produto.quantidade = -100;
 
       await expect(
@@ -103,7 +111,7 @@ describe('Produto Estoque Repositorio', () => {
 
   describe('Atualizar Produto', () => {
     it('Retorno de produto atualizado ao inserir dados válido', async () => {
-      const produtoAux = GeradorObjetos.criarProdutoEstoque();
+      const produtoAux = GeradorDeObjetos.criarProdutoEstoque();
 
       produtoAux.id = produto1.id;
 
@@ -231,7 +239,7 @@ describe('Produto Estoque Repositorio', () => {
 function registrarProdutoDeTeste(
   estoqueRepositorio: ProdutosEstoqueRepository,
 ): { produtoRegistrado: ProdutoEstoque; produtoBanco: ProdutoEstoqueDB } {
-  const produtoRegistrado = GeradorObjetos.criarProdutoEstoque();
+  const produtoRegistrado = GeradorDeObjetos.criarProdutoEstoque();
   const produtoBanco = new ProdutoEstoqueDB(produtoRegistrado);
   produtoRegistrado.id = produtoBanco.id;
 

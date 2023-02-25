@@ -1,6 +1,5 @@
 import { ProdutoCardapio } from './../../../../dominio/produto-cardapio.entity';
 import { IProdutosCardapioRepository } from './../../../contratos/produtos-cardapio.repository.interface';
-
 import { ProdutoCardapioDB } from './../modelos/produto-cardapio.db-entity';
 import { ProdutosEstoqueRepository } from './produtos-estoque.repository';
 
@@ -14,7 +13,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
     const id = produtoCadastrado.id;
 
     const listaUsoAtual = [...produto.composicao.keys()];
-    this.estoqueRepository.marcarRelacoes(id, listaUsoAtual);
+    await this.estoqueRepository.marcarRelacoes(id, listaUsoAtual);
 
     this.produtos.set(id, produtoCadastrado);
 
@@ -54,10 +53,20 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
+    if (produto.composicao instanceof Map) {
+      if (produto.composicao.size === 0) {
+        throw new Error('Composição não inserida (composição vazia)');
+      }
+    } else {
+      throw new Error('Erro no formato da composição');
+    }
+
+    const listaUsoAtual: string[] = [...produto.composicao.keys()];
+    await this.estoqueRepository.validarListaIds(listaUsoAtual);
+
     const listaUsoAnterior = [...produtoAtualizado.composicao.keys()];
-    this.estoqueRepository.removerRelacoes(id, listaUsoAnterior);
-    const listaUsoAtual = [...produto.composicao.keys()];
-    this.estoqueRepository.marcarRelacoes(id, listaUsoAtual);
+    await this.estoqueRepository.removerRelacoes(id, listaUsoAnterior);
+    await this.estoqueRepository.marcarRelacoes(id, listaUsoAtual);
 
     produtoAtualizado.carregarDadosBase(produto);
 
@@ -75,28 +84,33 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
     }
 
     const listaUsoAnterior = [...produto.composicao.keys()];
-    this.estoqueRepository.removerRelacoes(id, listaUsoAnterior);
+    await this.estoqueRepository.removerRelacoes(id, listaUsoAnterior);
 
     this.produtos.delete(id);
   }
 
   async marcarRelacoes(idPedido: string, idProdutos: string[]) {
+    await this.validarListaIds(idProdutos);
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
-      if (!produto) {
-        throw this.erroProdutoNaoEncontrado(idProduto);
-      }
       produto.usadoPor.add(idPedido);
     });
   }
 
   async removerRelacoes(idPedido: string, idProdutos: string[]) {
+    await this.validarListaIds(idProdutos);
+    idProdutos.forEach((idProduto) => {
+      const produto = this.produtos.get(idProduto);
+      produto.usadoPor.delete(idPedido);
+    });
+  }
+
+  async validarListaIds(idProdutos: string[]): Promise<void> {
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
         throw this.erroProdutoNaoEncontrado(idProduto);
       }
-      produto.usadoPor.delete(idPedido);
     });
   }
 

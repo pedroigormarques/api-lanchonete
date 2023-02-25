@@ -1,7 +1,6 @@
+import { ProdutoEstoqueDB } from '../modelos/produto-estoque.db-entity';
 import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from './../../../contratos/produtos-estoque.repository.interface';
-
-import { ProdutoEstoqueDB } from '../modelos/produto-estoque.db-entity';
 
 export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
   private produtos = new Map<string, ProdutoEstoqueDB>();
@@ -67,34 +66,27 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
   }
 
   async marcarRelacoes(idProdutoCardapio: string, idProdutos: string[]) {
-    const produtosDB: ProdutoEstoqueDB[] = [];
+    await this.validarListaIds(idProdutos);
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
-      if (!produto) {
-        throw this.erroProdutoNaoEncontrado(idProduto);
-      } else {
-        produtosDB.push(produto);
-      }
-    });
-
-    produtosDB.forEach((produtoDB) => {
-      produtoDB.usadoPor.add(idProdutoCardapio);
+      produto.usadoPor.add(idProdutoCardapio);
     });
   }
 
   async removerRelacoes(idProdutoCardapio: string, idProdutos: string[]) {
-    const produtosDB: ProdutoEstoqueDB[] = [];
+    await this.validarListaIds(idProdutos);
+    idProdutos.forEach((idProduto) => {
+      const produto = this.produtos.get(idProduto);
+      produto.usadoPor.delete(idProdutoCardapio);
+    });
+  }
+
+  async validarListaIds(idProdutos: string[]): Promise<void> {
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
         throw this.erroProdutoNaoEncontrado(idProduto);
-      } else {
-        produtosDB.push(produto);
       }
-    });
-
-    produtosDB.forEach((produtoDB) => {
-      produtoDB.usadoPor.delete(idProdutoCardapio);
     });
   }
 
