@@ -1,30 +1,25 @@
-import { randomUUID } from 'crypto';
+import { PedidoFechadoDB } from '../modelos/pedido-fechado.db-entity';
 import { PedidoFechado } from './../../../../dominio/pedido-fechado.entity';
 import { IPedidosFechadosRepository } from './../../../contratos/pedidos-fechados.repository.interface';
 
 export class PedidosFechadosRepository implements IPedidosFechadosRepository {
-  private pedidosFechados = new Map<string, PedidoFechado>();
+  private pedidosFechados = new Map<string, PedidoFechadoDB>();
 
   async cadastrarPedidoFechado(
     pedidoFechado: PedidoFechado,
   ): Promise<PedidoFechado> {
-    const id = randomUUID();
-
-    const pedidoFechadoCadastrado = new PedidoFechado();
-
-    pedidoFechadoCadastrado.id = id;
-    pedidoFechadoCadastrado.horaFechamento = new Date();
-    pedidoFechadoCadastrado.horaAbertura = pedidoFechado.horaAbertura;
-    pedidoFechadoCadastrado.mesa = pedidoFechado.mesa;
-    pedidoFechadoCadastrado.produtosUtilizados =
-      pedidoFechado.produtosUtilizados;
-    pedidoFechadoCadastrado.produtosVendidos = pedidoFechado.produtosVendidos;
-    pedidoFechadoCadastrado.valorConta = pedidoFechado.valorConta;
+    const pedidoFechadoCadastrado = new PedidoFechadoDB(pedidoFechado);
+    const id = pedidoFechadoCadastrado.id;
 
     this.pedidosFechados.set(id, pedidoFechadoCadastrado);
-    return { ...pedidoFechadoCadastrado };
+    return pedidoFechadoCadastrado.paraPedidoFechado();
   }
+
   async carregarPedidosFechados(): Promise<PedidoFechado[]> {
-    return [...this.pedidosFechados.values()];
+    const pedidosFechados: PedidoFechado[] = [];
+    this.pedidosFechados.forEach((pedidoFechado) => {
+      pedidosFechados.push(pedidoFechado.paraPedidoFechado());
+    });
+    return pedidosFechados;
   }
 }
