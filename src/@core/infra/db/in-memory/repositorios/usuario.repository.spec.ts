@@ -30,11 +30,8 @@ describe('Usuario Repositorio', () => {
 
       const resposta = await usuarioRepositorio.validarUsuario(email, senha);
 
-      const esperado = { ...usuario1 };
-      delete esperado.senha;
-
       expect(resposta).toBeInstanceOf(Usuario);
-      expect(resposta).toEqual(esperado);
+      expect(resposta).toEqual(usuario1);
     });
     it('null ao não encontrar usuario com esses dados', async () => {
       const email = 'a@a.com';
@@ -55,8 +52,8 @@ describe('Usuario Repositorio', () => {
       expect(resposta.email).toEqual(usuarioTeste.email);
       expect(resposta.endereco).toEqual(usuarioTeste.endereco);
       expect(resposta.nomeLanchonete).toEqual(usuarioTeste.nomeLanchonete);
+      expect(resposta.senha).toEqual(usuarioTeste.senha);
       expect(resposta.id).toBeDefined();
-      expect(resposta.senha).toBeUndefined();
     });
     it('Erro ao passar dados insuficientes', async () => {
       const usuario = new Usuario();
@@ -78,7 +75,7 @@ describe('Usuario Repositorio', () => {
 
   describe('Atualizar Usuario', () => {
     it('Retorno de usuario atualizado com os dados passados', async () => {
-      const usuarioComDadosNovos = { ...usuario1 };
+      const usuarioComDadosNovos = new Usuario(usuario1);
 
       usuarioComDadosNovos.email = 'teste@teste.com';
 
@@ -87,9 +84,7 @@ describe('Usuario Repositorio', () => {
         usuarioComDadosNovos,
       );
 
-      const esperado = { ...usuarioComDadosNovos };
-      delete esperado.senha;
-      expect(resposta).toEqual(esperado);
+      expect(resposta).toEqual(usuarioComDadosNovos);
     });
 
     it('Erro ao passar dados inválidos inválido', async () => {
@@ -130,9 +125,7 @@ describe('Usuario Repositorio', () => {
     it('Retorno de usuario ao passar id válido', async () => {
       const resposta = await usuarioRepositorio.carregarUsuario(usuario1.id);
 
-      const esperado = { ...usuario1 };
-      delete esperado.senha;
-      expect(resposta).toEqual(esperado);
+      expect(resposta).toEqual(usuario1);
     });
 
     it('Erro ao passar id de usuario inválido', async () => {

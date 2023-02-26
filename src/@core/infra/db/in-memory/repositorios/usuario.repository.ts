@@ -12,7 +12,7 @@ export class UsuarioRepositorio implements IUsuarioRepository {
     });
 
     if (usuario && usuario.senha === senha) {
-      return usuario.paraUsuario();
+      return new Usuario(usuario);
     }
     return null;
   }
@@ -24,7 +24,7 @@ export class UsuarioRepositorio implements IUsuarioRepository {
     const id = usuarioRegistrado.id;
 
     this.usuarios.set(id, usuarioRegistrado);
-    return usuarioRegistrado.paraUsuario();
+    return new Usuario(usuarioRegistrado);
   }
 
   async atualizarUsuario(id: string, usuario: Usuario): Promise<Usuario> {
@@ -34,14 +34,14 @@ export class UsuarioRepositorio implements IUsuarioRepository {
       throw new Error('usuário não encontrado');
     }
 
-    UsuarioDB.validarDadosAtualizacao(usuario);
+    usuario.verificarSeDadosSaoValidosOuErro();
 
     if (usuario.email !== usuarioAtualizado.email)
       this.validarEmail(usuario.email);
 
     usuarioAtualizado.atualizarDadosBase(usuario);
 
-    return usuarioAtualizado.paraUsuario();
+    return new Usuario(usuarioAtualizado);
   }
 
   async carregarUsuario(id: string): Promise<Usuario> {
@@ -49,7 +49,7 @@ export class UsuarioRepositorio implements IUsuarioRepository {
     if (!usuario) {
       throw new Error('usuário não encontrado');
     }
-    return usuario.paraUsuario();
+    return new Usuario(usuario);
   }
 
   private validarEmail(email: string) {
