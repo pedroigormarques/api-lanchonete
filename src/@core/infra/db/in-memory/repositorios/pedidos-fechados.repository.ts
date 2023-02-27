@@ -12,13 +12,13 @@ export class PedidosFechadosRepository implements IPedidosFechadosRepository {
     const id = pedidoFechadoCadastrado.id;
 
     this.pedidosFechados.set(id, pedidoFechadoCadastrado);
-    return pedidoFechadoCadastrado.paraPedidoFechado();
+    return new PedidoFechado(pedidoFechadoCadastrado);
   }
 
   async carregarPedidosFechados(): Promise<PedidoFechado[]> {
     const pedidosFechados: PedidoFechado[] = [];
     this.pedidosFechados.forEach((pedidoFechado) => {
-      pedidosFechados.push(pedidoFechado.paraPedidoFechado());
+      pedidosFechados.push(new PedidoFechado(pedidoFechado));
     });
     return pedidosFechados;
   }

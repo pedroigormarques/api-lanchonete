@@ -249,7 +249,7 @@ function registrarPedidoDeTeste(pedidosRepositorio: PedidosRepository): {
 } {
   const pedidoRegistrado = GeradorDeObjetos.criarPedido();
   const pedidoBanco = new PedidoDB(pedidoRegistrado.mesa);
-  pedidoBanco.carregarDadosBase(pedidoRegistrado);
+  pedidoBanco.atualizarDados(pedidoRegistrado);
   pedidoRegistrado.id = pedidoBanco.id;
   pedidoRegistrado.horaAbertura = pedidoBanco.horaAbertura;
 

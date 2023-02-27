@@ -56,7 +56,6 @@ export class GeradorDeObjetos {
 
     if (comId) pedido.id = faker.datatype.uuid();
 
-    pedido.horaAbertura = new Date();
     pedido.mesa = faker.datatype.number({ min: 1, max: 10 });
     pedido.valorConta = +faker.commerce.price();
     pedido.produtosVendidos = this.gerarMapStringNumberAleatorio();
@@ -70,7 +69,6 @@ export class GeradorDeObjetos {
     if (comId) pedido.id = faker.datatype.uuid();
 
     pedido.horaAbertura = faker.date.recent();
-    pedido.horaFechamento = new Date();
     pedido.mesa = faker.datatype.number({ min: 1, max: 10 });
 
     pedido.produtosUtilizados = new Map<ProdutoEstoque, number>();

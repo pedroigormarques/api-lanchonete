@@ -13,12 +13,12 @@ export class PedidosRepository implements IPedidosRepository {
     const id = pedidoCadastrado.id;
 
     this.pedidos.set(id, pedidoCadastrado);
-    return pedidoCadastrado.paraPedido();
+    return new Pedido(pedidoCadastrado);
   }
 
   async carregarPedidos(): Promise<Pedido[]> {
     const pedidos = [] as Pedido[];
-    this.pedidos.forEach((pedidoDb) => pedidos.push(pedidoDb.paraPedido()));
+    this.pedidos.forEach((pedidoDb) => pedidos.push(new Pedido(pedidoDb)));
     return pedidos;
   }
 
@@ -29,7 +29,7 @@ export class PedidosRepository implements IPedidosRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
-    return pedido.paraPedido();
+    return new Pedido(pedido);
   }
 
   async atualizarPedido(id: string, pedido: Pedido): Promise<Pedido> {
@@ -39,7 +39,7 @@ export class PedidosRepository implements IPedidosRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
-    PedidoDB.validarDadosAtualizacao(pedido);
+    pedido.verificarSeDadosSaoValidosOuErro();
 
     const listaUsoAtual = [...pedido.produtosVendidos.keys()];
     await this.cardapioRepositorio.validarListaIds(listaUsoAtual);
@@ -50,9 +50,9 @@ export class PedidosRepository implements IPedidosRepository {
     }
     await this.cardapioRepositorio.marcarRelacoes(id, listaUsoAtual);
 
-    pedidoAtualizado.carregarDadosBase(pedido);
+    pedidoAtualizado.atualizarDados(pedido);
 
-    return pedidoAtualizado.paraPedido();
+    return new Pedido(pedidoAtualizado);
   }
 
   async removerPedido(id: string): Promise<void> {

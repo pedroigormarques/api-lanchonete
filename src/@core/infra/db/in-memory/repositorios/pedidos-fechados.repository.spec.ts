@@ -8,7 +8,6 @@ import { PedidosFechadosRepository } from './pedidos-fechados.repository';
 describe('Pedidos Fechados Repositorio', () => {
   let pedidosFechadosRepository: PedidosFechadosRepository;
   let pedidoFechado1: PedidoFechado;
-  let pedidoFechadoBanco1: PedidoFechadoDB;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -22,9 +21,7 @@ describe('Pedidos Fechados Repositorio', () => {
 
     pedidosFechadosRepository = moduleRef.get(PedidosFechadosRepository);
 
-    const pedidos = registrarPedidoFechadoDeTeste(pedidosFechadosRepository);
-    pedidoFechado1 = pedidos.pedidoFechadoRegistrado;
-    pedidoFechadoBanco1 = pedidos.pedidoFechadoBanco;
+    pedidoFechado1 = registrarPedidoFechadoDeTeste(pedidosFechadosRepository);
   });
 
   it('Instanciado', async () => {
@@ -84,7 +81,7 @@ describe('Pedidos Fechados Repositorio', () => {
 
   describe('Carregar Pedidos', () => {
     it('Retorno de produtos', async () => {
-      const { pedidoFechadoRegistrado } = registrarPedidoFechadoDeTeste(
+      const pedidoFechadoRegistrado = registrarPedidoFechadoDeTeste(
         pedidosFechadosRepository,
       );
       const resposta =
@@ -104,20 +101,13 @@ describe('Pedidos Fechados Repositorio', () => {
 
 function registrarPedidoFechadoDeTeste(
   pedidosFechadosRepositorio: PedidosFechadosRepository,
-): {
-  pedidoFechadoRegistrado: PedidoFechado;
-  pedidoFechadoBanco: PedidoFechadoDB;
-} {
+): PedidoFechado {
   const pedidoFechadoRegistrado = GeradorDeObjetos.criarPedidoFechado();
   const pedidoFechadoBanco = new PedidoFechadoDB(pedidoFechadoRegistrado);
 
   pedidoFechadoRegistrado.id = pedidoFechadoBanco.id;
-  pedidoFechadoRegistrado.horaFechamento = pedidoFechadoBanco.horaFechamento;
 
   (pedidosFechadosRepositorio as any).pedidosFechados //pela quebra de proteção "private"
     .set(pedidoFechadoBanco.id, pedidoFechadoBanco);
-  return {
-    pedidoFechadoRegistrado: pedidoFechadoRegistrado,
-    pedidoFechadoBanco: pedidoFechadoBanco,
-  };
+  return pedidoFechadoRegistrado;
 }
