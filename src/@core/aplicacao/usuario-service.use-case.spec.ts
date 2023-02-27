@@ -127,24 +127,17 @@ describe('Usuario Service', () => {
     it('Retorno de usuario atualizado ao passar alguns dados corretos', async () => {
       const usuarioBanco = GeradorDeObjetos.criarUsuario(true);
 
-      const nomeLanchonete = 'lanchonete';
-      const email = 'teste@teste.com';
-
-      const usuarioResposta = new Usuario(usuarioBanco);
-      usuarioResposta.nomeLanchonete = nomeLanchonete;
-      usuarioResposta.email = email;
-
       jest
         .spyOn(usuarioRespositorio, 'carregarUsuario')
         .mockResolvedValue(usuarioBanco);
 
       jest
         .spyOn(usuarioRespositorio, 'atualizarUsuario')
-        .mockResolvedValue(usuarioResposta);
+        .mockImplementation(async (id, usuario) => new Usuario(usuario));
 
       const dadosAtualizacao = {
-        email: email,
-        nomeLanchonete: nomeLanchonete,
+        email: 'teste@teste.com',
+        nomeLanchonete: 'lanchonete',
       } as Partial<DadosBaseUsuario>;
 
       const resposta = await usuarioService.atualizarUsuario(

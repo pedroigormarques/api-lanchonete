@@ -8,5 +8,8 @@ export interface IProdutosEstoqueRepository {
     id: string,
     produto: ProdutoEstoque,
   ): Promise<ProdutoEstoque>;
+  atualizarProdutos(
+    produtosEstoque: ProdutoEstoque[],
+  ): Promise<ProdutoEstoque[]>;
   removerProduto(id: string): Promise<void>;
 }

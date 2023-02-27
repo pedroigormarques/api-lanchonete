@@ -183,7 +183,7 @@ export class PedidosService {
     const mapProdutosEstoque: Map<string, number> =
       this.extrairQtdUsadaPorProdEstoque(produtosVendidos);
 
-    const produtosEstoque = await this.estoqueService.carregarProdutosEstoques([
+    const produtosEstoque = await this.estoqueService.carregarProdutosEstoque([
       ...mapProdutosEstoque.keys(),
     ]);
 
@@ -212,6 +212,7 @@ export class PedidosService {
   }
 
   private extrairQtdUsadaPorProdEstoque(
+    //parametros: <ProdutoCardapio, qtdConsumida>
     //retorna: <idProdutoEstoque, qtdTotalNecessário>
     produtosVendidos: Map<ProdutoCardapio, number>,
   ): Map<string, number> {

@@ -1,8 +1,7 @@
+import { DadosBaseProdutoEstoque } from './../dominio/produto-estoque.entity';
 import { DocChangeEvent } from './../dominio/doc-change-event.entity';
 import { tipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 import { Subject } from 'rxjs';
-import { CreateProdutoEstoqueDto } from '../dominio/DTOs/create-produto-estoque.dto';
-import { UpdateProdutoEstoqueDto } from '../dominio/DTOs/update-produto-estoque.dto';
 import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from '../infra/contratos/produtos-estoque.repository.interface';
 
@@ -34,14 +33,9 @@ export class EstoqueService {
   }
 
   async cadastrarProdutoEstoque(
-    dadosProdutoEstoque: CreateProdutoEstoqueDto,
+    dadosProdutoEstoque: DadosBaseProdutoEstoque,
   ): Promise<ProdutoEstoque> {
-    let produto = new ProdutoEstoque();
-
-    produto.descricao = dadosProdutoEstoque.descricao;
-    produto.nomeProduto = dadosProdutoEstoque.nomeProduto;
-    produto.quantidade = dadosProdutoEstoque.quantidade;
-    produto.unidade = dadosProdutoEstoque.unidade;
+    let produto = new ProdutoEstoque(dadosProdutoEstoque);
 
     produto = await this.estoqueRepositorio.cadastrarProduto(produto);
 
@@ -56,12 +50,12 @@ export class EstoqueService {
   async atualizarProdutosEstoque(
     produtos: ProdutoEstoque[],
   ): Promise<ProdutoEstoque[]> {
-    const produtosAtualizados = [] as ProdutoEstoque[];
-    const listaAtualizacoes = [] as DocChangeEvent<ProdutoEstoque>[];
+    const produtosAtualizados = await this.estoqueRepositorio.atualizarProdutos(
+      produtos,
+    );
 
-    produtos.forEach(async (pe) => {
-      const produtos = await this.atualizarProdutoEstoque(pe.id, pe);
-      produtosAtualizados.push(produtos);
+    const listaAtualizacoes = [] as DocChangeEvent<ProdutoEstoque>[];
+    produtosAtualizados.forEach(async (pe) => {
       listaAtualizacoes.push(
         new DocChangeEvent(tipoManipulacaoDado.Alterado, pe.id, pe),
       );
@@ -73,18 +67,11 @@ export class EstoqueService {
 
   async atualizarProdutoEstoque(
     idProduto: string,
-    dadosProdutoEstoque: UpdateProdutoEstoqueDto,
+    dadosProdutoEstoque: Partial<DadosBaseProdutoEstoque>,
   ): Promise<ProdutoEstoque> {
     let produto = await this.estoqueRepositorio.carregarProduto(idProduto);
 
-    if (dadosProdutoEstoque.nomeProduto)
-      produto.nomeProduto = dadosProdutoEstoque.nomeProduto;
-    if (dadosProdutoEstoque.descricao)
-      produto.descricao = dadosProdutoEstoque.descricao;
-    if (dadosProdutoEstoque.quantidade)
-      produto.quantidade = dadosProdutoEstoque.quantidade;
-    if (dadosProdutoEstoque.unidade)
-      produto.unidade = dadosProdutoEstoque.unidade;
+    produto.atualizarDados(dadosProdutoEstoque);
 
     produto = await this.estoqueRepositorio.atualizarProduto(
       idProduto,
@@ -99,7 +86,7 @@ export class EstoqueService {
     return produto;
   }
 
-  async carregarProdutosEstoques(
+  async carregarProdutosEstoque(
     listaIds?: string[],
   ): Promise<ProdutoEstoque[]> {
     return await this.estoqueRepositorio.carregarProdutos(listaIds);
@@ -121,7 +108,7 @@ export class EstoqueService {
   }
 
   async atualizarProdutosComGastos(gastosProdutosEstoque: Map<string, number>) {
-    const produtosEstoque = await this.carregarProdutosEstoques([
+    const produtosEstoque = await this.carregarProdutosEstoque([
       ...gastosProdutosEstoque.keys(),
     ]);
 

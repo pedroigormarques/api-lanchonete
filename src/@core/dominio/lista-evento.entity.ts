@@ -4,8 +4,6 @@ export class ListaEvento<T> {
   alteracoes: DocChangeEvent<T>[];
 
   constructor(lista: DocChangeEvent<T>[]) {
-    lista.forEach((evento) => {
-      this.alteracoes.push(evento);
-    });
+    this.alteracoes = lista;
   }
 }

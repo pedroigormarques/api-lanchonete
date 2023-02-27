@@ -52,6 +52,24 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     return new ProdutoEstoque(produtoAtualizado);
   }
 
+  async atualizarProdutos(
+    produtosEstoque: ProdutoEstoque[],
+  ): Promise<ProdutoEstoque[]> {
+    produtosEstoque.forEach((pe) => {
+      const produtoAtualizado = this.produtos.get(pe.id);
+      if (!produtoAtualizado) {
+        throw this.erroProdutoNaoEncontrado(pe.id);
+      }
+      pe.verificarSeDadosSaoValidosOuErro();
+    });
+
+    return produtosEstoque.map((pe) => {
+      const produtoAtualizado = this.produtos.get(pe.id);
+      produtoAtualizado.atualizarDados(pe);
+      return new ProdutoEstoque(produtoAtualizado);
+    });
+  }
+
   async removerProduto(id: string): Promise<void> {
     const produto = this.produtos.get(id);
     if (!produto) {

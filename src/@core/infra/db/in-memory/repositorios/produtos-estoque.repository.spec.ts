@@ -122,12 +122,22 @@ describe('Produto Estoque Repositorio', () => {
 
       expect(resposta.id).toEqual(produto1.id);
       expect(resposta).toEqual(produtoAux);
+
+      expect(new ProdutoEstoque(produto1Banco)).toEqual(produtoAux);
     });
 
     it('Erro ao não encontrar produto a ser atualizado com o id passado', async () => {
+      const produtoAux = GeradorDeObjetos.criarProdutoEstoque();
+
       await expect(
-        estoqueRepositorio.atualizarProduto('a', produto1),
+        estoqueRepositorio.atualizarProduto(produtoAux.id, produtoAux),
       ).rejects.toThrowError();
+
+      expect(
+        new ProdutoEstoque(
+          (estoqueRepositorio as any).produtos.get(produto1.id),
+        ),
+      ).toEqual(produto1);
     });
 
     it('Erro ao passar quantidade menor que 0 com dados válidos', async () => {
@@ -138,6 +148,10 @@ describe('Produto Estoque Repositorio', () => {
       await expect(
         estoqueRepositorio.atualizarProduto(produto.id, produto),
       ).rejects.toThrowError();
+
+      expect(
+        (estoqueRepositorio as any).produtos.get(produto1.id).quantidade,
+      ).toEqual(produto1.quantidade);
     });
 
     it('Erro ao tentar trocar a unidade de um produto sendo utilizado', async () => {
@@ -150,6 +164,72 @@ describe('Produto Estoque Repositorio', () => {
       await expect(
         estoqueRepositorio.atualizarProduto(produto.id, produto),
       ).rejects.toThrowError();
+
+      expect(
+        (estoqueRepositorio as any).produtos.get(produto1.id).unidade,
+      ).toEqual(produto1.unidade);
+    });
+  });
+
+  describe('Atualizar Produtos', () => {
+    it('Retorno de produtos atualizados ao inserir lista válida', async () => {
+      const { produtoRegistrado: produto2, produtoBanco: produtoBanco2 } =
+        registrarProdutoDeTeste(estoqueRepositorio);
+
+      const produtoAux = GeradorDeObjetos.criarProdutoEstoque();
+      const produtoAux2 = GeradorDeObjetos.criarProdutoEstoque();
+
+      produtoAux.id = produto1.id;
+      produtoAux2.id = produto2.id;
+
+      const resposta = await estoqueRepositorio.atualizarProdutos([
+        produtoAux,
+        produtoAux2,
+      ]);
+
+      expect(resposta).toBeInstanceOf(Array<ProdutoEstoque>);
+      expect(resposta.length).toEqual(2);
+      expect(resposta).toContainEqual(produtoAux);
+      expect(resposta).toContainEqual(produtoAux2);
+
+      expect(new ProdutoEstoque(produto1Banco)).toEqual(produtoAux);
+      expect(new ProdutoEstoque(produtoBanco2)).toEqual(produtoAux2);
+    });
+
+    it('Erro ao não encontrar produto a ser atualizado com o id passado', async () => {
+      const produtoAux = GeradorDeObjetos.criarProdutoEstoque();
+      const produtoAux2 = GeradorDeObjetos.criarProdutoEstoque();
+
+      produtoAux.id = produto1.id;
+
+      await expect(
+        estoqueRepositorio.atualizarProdutos([produtoAux, produtoAux2]),
+      ).rejects.toThrowError();
+
+      expect(
+        new ProdutoEstoque(
+          (estoqueRepositorio as any).produtos.get(produto1.id),
+        ),
+      ).toEqual(produto1);
+      expect((estoqueRepositorio as any).produtos.size).toEqual(1);
+    });
+
+    it('Erro ao passar algum dos dados inválidos', async () => {
+      const produtoAux = GeradorDeObjetos.criarProdutoEstoque();
+
+      produtoAux.id = produto1.id;
+      produtoAux.quantidade = -10;
+
+      await expect(
+        estoqueRepositorio.atualizarProdutos([produtoAux]),
+      ).rejects.toThrowError();
+
+      expect(
+        new ProdutoEstoque(
+          (estoqueRepositorio as any).produtos.get(produto1.id),
+        ),
+      ).toEqual(produto1);
+      expect((estoqueRepositorio as any).produtos.size).toEqual(1);
     });
   });
 
