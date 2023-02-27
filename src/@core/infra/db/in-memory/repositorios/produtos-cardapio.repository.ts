@@ -17,7 +17,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
 
     this.produtos.set(id, produtoCadastrado);
 
-    return produtoCadastrado.paraProdutoCardapio();
+    return new ProdutoCardapio(produtoCadastrado);
   }
 
   async carregarProdutos(listaIds?: string[]): Promise<ProdutoCardapio[]> {
@@ -29,7 +29,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       if (!produto) {
         throw this.erroProdutoNaoEncontrado(idProduto);
       }
-      listaProdutos.push(produto.paraProdutoCardapio());
+      listaProdutos.push(new ProdutoCardapio(produto));
     });
     return listaProdutos;
   }
@@ -41,7 +41,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
-    return produto.paraProdutoCardapio();
+    return new ProdutoCardapio(produto);
   }
 
   async atualizarProduto(
@@ -53,7 +53,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
-    ProdutoCardapioDB.validarDados(produto);
+    produto.verificarSeDadosSaoValidosOuErro();
 
     const listaUsoAtual: string[] = [...produto.composicao.keys()];
     await this.estoqueRepository.validarListaIds(listaUsoAtual);
@@ -62,9 +62,9 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
     await this.estoqueRepository.removerRelacoes(id, listaUsoAnterior);
     await this.estoqueRepository.marcarRelacoes(id, listaUsoAtual);
 
-    produtoAtualizado.carregarDadosBase(produto);
+    produtoAtualizado.atualizarDados(produto);
 
-    return produtoAtualizado.paraProdutoCardapio();
+    return new ProdutoCardapio(produtoAtualizado);
   }
 
   async removerProduto(id: string): Promise<void> {
