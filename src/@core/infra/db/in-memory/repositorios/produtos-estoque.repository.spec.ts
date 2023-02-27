@@ -131,7 +131,7 @@ describe('Produto Estoque Repositorio', () => {
     });
 
     it('Erro ao passar quantidade menor que 0 com dados válidos', async () => {
-      const produto = { ...produto1 };
+      const produto = new ProdutoEstoque(produto1);
 
       produto.quantidade = -100;
 
@@ -142,7 +142,7 @@ describe('Produto Estoque Repositorio', () => {
 
     it('Erro ao tentar trocar a unidade de um produto sendo utilizado', async () => {
       produto1Banco.usadoPor.add('idTeste');
-      const produto = { ...produto1 };
+      const produto = new ProdutoEstoque(produto1);
 
       produto.unidade =
         produto.unidade === UNIDADES.L ? UNIDADES.g : UNIDADES.L;

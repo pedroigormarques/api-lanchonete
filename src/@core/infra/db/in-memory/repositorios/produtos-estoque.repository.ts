@@ -10,7 +10,7 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     const id = produtoCadastrado.id;
     this.produtos.set(id, produtoCadastrado);
 
-    return produtoCadastrado.paraProdutoEstoque();
+    return new ProdutoEstoque(produtoCadastrado);
   }
 
   async carregarProdutos(listaIds?: string[]): Promise<ProdutoEstoque[]> {
@@ -23,7 +23,7 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
         throw this.erroProdutoNaoEncontrado(idProduto);
       }
 
-      listaProdutos.push(produto.paraProdutoEstoque());
+      listaProdutos.push(new ProdutoEstoque(produto));
     });
     return listaProdutos;
   }
@@ -35,7 +35,7 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
-    return produto.paraProdutoEstoque();
+    return new ProdutoEstoque(produto);
   }
 
   async atualizarProduto(
@@ -47,9 +47,9 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
       throw this.erroProdutoNaoEncontrado(id);
     }
 
-    produtoAtualizado.carregarDadosBase(produto);
+    produtoAtualizado.atualizarDados(produto);
 
-    return produtoAtualizado.paraProdutoEstoque();
+    return new ProdutoEstoque(produtoAtualizado);
   }
 
   async removerProduto(id: string): Promise<void> {
@@ -59,7 +59,9 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     }
 
     if (produto.usadoPor.size > 0) {
-      throw this.erroProdutoSendoUtilizado(id);
+      throw new Error(
+        `Produto de id ${id} está sendo utilizado por algum produto do cardápio. Remoção cancelada`,
+      );
     }
 
     this.produtos.delete(id);
@@ -92,11 +94,5 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
 
   private erroProdutoNaoEncontrado(id: string) {
     return new Error(`produto de id ${id} não encontrado`);
-  }
-
-  private erroProdutoSendoUtilizado(id: string) {
-    return new Error(
-      `produto de id ${id} está sendo utilizado por algum produto do cardápio`,
-    );
   }
 }
