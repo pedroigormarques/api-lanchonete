@@ -1,11 +1,9 @@
-import { ListaEvento } from './../dominio/lista-evento.entity';
-import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
-import { IProdutosCardapioRepository } from '../infra/contratos/produtos-cardapio.repository.interface';
 import { DocChangeEvent } from '../dominio/doc-change-event.entity';
 import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
-
-import { CreateProdutoCardapioDto } from '../dominio/DTOs/create-produto-cardapio.dto';
-import { UpdateProdutoCardapioDto } from '../dominio/DTOs/update-produto-cardapio.dto';
+import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
+import { IProdutosCardapioRepository } from '../infra/contratos/produtos-cardapio.repository.interface';
+import { ListaEvento } from './../dominio/lista-evento.entity';
+import { DadosBaseProdutoCardapio } from './../dominio/produto-cardapio.entity';
 import { NotificadorDeEventos } from './notificadorDeEventos';
 
 export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
@@ -23,14 +21,9 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
   }
 
   async cadastrarProdutoCardapio(
-    dadosProdutoCardapio: CreateProdutoCardapioDto,
+    dadosProdutoCardapio: DadosBaseProdutoCardapio,
   ): Promise<ProdutoCardapio> {
-    let produto = new ProdutoCardapio();
-    produto.descricao = dadosProdutoCardapio.descricao;
-    produto.nomeProduto = dadosProdutoCardapio.nomeProduto;
-    produto.categoria = dadosProdutoCardapio.categoria;
-    produto.composicao = dadosProdutoCardapio.composicao;
-    produto.preco = dadosProdutoCardapio.preco;
+    let produto = new ProdutoCardapio(dadosProdutoCardapio);
 
     produto = await this.cardapioRepositorio.cadastrarProduto(produto);
 
@@ -44,19 +37,11 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
 
   async atualizarProdutoCardapio(
     idProduto: string,
-    dadosProdutoCardapio: UpdateProdutoCardapioDto,
+    dadosProdutoCardapio: Partial<DadosBaseProdutoCardapio>,
   ): Promise<ProdutoCardapio> {
     let produto = await this.cardapioRepositorio.carregarProduto(idProduto);
 
-    if (dadosProdutoCardapio.nomeProduto)
-      produto.nomeProduto = dadosProdutoCardapio.nomeProduto;
-    if (dadosProdutoCardapio.descricao)
-      produto.descricao = dadosProdutoCardapio.descricao;
-    if (dadosProdutoCardapio.categoria)
-      produto.categoria = dadosProdutoCardapio.categoria;
-    if (dadosProdutoCardapio.composicao)
-      produto.composicao = dadosProdutoCardapio.composicao;
-    if (dadosProdutoCardapio.preco) produto.preco = dadosProdutoCardapio.preco;
+    produto.atualizarDados(dadosProdutoCardapio);
 
     produto = await this.cardapioRepositorio.atualizarProduto(
       idProduto,
