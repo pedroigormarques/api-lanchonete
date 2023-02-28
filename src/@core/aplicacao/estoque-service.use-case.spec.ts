@@ -15,8 +15,8 @@ describe('Estoque Service', () => {
       providers: [
         {
           provide: EstoqueService,
-          useFactory: (estoqueRepositorio: IProdutosEstoqueRepository) =>
-            new EstoqueService(estoqueRepositorio),
+          useFactory: async (estoqueRepositorio: IProdutosEstoqueRepository) =>
+            await EstoqueService.create(estoqueRepositorio),
           inject: [ProdutosEstoqueRepository],
         },
         {
@@ -35,18 +35,6 @@ describe('Estoque Service', () => {
   it('Instanciado', () => {
     expect(estoqueRepositorio).toBeDefined();
     expect(estoqueService).toBeDefined();
-  });
-
-  describe('Abrir Conexao', () => {
-    it.todo(
-      'Fazer os testes após refatoração de toda a lógica/classes de eventos',
-    );
-  });
-
-  describe('Emitir Alteracao', () => {
-    it.todo(
-      'Fazer os testes após refatoração de toda a lógica/classes de eventos',
-    );
   });
 
   describe('Cadastrar Produto Estoque', () => {

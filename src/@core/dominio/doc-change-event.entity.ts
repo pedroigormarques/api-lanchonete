@@ -1,8 +1,8 @@
-import { tipoManipulacaoDado } from './enums/tipo-manipulacao-dado.enum';
+import { TipoManipulacaoDado } from './enums/tipo-manipulacao-dado.enum';
 
 export class DocChangeEvent<T> {
   constructor(
-    public acao: tipoManipulacaoDado,
+    public acao: TipoManipulacaoDado,
     public id?: string,
     public data?: T,
   ) {}

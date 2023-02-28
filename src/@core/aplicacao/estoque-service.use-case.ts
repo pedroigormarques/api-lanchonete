@@ -1,35 +1,24 @@
 import { DadosBaseProdutoEstoque } from './../dominio/produto-estoque.entity';
 import { DocChangeEvent } from './../dominio/doc-change-event.entity';
-import { tipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
-import { Subject } from 'rxjs';
+import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from '../infra/contratos/produtos-estoque.repository.interface';
 
 import { ListaEvento } from '../dominio/lista-evento.entity';
+import { NotificadorDeEventos } from './notificadorDeEventos';
 
-export class EstoqueService {
-  constructor(private estoqueRepositorio: IProdutosEstoqueRepository) {}
-
-  private estoqueEvents = new Subject();
-
-  async abrirConexao() {
-    //Verificar a maneira de adicionar o conteúdo atual assim que for aberto uma conexão
-
-    /*const produtos = await this.carregarProdutosEstoques();
-
-    const listaAlteracoes = [];
-    produtos.forEach((pe) => {
-      listaAlteracoes.push(new DocChangeEvent(ACAO.Adicionado, pe.id, pe));
-    });
-    const evento = new ListaEvento<ProdutoEstoque>(listaAlteracoes);
-
-    this.emitirAlteracao(evento);*/
-
-    return this.estoqueEvents.asObservable();
+export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
+  constructor(private estoqueRepositorio: IProdutosEstoqueRepository) {
+    super();
   }
 
-  emitirAlteracao(evento: ListaEvento<ProdutoEstoque>) {
-    return this.estoqueEvents.next(evento);
+  static async create(
+    estoqueRepositorio: IProdutosEstoqueRepository,
+  ): Promise<EstoqueService> {
+    const estoqueService = new EstoqueService(estoqueRepositorio);
+    const dadosIniciais = await estoqueService.carregarProdutosEstoque();
+    estoqueService.carregarDadosIniciais(dadosIniciais);
+    return estoqueService;
   }
 
   async cadastrarProdutoEstoque(
@@ -40,7 +29,7 @@ export class EstoqueService {
     produto = await this.estoqueRepositorio.cadastrarProduto(produto);
 
     const evento = new ListaEvento<ProdutoEstoque>([
-      new DocChangeEvent(tipoManipulacaoDado.Adicionado, produto.id, produto),
+      new DocChangeEvent(TipoManipulacaoDado.Adicionado, produto.id, produto),
     ]);
     this.emitirAlteracao(evento);
 
@@ -57,7 +46,7 @@ export class EstoqueService {
     const listaAtualizacoes = [] as DocChangeEvent<ProdutoEstoque>[];
     produtosAtualizados.forEach(async (pe) => {
       listaAtualizacoes.push(
-        new DocChangeEvent(tipoManipulacaoDado.Alterado, pe.id, pe),
+        new DocChangeEvent(TipoManipulacaoDado.Alterado, pe.id, pe),
       );
     });
     this.emitirAlteracao(new ListaEvento<ProdutoEstoque>(listaAtualizacoes));
@@ -79,7 +68,7 @@ export class EstoqueService {
     );
 
     const evento = new ListaEvento<ProdutoEstoque>([
-      new DocChangeEvent(tipoManipulacaoDado.Alterado, idProduto, produto),
+      new DocChangeEvent(TipoManipulacaoDado.Alterado, idProduto, produto),
     ]);
     this.emitirAlteracao(evento);
 
@@ -100,7 +89,7 @@ export class EstoqueService {
     await this.estoqueRepositorio.removerProduto(idProduto);
 
     const evento = new ListaEvento<ProdutoEstoque>([
-      new DocChangeEvent(tipoManipulacaoDado.Removido, idProduto),
+      new DocChangeEvent(TipoManipulacaoDado.Removido, idProduto),
     ]);
     this.emitirAlteracao(evento);
 

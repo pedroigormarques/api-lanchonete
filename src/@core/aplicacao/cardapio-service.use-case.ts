@@ -1,36 +1,25 @@
 import { ListaEvento } from './../dominio/lista-evento.entity';
-import { Subject } from 'rxjs';
 import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
 import { IProdutosCardapioRepository } from '../infra/contratos/produtos-cardapio.repository.interface';
 import { DocChangeEvent } from '../dominio/doc-change-event.entity';
-import { tipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
+import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 
 import { CreateProdutoCardapioDto } from '../dominio/DTOs/create-produto-cardapio.dto';
 import { UpdateProdutoCardapioDto } from '../dominio/DTOs/update-produto-cardapio.dto';
+import { NotificadorDeEventos } from './notificadorDeEventos';
 
-export class CardapioService {
-  constructor(private cardapioRepositorio: IProdutosCardapioRepository) {}
-
-  private cardapioEvents = new Subject();
-
-  async abrirConexao() {
-    //Verificar a maneira de adicionar o conteúdo atual assim que for aberto uma conexão
-
-    /*const produtos = await this.carregarProdutosCardapio();
-
-    const listaAlteracoes = [];
-    produtos.forEach((pc) => {
-      listaAlteracoes.push(new DocChangeEvent(ACAO.Adicionado, pc.id, pc));
-    });
-    const evento = new ListaEvento<ProdutoCardapio>(listaAlteracoes);
-
-    this.emitirAlteracao(evento);*/
-
-    return this.cardapioEvents.asObservable();
+export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
+  constructor(private cardapioRepositorio: IProdutosCardapioRepository) {
+    super();
   }
 
-  emitirAlteracao(evento: ListaEvento<ProdutoCardapio>) {
-    return this.cardapioEvents.next(evento);
+  static async create(
+    cardapioRepositorio: IProdutosCardapioRepository,
+  ): Promise<CardapioService> {
+    const cardapioService = new CardapioService(cardapioRepositorio);
+    const dadosIniciais = await cardapioService.carregarProdutosCardapio();
+    cardapioService.carregarDadosIniciais(dadosIniciais);
+    return cardapioService;
   }
 
   async cadastrarProdutoCardapio(
@@ -46,7 +35,7 @@ export class CardapioService {
     produto = await this.cardapioRepositorio.cadastrarProduto(produto);
 
     const evento = new ListaEvento<ProdutoCardapio>([
-      new DocChangeEvent(tipoManipulacaoDado.Adicionado, produto.id, produto),
+      new DocChangeEvent(TipoManipulacaoDado.Adicionado, produto.id, produto),
     ]);
     this.emitirAlteracao(evento);
 
@@ -75,7 +64,7 @@ export class CardapioService {
     );
 
     const evento = new ListaEvento<ProdutoCardapio>([
-      new DocChangeEvent(tipoManipulacaoDado.Alterado, idProduto, produto),
+      new DocChangeEvent(TipoManipulacaoDado.Alterado, idProduto, produto),
     ]);
     this.emitirAlteracao(evento);
 
@@ -104,7 +93,7 @@ export class CardapioService {
     await this.cardapioRepositorio.removerProduto(idProduto);
 
     const evento = new ListaEvento<ProdutoCardapio>([
-      new DocChangeEvent(tipoManipulacaoDado.Removido, idProduto),
+      new DocChangeEvent(TipoManipulacaoDado.Removido, idProduto),
     ]);
     this.emitirAlteracao(evento);
 

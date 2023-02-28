@@ -1,4 +1,4 @@
-export enum tipoManipulacaoDado {
+export enum TipoManipulacaoDado {
   Adicionado = 'Adicionado',
   Alterado = 'Alterado',
   Removido = 'Removido',

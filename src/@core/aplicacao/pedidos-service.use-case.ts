@@ -5,41 +5,38 @@ import { PedidoFechado } from '../dominio/pedido-fechado.entity';
 import { CreatePedidoDto } from './../dominio/DTOs/create-pedido.dto';
 import { Pedido } from '../dominio/pedido.entity';
 import { ListaEvento } from './../dominio/lista-evento.entity';
-import { tipoManipulacaoDado } from './../dominio/enums/tipo-manipulacao-dado.enum';
+import { TipoManipulacaoDado } from './../dominio/enums/tipo-manipulacao-dado.enum';
 import { DocChangeEvent } from './../dominio/doc-change-event.entity';
 import { IPedidosFechadosRepository } from '../infra/contratos/pedidos-fechados.repository.interface';
 import { IPedidosRepository } from '../infra/contratos/pedidos.repository.interface';
-import { Subject } from 'rxjs';
 import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
+import { NotificadorDeEventos } from './notificadorDeEventos';
 
-export class PedidosService {
+export class PedidosService extends NotificadorDeEventos<Pedido> {
   constructor(
     private pedidosRepositorio: IPedidosRepository,
     private pedidosFechadosRepositorio: IPedidosFechadosRepository,
     private cardapioService: CardapioService,
     private estoqueService: EstoqueService,
-  ) {}
-
-  private pedidosEvents = new Subject();
-
-  async abrirConexaoParaPedidos() {
-    //Verificar a maneira de adicionar o conteúdo atual assim que for aberto uma conexão
-
-    /*const pedidos = await this.carregarPedidos();
-  
-      const listaAlteracoes = [];
-      pedidos.forEach((p) => {
-        listaAlteracoes.push(new DocChangeEvent(tipoManipulacaoDado.Adicionado, p.id, p));
-      });
-      const evento = new ListaEvento<Pedido>(listaAlteracoes);
-  
-      this.emitirAlteracao(evento);*/
-
-    return this.pedidosEvents.asObservable();
+  ) {
+    super();
   }
 
-  emitirAlteracao(evento: ListaEvento<Pedido>) {
-    return this.pedidosEvents.next(evento);
+  static async create(
+    pedidosRepositorio: IPedidosRepository,
+    pedidosFechadosRepositorio: IPedidosFechadosRepository,
+    cardapioService: CardapioService,
+    estoqueService: EstoqueService,
+  ): Promise<PedidosService> {
+    const pedidosService = new PedidosService(
+      pedidosRepositorio,
+      pedidosFechadosRepositorio,
+      cardapioService,
+      estoqueService,
+    );
+    const dadosIniciais = await pedidosService.carregarPedidos();
+    pedidosService.carregarDadosIniciais(dadosIniciais);
+    return pedidosService;
   }
 
   async cadastrarPedido(dadosPedido: CreatePedidoDto): Promise<Pedido> {
@@ -49,7 +46,7 @@ export class PedidosService {
     pedido = await this.pedidosRepositorio.cadastrarPedido(pedido);
 
     const evento = new ListaEvento<Pedido>([
-      new DocChangeEvent(tipoManipulacaoDado.Adicionado, pedido.id, pedido),
+      new DocChangeEvent(TipoManipulacaoDado.Adicionado, pedido.id, pedido),
     ]);
     this.emitirAlteracao(evento);
 
@@ -114,7 +111,7 @@ export class PedidosService {
     pedido = await this.pedidosRepositorio.atualizarPedido(idPedido, pedido);
 
     const evento = new ListaEvento<Pedido>([
-      new DocChangeEvent(tipoManipulacaoDado.Alterado, pedido.id, pedido),
+      new DocChangeEvent(TipoManipulacaoDado.Alterado, pedido.id, pedido),
     ]);
     this.emitirAlteracao(evento);
 
@@ -140,7 +137,7 @@ export class PedidosService {
 
     await this.pedidosRepositorio.removerPedido(idPedido);
     const evento = new ListaEvento<Pedido>([
-      new DocChangeEvent(tipoManipulacaoDado.Removido, idPedido),
+      new DocChangeEvent(TipoManipulacaoDado.Removido, idPedido),
     ]);
     this.emitirAlteracao(evento);
 
@@ -165,7 +162,7 @@ export class PedidosService {
 
     await this.pedidosRepositorio.removerPedido(idPedido);
     const evento = new ListaEvento<Pedido>([
-      new DocChangeEvent(tipoManipulacaoDado.Removido, idPedido),
+      new DocChangeEvent(TipoManipulacaoDado.Removido, idPedido),
     ]);
     this.emitirAlteracao(evento);
     return await this.pedidosFechadosRepositorio.cadastrarPedidoFechado(
