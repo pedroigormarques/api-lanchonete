@@ -45,7 +45,7 @@ describe('Pedidos Repositorio', () => {
 
   describe('Cadastrar Pedido', () => {
     it('Registro realizado com dados válidos', async () => {
-      const pedido = GeradorDeObjetos.criarPedido();
+      const pedido = new Pedido({ mesa: 5 });
 
       const resposta = await pedidosRespository.cadastrarPedido(pedido);
 

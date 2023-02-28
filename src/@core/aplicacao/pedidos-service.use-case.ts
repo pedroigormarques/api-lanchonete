@@ -1,15 +1,15 @@
-import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
-import { CardapioService } from './cardapio-service.use-case';
-import { EstoqueService } from './estoque-service.use-case';
 import { PedidoFechado } from '../dominio/pedido-fechado.entity';
-import { CreatePedidoDto } from './../dominio/DTOs/create-pedido.dto';
-import { Pedido } from '../dominio/pedido.entity';
-import { ListaEvento } from './../dominio/lista-evento.entity';
-import { TipoManipulacaoDado } from './../dominio/enums/tipo-manipulacao-dado.enum';
-import { DocChangeEvent } from './../dominio/doc-change-event.entity';
+import { DadosBasePedido, Pedido } from '../dominio/pedido.entity';
+import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
+import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { IPedidosFechadosRepository } from '../infra/contratos/pedidos-fechados.repository.interface';
 import { IPedidosRepository } from '../infra/contratos/pedidos.repository.interface';
-import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
+import { DocChangeEvent } from './../dominio/doc-change-event.entity';
+import { TipoManipulacaoDado } from './../dominio/enums/tipo-manipulacao-dado.enum';
+import { ListaEvento } from './../dominio/lista-evento.entity';
+import { DadosBasePedidoFechado } from './../dominio/pedido-fechado.entity';
+import { CardapioService } from './cardapio-service.use-case';
+import { EstoqueService } from './estoque-service.use-case';
 import { NotificadorDeEventos } from './notificadorDeEventos';
 
 export class PedidosService extends NotificadorDeEventos<Pedido> {
@@ -39,9 +39,10 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     return pedidosService;
   }
 
-  async cadastrarPedido(dadosPedido: CreatePedidoDto): Promise<Pedido> {
-    let pedido = new Pedido();
-    pedido.mesa = dadosPedido.mesa;
+  async cadastrarPedido(
+    dadosPedido: Pick<DadosBasePedido, 'mesa'>,
+  ): Promise<Pedido> {
+    let pedido = new Pedido(dadosPedido);
 
     pedido = await this.pedidosRepositorio.cadastrarPedido(pedido);
 
@@ -147,18 +148,19 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   async fecharPedido(idPedido: string): Promise<PedidoFechado> {
     const pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
 
-    const pedidoFechado = new PedidoFechado();
-    pedidoFechado.horaAbertura = pedido.horaAbertura;
-    pedidoFechado.mesa = pedido.mesa;
-    pedidoFechado.valorConta = pedido.valorConta;
+    const dadosPedido = {} as DadosBasePedidoFechado;
+    dadosPedido.horaAbertura = pedido.horaAbertura;
+    dadosPedido.mesa = pedido.mesa;
+    dadosPedido.valorConta = pedido.valorConta;
 
-    pedidoFechado.produtosVendidos = await this.comporProdutosVendidos(
+    dadosPedido.produtosVendidos = await this.comporProdutosVendidos(
       pedido.produtosVendidos,
     );
 
-    pedidoFechado.produtosUtilizados = await this.comporProdutosUtilizados(
-      pedidoFechado.produtosVendidos,
+    dadosPedido.produtosUtilizados = await this.comporProdutosUtilizados(
+      dadosPedido.produtosVendidos,
     );
+    const pedidoFechado = new PedidoFechado(dadosPedido);
 
     await this.pedidosRepositorio.removerPedido(idPedido);
     const evento = new ListaEvento<Pedido>([
