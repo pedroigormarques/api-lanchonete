@@ -2,29 +2,29 @@ import { Test } from '@nestjs/testing';
 
 import { GeradorDeObjetos } from './../../test/gerador-objetos.faker';
 import { Usuario, DadosBaseUsuario } from './../dominio/usuario.entity';
-import { UsuarioRepositorio } from './../infra/db/in-memory/repositorios/usuario.repository';
+import { UsuarioRepository } from './../infra/db/in-memory/repositorios/usuario.repository';
 import { UsuarioService } from './usuario-service.use-case';
 
 describe('Usuario Service', () => {
   let usuarioService: UsuarioService;
-  let usuarioRespositorio: UsuarioRepositorio;
+  let usuarioRespositorio: UsuarioRepository;
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
         {
           provide: UsuarioService,
-          useFactory: (usuarioRepositorio: UsuarioRepositorio) =>
+          useFactory: (usuarioRepositorio: UsuarioRepository) =>
             new UsuarioService(usuarioRepositorio),
-          inject: [UsuarioRepositorio],
+          inject: [UsuarioRepository],
         },
         {
-          provide: UsuarioRepositorio,
-          useClass: UsuarioRepositorio,
+          provide: UsuarioRepository,
+          useClass: UsuarioRepository,
         },
       ],
     }).compile();
 
-    usuarioRespositorio = moduleRef.get<UsuarioRepositorio>(UsuarioRepositorio);
+    usuarioRespositorio = moduleRef.get<UsuarioRepository>(UsuarioRepository);
     usuarioService = moduleRef.get<UsuarioService>(UsuarioService);
   });
 

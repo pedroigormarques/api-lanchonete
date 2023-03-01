@@ -4,7 +4,7 @@ import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
 import { IProdutosCardapioRepository } from '../infra/contratos/produtos-cardapio.repository.interface';
 import { ListaEvento } from './../dominio/lista-evento.entity';
 import { DadosBaseProdutoCardapio } from './../dominio/produto-cardapio.entity';
-import { NotificadorDeEventos } from './notificadorDeEventos';
+import { NotificadorDeEventos } from './notificador-de-eventos';
 
 export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
   constructor(private cardapioRepositorio: IProdutosCardapioRepository) {

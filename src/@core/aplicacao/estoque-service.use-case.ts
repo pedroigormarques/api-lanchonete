@@ -5,7 +5,7 @@ import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from '../infra/contratos/produtos-estoque.repository.interface';
 
 import { ListaEvento } from '../dominio/lista-evento.entity';
-import { NotificadorDeEventos } from './notificadorDeEventos';
+import { NotificadorDeEventos } from './notificador-de-eventos';
 
 export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
   constructor(private estoqueRepositorio: IProdutosEstoqueRepository) {

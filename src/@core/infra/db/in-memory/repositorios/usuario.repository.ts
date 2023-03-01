@@ -2,7 +2,7 @@ import { Usuario } from '../../../../dominio/usuario.entity';
 import { IUsuarioRepository } from '../../../contratos/usuario.repository.interface';
 import { UsuarioDB } from './../modelos/usuario.db-entity';
 
-export class UsuarioRepositorio implements IUsuarioRepository {
+export class UsuarioRepository implements IUsuarioRepository {
   private usuarios = new Map<string, UsuarioDB>();
 
   async validarUsuario(email: string, senha: string): Promise<Usuario> {

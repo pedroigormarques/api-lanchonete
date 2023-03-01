@@ -12,7 +12,7 @@ import { CardapioService } from './cardapio-service.use-case';
 import { EstoqueService } from './estoque-service.use-case';
 import { PedidosService } from './pedidos-service.use-case';
 
-describe('Cardapio Service', () => {
+describe('Pedidos Service', () => {
   let pedidosService: PedidosService;
   let pedidosRepository: PedidosRepository;
 

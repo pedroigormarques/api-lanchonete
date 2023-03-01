@@ -10,7 +10,7 @@ import { ListaEvento } from './../dominio/lista-evento.entity';
 import { DadosBasePedidoFechado } from './../dominio/pedido-fechado.entity';
 import { CardapioService } from './cardapio-service.use-case';
 import { EstoqueService } from './estoque-service.use-case';
-import { NotificadorDeEventos } from './notificadorDeEventos';
+import { NotificadorDeEventos } from './notificador-de-eventos';
 
 export class PedidosService extends NotificadorDeEventos<Pedido> {
   constructor(

@@ -3,18 +3,18 @@ import { Test } from '@nestjs/testing';
 import { GeradorDeObjetos } from '../../../../../test/gerador-objetos.faker';
 import { Usuario } from './../../../../dominio/usuario.entity';
 import { UsuarioDB } from './../modelos/usuario.db-entity';
-import { UsuarioRepositorio } from './usuario.repository';
+import { UsuarioRepository } from './usuario.repository';
 
 describe('Usuario Repositorio', () => {
-  let usuarioRepositorio: UsuarioRepositorio;
+  let usuarioRepositorio: UsuarioRepository;
   let usuario1: Usuario;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      providers: [UsuarioRepositorio],
+      providers: [UsuarioRepository],
     }).compile();
 
-    usuarioRepositorio = moduleRef.get<UsuarioRepositorio>(UsuarioRepositorio);
+    usuarioRepositorio = moduleRef.get<UsuarioRepository>(UsuarioRepository);
 
     //registrando ao menos um usuario antes de cada teste para os testes de validação, update e carregamento
     usuario1 = registrarUsuarioDeTeste(usuarioRepositorio);
@@ -136,7 +136,7 @@ describe('Usuario Repositorio', () => {
   });
 });
 
-function registrarUsuarioDeTeste(usuarioRepositorio: UsuarioRepositorio) {
+function registrarUsuarioDeTeste(usuarioRepositorio: UsuarioRepository) {
   const usuarioTeste = GeradorDeObjetos.criarUsuario();
   const usuarioBanco = new UsuarioDB(usuarioTeste);
   usuarioTeste.id = usuarioBanco.id;
