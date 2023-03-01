@@ -1,5 +1,5 @@
-import { IUsuarioRepository } from './../../../dist/@core/infra/contratos/usuario.repository.interface.d';
-import { Usuario, DadosBaseUsuario } from './../dominio/usuario.entity';
+import { IUsuarioRepository } from '../infra/contratos/usuario.repository.interface';
+import { DadosBaseUsuario, Usuario } from './../dominio/usuario.entity';
 
 export class UsuarioService {
   constructor(private usuarioRepositorio: IUsuarioRepository) {}

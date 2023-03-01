@@ -1,4 +1,5 @@
 import { ReplaySubject } from 'rxjs';
+
 import { DocChangeEvent } from '../dominio/doc-change-event.entity';
 import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 import { ListaEvento } from '../dominio/lista-evento.entity';
@@ -27,6 +28,6 @@ export class NotificadorDeEventos<T extends itemDoBancoDeDados> {
       );
     });
     const evento = new ListaEvento<T>(listaItens);
-    this.emitirAlteracao(evento);
+    this.eventsSubject.next(evento);
   }
 }
