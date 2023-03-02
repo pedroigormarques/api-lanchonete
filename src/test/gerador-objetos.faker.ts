@@ -23,10 +23,17 @@ export class GeradorDeObjetos {
     return usuario;
   }
 
-  static criarProdutoEstoque(comId = false): ProdutoEstoque {
+  static criarProdutoEstoque(
+    comId = false,
+    idUsuario?: string,
+  ): ProdutoEstoque {
     const produtoEstoque = new ProdutoEstoque();
 
     if (comId) produtoEstoque.id = faker.datatype.uuid();
+
+    idUsuario
+      ? (produtoEstoque.idUsuario = idUsuario)
+      : (produtoEstoque.idUsuario = faker.datatype.uuid());
 
     produtoEstoque.descricao = faker.commerce.productDescription();
     produtoEstoque.nomeProduto = faker.commerce.productName();

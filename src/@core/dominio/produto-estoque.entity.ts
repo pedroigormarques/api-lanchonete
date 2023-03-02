@@ -6,10 +6,12 @@ export interface DadosBaseProdutoEstoque {
   nomeProduto: string;
   quantidade: number;
   unidade: UNIDADES;
+  idUsuario: string;
 }
 
 export class ProdutoEstoque {
   id?: string;
+  idUsuario: string;
   descricao: string;
   nomeProduto: string;
   quantidade: number;
@@ -25,7 +27,9 @@ export class ProdutoEstoque {
     }
   }
 
-  atualizarDados(dadosProduto: Partial<DadosBaseProdutoEstoque>) {
+  atualizarDados(
+    dadosProduto: Omit<Partial<DadosBaseProdutoEstoque>, 'idUsuario'>,
+  ) {
     if (dadosProduto.nomeProduto) this.nomeProduto = dadosProduto.nomeProduto;
     if (dadosProduto.descricao) this.descricao = dadosProduto.descricao;
     if (dadosProduto.unidade) this.setUnidade(dadosProduto.unidade);
@@ -58,6 +62,7 @@ export class ProdutoEstoque {
     dadosProduto: { id?: string } & DadosBaseProdutoEstoque,
   ) {
     if (dadosProduto.id) this.id = dadosProduto.id;
+    this.idUsuario = dadosProduto.idUsuario;
     this.descricao = dadosProduto.descricao;
     this.nomeProduto = dadosProduto.nomeProduto;
     this.setQuantidade(dadosProduto.quantidade);
@@ -68,6 +73,7 @@ export class ProdutoEstoque {
     dadosProduto: DadosBaseProdutoEstoque,
   ): boolean {
     if (
+      typeof dadosProduto.idUsuario !== 'string' ||
       typeof dadosProduto.descricao !== 'string' ||
       typeof dadosProduto.nomeProduto !== 'string' ||
       typeof dadosProduto.quantidade !== 'number' ||

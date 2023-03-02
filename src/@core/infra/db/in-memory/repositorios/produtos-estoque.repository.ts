@@ -13,18 +13,28 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     return new ProdutoEstoque(produtoCadastrado);
   }
 
-  async carregarProdutos(listaIds?: string[]): Promise<ProdutoEstoque[]> {
-    const lista: string[] = listaIds ?? [...this.produtos.keys()];
-
+  async carregarProdutos(
+    idUsuario: string,
+    listaIds?: string[],
+  ): Promise<ProdutoEstoque[]> {
     const listaProdutos = [] as ProdutoEstoque[];
-    lista.forEach((idProduto) => {
-      const produto = this.produtos.get(idProduto);
-      if (!produto) {
-        throw this.erroProdutoNaoEncontrado(idProduto);
-      }
-
-      listaProdutos.push(new ProdutoEstoque(produto));
-    });
+    if (listaIds) {
+      listaIds.forEach((idProduto) => {
+        const produto = this.produtos.get(idProduto);
+        if (!produto) {
+          throw this.erroProdutoNaoEncontrado(idProduto);
+        }
+        if (produto.idUsuario === idUsuario) {
+          listaProdutos.push(new ProdutoEstoque(produto));
+        }
+      });
+    } else {
+      this.produtos.forEach((produtoDb) => {
+        if (produtoDb.idUsuario === idUsuario) {
+          listaProdutos.push(new ProdutoEstoque(produtoDb));
+        }
+      });
+    }
     return listaProdutos;
   }
 

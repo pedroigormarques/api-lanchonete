@@ -66,31 +66,56 @@ describe('Produto Estoque Repositorio', () => {
   });
 
   describe('Carregar Produtos', () => {
-    it('Retorno de produtos', async () => {
-      const { produtoRegistrado } = registrarProdutoDeTeste(estoqueRepositorio);
-      const resposta = await estoqueRepositorio.carregarProdutos();
+    it('Retorno de produtos do usuario passado', async () => {
+      const idUsuarioTeste = 'idTeste';
+      const { produtoRegistrado: produtoDoUsuario1 } = registrarProdutoDeTeste(
+        estoqueRepositorio,
+        idUsuarioTeste,
+      );
+      const { produtoRegistrado: produtoDoUsuario2 } = registrarProdutoDeTeste(
+        estoqueRepositorio,
+        idUsuarioTeste,
+      );
+      const resposta = await estoqueRepositorio.carregarProdutos(
+        idUsuarioTeste,
+      );
+      console.log(produto1);
+      console.log(produtoDoUsuario1);
+      console.log(produtoDoUsuario2);
+
+      console.log(resposta);
 
       expect(resposta).toBeInstanceOf(Array<ProdutoEstoque>);
       expect(resposta.length).toEqual(2);
-      expect(resposta).toContainEqual(produto1);
-      expect(resposta).toContainEqual(produtoRegistrado);
+      expect(resposta).toContainEqual(produtoDoUsuario1);
+      expect(resposta[0].idUsuario).toEqual(idUsuarioTeste);
+      expect(resposta).toContainEqual(produtoDoUsuario2);
+      expect(resposta[1].idUsuario).toEqual(idUsuarioTeste);
     });
 
-    it('Retorno de produtos ao inserir lista com ids válidos', async () => {
-      const { produtoRegistrado: produto2 } =
-        registrarProdutoDeTeste(estoqueRepositorio);
+    it('Retorno de produtos ao inserir lista com ids válidos do usuário', async () => {
+      const idUsuarioTeste = 'idTeste';
+      const { produtoRegistrado: produto2 } = registrarProdutoDeTeste(
+        estoqueRepositorio,
+        idUsuarioTeste,
+      );
       registrarProdutoDeTeste(estoqueRepositorio);
 
-      const resposta = await estoqueRepositorio.carregarProdutos([produto2.id]);
+      const resposta = await estoqueRepositorio.carregarProdutos(
+        idUsuarioTeste,
+        [produto2.id],
+      );
 
       expect(resposta).toBeInstanceOf(Array<ProdutoEstoque>);
       expect(resposta.length).toEqual(1);
       expect(resposta).toContainEqual(produto2);
+      expect(resposta[0].idUsuario).toEqual(idUsuarioTeste);
     });
 
-    it('Erro ao não encontrar produto com um dos ids passados', async () => {
+    it('Erro ao tentar carregar produto que não existe', async () => {
+      const idUsuarioTeste = 'idTeste';
       await expect(
-        estoqueRepositorio.carregarProdutos(['a']),
+        estoqueRepositorio.carregarProdutos(idUsuarioTeste, ['a']),
       ).rejects.toThrowError();
     });
   });
@@ -318,8 +343,12 @@ describe('Produto Estoque Repositorio', () => {
 
 function registrarProdutoDeTeste(
   estoqueRepositorio: ProdutosEstoqueRepository,
+  idUsuario?: string,
 ): { produtoRegistrado: ProdutoEstoque; produtoBanco: ProdutoEstoqueDB } {
-  const produtoRegistrado = GeradorDeObjetos.criarProdutoEstoque();
+  const produtoRegistrado = GeradorDeObjetos.criarProdutoEstoque(
+    false,
+    idUsuario,
+  );
   const produtoBanco = new ProdutoEstoqueDB(produtoRegistrado);
   produtoRegistrado.id = produtoBanco.id;
 

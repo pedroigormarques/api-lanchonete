@@ -63,6 +63,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   }
 
   async alterarQtdItemDoPedido(
+    idUsuario: string, //fazer toda lógica de autorização para o método
     idPedido: string,
     idProdutoCardapio: string,
     novaQuantidade: number,
@@ -98,7 +99,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
 
     const qtdGasta = this.extrairQtdUsadaPorProdEstoque(produtoConsumidoEQtd);
     //verificação, calculo e atualização das novas quantidades no estoque
-    await this.estoqueService.atualizarProdutosComGastos(qtdGasta);
+    await this.estoqueService.atualizarProdutosComGastos(idUsuario, qtdGasta);
 
     //atualização do pedido e lançamento do evento
     pedido.valorConta += quantidadeConsumida * produtoCardapio.preco;
@@ -119,7 +120,10 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     return pedido;
   }
 
-  async deletarPedido(idPedido: string): Promise<void> {
+  async deletarPedido(
+    idUsuario: string, //fazer toda lógica de autorização para o método
+    idPedido: string,
+  ): Promise<void> {
     const pedido1: Pedido = await this.pedidosRepositorio.carregarPedido(
       idPedido,
     );
@@ -134,7 +138,10 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
 
     const gastosProdutosEstoque: Map<string, number> =
       this.extrairQtdUsadaPorProdEstoque(produtosVendidosCanceladosCompostos);
-    await this.estoqueService.atualizarProdutosComGastos(gastosProdutosEstoque);
+    await this.estoqueService.atualizarProdutosComGastos(
+      idUsuario,
+      gastosProdutosEstoque,
+    );
 
     await this.pedidosRepositorio.removerPedido(idPedido);
     const evento = new ListaEvento<Pedido>([
@@ -145,7 +152,10 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     return;
   }
 
-  async fecharPedido(idPedido: string): Promise<PedidoFechado> {
+  async fecharPedido(
+    idUsuario: string, //fazer toda lógica de autorização para o método
+    idPedido: string,
+  ): Promise<PedidoFechado> {
     const pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
 
     const dadosPedido = {} as DadosBasePedidoFechado;
@@ -158,6 +168,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     );
 
     dadosPedido.produtosUtilizados = await this.comporProdutosUtilizados(
+      idUsuario,
       dadosPedido.produtosVendidos,
     );
     const pedidoFechado = new PedidoFechado(dadosPedido);
@@ -177,14 +188,16 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   }
 
   private async comporProdutosUtilizados(
+    idUsuario: string, //fazer toda lógica de autorização para o método
     produtosVendidos: Map<ProdutoCardapio, number>,
   ): Promise<Map<ProdutoEstoque, number>> {
     const mapProdutosEstoque: Map<string, number> =
       this.extrairQtdUsadaPorProdEstoque(produtosVendidos);
 
-    const produtosEstoque = await this.estoqueService.carregarProdutosEstoque([
-      ...mapProdutosEstoque.keys(),
-    ]);
+    const produtosEstoque = await this.estoqueService.carregarProdutosEstoque(
+      idUsuario,
+      [...mapProdutosEstoque.keys()],
+    );
 
     const produtosUtilizados = new Map<ProdutoEstoque, number>();
     produtosEstoque.forEach((pe) => {

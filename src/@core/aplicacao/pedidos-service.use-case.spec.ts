@@ -200,6 +200,7 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       const resposta = await pedidosService.alterarQtdItemDoPedido(
+        'idUsuario', //fazer sistema inteiro de autenticação
         pedido.id,
         produto.id,
         10,
@@ -235,7 +236,7 @@ describe('Pedidos Service', () => {
       let qtdConsumida: number;
       jest
         .spyOn(estoqueService, 'atualizarProdutosComGastos')
-        .mockImplementation(async (map) => {
+        .mockImplementation(async (idUsuario, map) => {
           map.forEach((qtdEst, idProd) => {
             qtdConsumida = qtdEst / produto.composicao.get(idProd);
           });
@@ -249,6 +250,7 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       const resposta = await pedidosService.alterarQtdItemDoPedido(
+        'idUsuario', //fazer sistema inteiro de autenticação
         pedido.id,
         produto.id,
         qtdNova,
@@ -284,7 +286,7 @@ describe('Pedidos Service', () => {
       let qtdConsumida: number;
       jest
         .spyOn(estoqueService, 'atualizarProdutosComGastos')
-        .mockImplementation(async (map) => {
+        .mockImplementation(async (idUsuario, map) => {
           map.forEach((qtdEst, idProd) => {
             qtdConsumida = qtdEst / produto.composicao.get(idProd);
           });
@@ -298,6 +300,7 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       const resposta = await pedidosService.alterarQtdItemDoPedido(
+        'idUsuario', //fazer sistema inteiro de autenticação
         pedido.id,
         produto.id,
         0,
@@ -335,7 +338,12 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       await expect(
-        pedidosService.alterarQtdItemDoPedido('a', 'b', 10),
+        pedidosService.alterarQtdItemDoPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          'a',
+          'b',
+          10,
+        ),
       ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(1);
@@ -361,7 +369,12 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       await expect(
-        pedidosService.alterarQtdItemDoPedido('a', 'b', -10),
+        pedidosService.alterarQtdItemDoPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          'a',
+          'b',
+          -10,
+        ),
       ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(0);
@@ -388,7 +401,12 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       await expect(
-        pedidosService.alterarQtdItemDoPedido(pedido.id, 'b', 0),
+        pedidosService.alterarQtdItemDoPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          pedido.id,
+          'b',
+          0,
+        ),
       ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(1);
@@ -415,7 +433,12 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       await expect(
-        pedidosService.alterarQtdItemDoPedido('a', 'b', 10),
+        pedidosService.alterarQtdItemDoPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          'a',
+          'b',
+          10,
+        ),
       ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(1);
@@ -442,7 +465,12 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       await expect(
-        pedidosService.alterarQtdItemDoPedido('a', 'b', 10),
+        pedidosService.alterarQtdItemDoPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          'a',
+          'b',
+          10,
+        ),
       ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(1);
@@ -471,7 +499,12 @@ describe('Pedidos Service', () => {
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
       await expect(
-        pedidosService.alterarQtdItemDoPedido('a', 'b', 10),
+        pedidosService.alterarQtdItemDoPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          'a',
+          'b',
+          10,
+        ),
       ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(1);
@@ -503,14 +536,17 @@ describe('Pedidos Service', () => {
 
       jest
         .spyOn(estoqueService, 'atualizarProdutosComGastos')
-        .mockImplementation(async (pd) => {
+        .mockImplementation(async (idUsuario, pd) => {
           produtosDevolvidos = pd;
         });
 
       jest.spyOn(pedidosRepository, 'removerPedido').mockResolvedValue(null);
       jest.spyOn(pedidosService, 'emitirAlteracao').mockReturnValue(null);
 
-      await pedidosService.deletarPedido(pedidoBanco.id);
+      await pedidosService.deletarPedido(
+        'idUsuario', //fazer sistema inteiro de autenticação
+        pedidoBanco.id,
+      );
 
       expect(produtosDevolvidos).toEqual(produtosDevolvidosEsperado);
 
@@ -531,7 +567,12 @@ describe('Pedidos Service', () => {
         .spyOn(pedidosFechadosRepository, 'cadastrarPedidoFechado')
         .mockResolvedValue(null);
 
-      await expect(pedidosService.deletarPedido('a')).rejects.toThrowError();
+      await expect(
+        pedidosService.deletarPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          'a',
+        ),
+      ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(1);
       expect(pedidosRepository.removerPedido).toBeCalledTimes(0);
@@ -573,7 +614,10 @@ describe('Pedidos Service', () => {
           return pf;
         });
 
-      const resposta = await pedidosService.fecharPedido(pedidoBanco.id);
+      const resposta = await pedidosService.fecharPedido(
+        'idUsuario', //fazer sistema inteiro de autenticação
+        pedidoBanco.id,
+      );
 
       expect(resposta).toBeInstanceOf(PedidoFechado);
       expect(resposta.id).toBeDefined();
@@ -604,7 +648,12 @@ describe('Pedidos Service', () => {
         .spyOn(pedidosFechadosRepository, 'cadastrarPedidoFechado')
         .mockResolvedValue(null);
 
-      await expect(pedidosService.fecharPedido('a')).rejects.toThrowError();
+      await expect(
+        pedidosService.fecharPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          'a',
+        ),
+      ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(1);
       expect(pedidosRepository.removerPedido).toBeCalledTimes(0);
@@ -640,7 +689,10 @@ describe('Pedidos Service', () => {
         .mockResolvedValue(null);
 
       await expect(
-        pedidosService.fecharPedido(pedidoBanco.id),
+        pedidosService.fecharPedido(
+          'idUsuario', //fazer sistema inteiro de autenticação
+          pedidoBanco.id,
+        ),
       ).rejects.toThrowError();
 
       expect(pedidosRepository.carregarPedido).toBeCalledTimes(1);
