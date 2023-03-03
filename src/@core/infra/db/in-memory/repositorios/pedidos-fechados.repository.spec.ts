@@ -7,7 +7,6 @@ import { PedidosFechadosRepository } from './pedidos-fechados.repository';
 
 describe('Pedidos Fechados Repositorio', () => {
   let pedidosFechadosRepository: PedidosFechadosRepository;
-  let pedidoFechado1: PedidoFechado;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -21,7 +20,7 @@ describe('Pedidos Fechados Repositorio', () => {
 
     pedidosFechadosRepository = moduleRef.get(PedidosFechadosRepository);
 
-    pedidoFechado1 = registrarPedidoFechadoDeTeste(pedidosFechadosRepository);
+    registrarPedidoFechadoDeTeste(pedidosFechadosRepository);
   });
 
   it('Instanciado', async () => {
@@ -81,19 +80,26 @@ describe('Pedidos Fechados Repositorio', () => {
 
   describe('Carregar Pedidos', () => {
     it('Retorno de produtos', async () => {
+      const idUsuario = 'idTeste';
       const pedidoFechadoRegistrado = registrarPedidoFechadoDeTeste(
         pedidosFechadosRepository,
+        idUsuario,
       );
-      const resposta =
-        await pedidosFechadosRepository.carregarPedidosFechados();
+      const pedidoFechadoRegistrado2 = registrarPedidoFechadoDeTeste(
+        pedidosFechadosRepository,
+        idUsuario,
+      );
+      const resposta = await pedidosFechadosRepository.carregarPedidosFechados(
+        idUsuario,
+      );
 
       expect(resposta).toBeInstanceOf(Array<PedidoFechado>);
       expect(resposta.length).toEqual(2);
-      expect(resposta).toContainEqual(pedidoFechado1);
       expect(resposta).toContainEqual(pedidoFechadoRegistrado);
+      expect(resposta).toContainEqual(pedidoFechadoRegistrado2);
 
       expect((pedidosFechadosRepository as any).pedidosFechados.size).toEqual(
-        2,
+        3,
       );
     });
   });
@@ -101,8 +107,12 @@ describe('Pedidos Fechados Repositorio', () => {
 
 function registrarPedidoFechadoDeTeste(
   pedidosFechadosRepositorio: PedidosFechadosRepository,
+  idUsuario?: string,
 ): PedidoFechado {
-  const pedidoFechadoRegistrado = GeradorDeObjetos.criarPedidoFechado();
+  const pedidoFechadoRegistrado = GeradorDeObjetos.criarPedidoFechado(
+    false,
+    idUsuario,
+  );
   const pedidoFechadoBanco = new PedidoFechadoDB(pedidoFechadoRegistrado);
 
   pedidoFechadoRegistrado.id = pedidoFechadoBanco.id;

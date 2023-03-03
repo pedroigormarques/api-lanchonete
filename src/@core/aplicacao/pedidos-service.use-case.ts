@@ -1,3 +1,5 @@
+import { ForbiddenException } from '@nestjs/common';
+
 import { PedidoFechado } from '../dominio/pedido-fechado.entity';
 import { DadosBasePedido, Pedido } from '../dominio/pedido.entity';
 import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
@@ -37,10 +39,12 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   }
 
   async cadastrarPedido(
-    idUsuario: string, //fazer toda lógica de autorização para o método
-    dadosPedido: Pick<DadosBasePedido, 'mesa'>,
+    idUsuario: string,
+    dadosPedido: Pick<DadosBasePedido, 'mesa' | 'idUsuario'>,
   ): Promise<Pedido> {
     let pedido = new Pedido(dadosPedido);
+
+    this.acaoEstaAutorizada(idUsuario, pedido);
 
     pedido = await this.pedidosRepositorio.cadastrarPedido(pedido);
 
@@ -55,15 +59,19 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   }
 
   async carregarPedidos(idUsuario: string): Promise<Pedido[]> {
-    return await this.pedidosRepositorio.carregarPedidos();
+    return await this.pedidosRepositorio.carregarPedidos(idUsuario);
   }
 
-  async carregarPedido(idPedido: string): Promise<Pedido> {
-    return await this.pedidosRepositorio.carregarPedido(idPedido);
+  async carregarPedido(idUsuario: string, idPedido: string): Promise<Pedido> {
+    const pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
+
+    this.acaoEstaAutorizada(idUsuario, pedido);
+
+    return pedido;
   }
 
   async alterarQtdItemDoPedido(
-    idUsuario: string, //fazer toda lógica de autorização para o método
+    idUsuario: string,
     idPedido: string,
     idProdutoCardapio: string,
     novaQuantidade: number,
@@ -75,6 +83,8 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     }
 
     let pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
+
+    this.acaoEstaAutorizada(idUsuario, pedido);
 
     const produtoNoPedido = pedido.produtosVendidos.has(idProdutoCardapio);
 
@@ -123,16 +133,15 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     return pedido;
   }
 
-  async deletarPedido(
-    idUsuario: string, //fazer toda lógica de autorização para o método
-    idPedido: string,
-  ): Promise<void> {
-    const pedido1: Pedido = await this.pedidosRepositorio.carregarPedido(
+  async deletarPedido(idUsuario: string, idPedido: string): Promise<void> {
+    const pedido: Pedido = await this.pedidosRepositorio.carregarPedido(
       idPedido,
     );
 
+    this.acaoEstaAutorizada(idUsuario, pedido);
+
     const produtosVendidosCancelados = new Map<string, number>();
-    pedido1.produtosVendidos.forEach((idProdutoCardapio, qtdConsumida) => {
+    pedido.produtosVendidos.forEach((idProdutoCardapio, qtdConsumida) => {
       produtosVendidosCancelados.set(qtdConsumida, -idProdutoCardapio);
     });
 
@@ -154,13 +163,16 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   }
 
   async fecharPedido(
-    idUsuario: string, //fazer toda lógica de autorização para o método
+    idUsuario: string,
     idPedido: string,
   ): Promise<PedidoFechado> {
     const pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
 
+    this.acaoEstaAutorizada(idUsuario, pedido);
+
     const dadosPedido = {} as DadosBasePedidoFechado;
     dadosPedido.horaAbertura = pedido.horaAbertura;
+    dadosPedido.idUsuario = pedido.idUsuario;
     dadosPedido.mesa = pedido.mesa;
     dadosPedido.valorConta = pedido.valorConta;
 
@@ -183,12 +195,14 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     );
   }
 
-  async carregarPedidosFechados(): Promise<PedidoFechado[]> {
-    return await this.pedidosFechadosRepositorio.carregarPedidosFechados();
+  async carregarPedidosFechados(idUsuario: string): Promise<PedidoFechado[]> {
+    return await this.pedidosFechadosRepositorio.carregarPedidosFechados(
+      idUsuario,
+    );
   }
 
   private async comporProdutosUtilizados(
-    idUsuario: string, //fazer toda lógica de autorização para o método
+    idUsuario: string,
     produtosVendidos: Map<ProdutoCardapio, number>,
   ): Promise<Map<ProdutoEstoque, number>> {
     const mapProdutosEstoque: Map<string, number> =
@@ -248,5 +262,18 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     });
 
     return map;
+  }
+
+  private acaoEstaAutorizada(
+    idUsuario: string,
+    dadoAutorizado: { idUsuario: string },
+  ) {
+    if (dadoAutorizado.idUsuario !== idUsuario) {
+      throw this.erroAutorizacao();
+    }
+  }
+
+  private erroAutorizacao() {
+    return new ForbiddenException();
   }
 }

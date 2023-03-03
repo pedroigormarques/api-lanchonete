@@ -1,7 +1,8 @@
-import { ProdutoEstoque } from './produto-estoque.entity';
 import { ProdutoCardapio } from './produto-cardapio.entity';
+import { ProdutoEstoque } from './produto-estoque.entity';
 
 export interface DadosBasePedidoFechado {
+  idUsuario: string;
   mesa: number;
   horaAbertura: Date;
   valorConta: number;
@@ -11,6 +12,7 @@ export interface DadosBasePedidoFechado {
 
 export class PedidoFechado {
   id?: string;
+  idUsuario: string;
   mesa: number;
   horaAbertura: Date;
   horaFechamento: Date;
@@ -41,6 +43,7 @@ export class PedidoFechado {
     if (dadosPedidoFechado.horaFechamento)
       this.horaFechamento = new Date(dadosPedidoFechado.horaFechamento);
 
+    this.idUsuario = dadosPedidoFechado.idUsuario;
     this.horaAbertura = new Date(dadosPedidoFechado.horaAbertura);
     this.mesa = dadosPedidoFechado.mesa;
     this.valorConta = dadosPedidoFechado.valorConta;
@@ -65,6 +68,7 @@ export class PedidoFechado {
     dadosPedidoFechado: DadosBasePedidoFechado,
   ): boolean {
     if (
+      typeof dadosPedidoFechado.idUsuario !== 'string' ||
       typeof dadosPedidoFechado.mesa !== 'number' ||
       dadosPedidoFechado.mesa <= 0 ||
       !(dadosPedidoFechado.horaAbertura instanceof Date) ||

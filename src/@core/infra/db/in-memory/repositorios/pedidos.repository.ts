@@ -9,16 +9,20 @@ export class PedidosRepository implements IPedidosRepository {
   constructor(private cardapioRepositorio: ProdutosCardapioRepository) {}
 
   async cadastrarPedido(pedido: Pedido): Promise<Pedido> {
-    const pedidoCadastrado = new PedidoDB(pedido.mesa);
+    const pedidoCadastrado = new PedidoDB(pedido.idUsuario, pedido.mesa);
     const id = pedidoCadastrado.id;
 
     this.pedidos.set(id, pedidoCadastrado);
     return new Pedido(pedidoCadastrado);
   }
 
-  async carregarPedidos(): Promise<Pedido[]> {
+  async carregarPedidos(idUsuario: string): Promise<Pedido[]> {
     const pedidos = [] as Pedido[];
-    this.pedidos.forEach((pedidoDb) => pedidos.push(new Pedido(pedidoDb)));
+    this.pedidos.forEach((pedidoDb) => {
+      if (pedidoDb.idUsuario === idUsuario) {
+        pedidos.push(new Pedido(pedidoDb));
+      }
+    });
     return pedidos;
   }
 
@@ -42,13 +46,24 @@ export class PedidosRepository implements IPedidosRepository {
     pedido.verificarSeDadosSaoValidosOuErro();
 
     const listaUsoAtual = [...pedido.produtosVendidos.keys()];
-    await this.cardapioRepositorio.validarListaIds(listaUsoAtual);
+    await this.cardapioRepositorio.validarListaIds(
+      pedido.idUsuario,
+      listaUsoAtual,
+    );
 
     if (pedidoAtualizado.produtosVendidos.size !== 0) {
       const listaUsoAnterior = [...pedidoAtualizado.produtosVendidos.keys()];
-      await this.cardapioRepositorio.removerRelacoes(id, listaUsoAnterior);
+      await this.cardapioRepositorio.removerRelacoes(
+        id,
+        pedido.idUsuario,
+        listaUsoAnterior,
+      );
     }
-    await this.cardapioRepositorio.marcarRelacoes(id, listaUsoAtual);
+    await this.cardapioRepositorio.marcarRelacoes(
+      id,
+      pedido.idUsuario,
+      listaUsoAtual,
+    );
 
     pedidoAtualizado.atualizarDados(pedido);
 
@@ -62,7 +77,11 @@ export class PedidosRepository implements IPedidosRepository {
     }
 
     const listaUsoAnterior = [...pedido.produtosVendidos.keys()];
-    await this.cardapioRepositorio.removerRelacoes(id, listaUsoAnterior);
+    await this.cardapioRepositorio.removerRelacoes(
+      id,
+      pedido.idUsuario,
+      listaUsoAnterior,
+    );
 
     this.pedidos.delete(id);
     return;

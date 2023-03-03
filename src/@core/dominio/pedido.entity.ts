@@ -1,4 +1,5 @@
 export interface DadosBasePedido {
+  idUsuario: string;
   mesa: number;
   valorConta: number;
   produtosVendidos: Map<string, number>; //idProdutoCardapio, quantidade
@@ -6,6 +7,7 @@ export interface DadosBasePedido {
 
 function isDadosBasePedido(valor): valor is DadosBasePedido {
   if (
+    typeof valor?.idUsuario === 'string' &&
     typeof valor?.mesa === 'number' &&
     typeof valor?.valorConta === 'number' &&
     valor?.produtosVendidos instanceof Map
@@ -16,18 +18,22 @@ function isDadosBasePedido(valor): valor is DadosBasePedido {
 
 export class Pedido {
   id?: string;
+  idUsuario: string;
   mesa: number;
   horaAbertura: Date;
   valorConta: number;
   produtosVendidos: Map<string, number>; //idProdutoCardapio, quantidade
 
   constructor();
-  constructor(dadosPedido: Pick<DadosBasePedido, 'mesa'>);
+  constructor(dadosPedido: Pick<DadosBasePedido, 'mesa' | 'idUsuario'>);
   constructor(dadosPedido: Pedido);
-  constructor(dadosPedido?: Pick<DadosBasePedido, 'mesa'> | Pedido) {
+  constructor(
+    dadosPedido?: Pick<DadosBasePedido, 'mesa' | 'idUsuario'> | Pedido,
+  ) {
     if (dadosPedido) {
       Pedido.dadosSaoValidosParaRegistroOuErro(dadosPedido);
       this.setMesa(dadosPedido.mesa);
+      this.idUsuario = dadosPedido.idUsuario;
       if (dadosPedido instanceof Pedido) {
         this.registrarDados(dadosPedido);
       }
@@ -38,7 +44,7 @@ export class Pedido {
     }
   }
 
-  atualizarDados(dadosPedido: Partial<DadosBasePedido>) {
+  atualizarDados(dadosPedido: Omit<Partial<DadosBasePedido>, 'idUsuario'>) {
     if (dadosPedido.mesa) this.setMesa(dadosPedido.mesa);
     if (dadosPedido.produtosVendidos)
       this.produtosVendidos = new Map(dadosPedido.produtosVendidos.entries());
@@ -86,9 +92,12 @@ export class Pedido {
   }
 
   private static possuiTodosOsDadosValidos(
-    dadosPedido: Pick<DadosBasePedido, 'mesa'> | DadosBasePedido,
+    dadosPedido: Pick<DadosBasePedido, 'mesa' | 'idUsuario'> | DadosBasePedido,
   ): boolean {
-    if (typeof dadosPedido.mesa !== 'number' || dadosPedido.mesa <= 0) {
+    if (
+      typeof dadosPedido.idUsuario !== 'string' &&
+      (typeof dadosPedido.mesa !== 'number' || dadosPedido.mesa <= 0)
+    ) {
       return false;
     }
     if (
@@ -105,7 +114,7 @@ export class Pedido {
   }
 
   private static dadosSaoValidosParaRegistroOuErro(
-    dadosPedido: Pick<DadosBasePedido, 'mesa'> | DadosBasePedido,
+    dadosPedido: Pick<DadosBasePedido, 'mesa' | 'idUsuario'> | DadosBasePedido,
   ) {
     if (!Pedido.possuiTodosOsDadosValidos(dadosPedido))
       throw new Error('Dados incorretos/insuficientes');

@@ -15,10 +15,12 @@ export class PedidosFechadosRepository implements IPedidosFechadosRepository {
     return new PedidoFechado(pedidoFechadoCadastrado);
   }
 
-  async carregarPedidosFechados(): Promise<PedidoFechado[]> {
+  async carregarPedidosFechados(idUsuario: string): Promise<PedidoFechado[]> {
     const pedidosFechados: PedidoFechado[] = [];
     this.pedidosFechados.forEach((pedidoFechado) => {
-      pedidosFechados.push(new PedidoFechado(pedidoFechado));
+      if (pedidoFechado.idUsuario === idUsuario) {
+        pedidosFechados.push(new PedidoFechado(pedidoFechado));
+      }
     });
     return pedidosFechados;
   }

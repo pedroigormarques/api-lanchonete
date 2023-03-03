@@ -45,12 +45,14 @@ describe('Pedidos Repositorio', () => {
 
   describe('Cadastrar Pedido', () => {
     it('Registro realizado com dados válidos', async () => {
-      const pedido = new Pedido({ mesa: 5 });
+      const idUsuario = 'idTeste';
+      const pedido = new Pedido({ mesa: 5, idUsuario });
 
       const resposta = await pedidosRespository.cadastrarPedido(pedido);
 
       expect(resposta).toBeInstanceOf(Pedido);
       expect(resposta.valorConta).toEqual(0);
+      expect(resposta.idUsuario).toEqual(pedido.idUsuario);
       expect(resposta.mesa).toEqual(pedido.mesa);
       expect(resposta.horaAbertura).toBeDefined();
       expect(resposta.produtosVendidos).toBeDefined();
@@ -98,15 +100,23 @@ describe('Pedidos Repositorio', () => {
 
   describe('Carregar Pedidos', () => {
     it('Retorno de produtos', async () => {
-      const { pedidoRegistrado } = registrarPedidoDeTeste(pedidosRespository);
-      const resposta = await pedidosRespository.carregarPedidos();
+      const idUsuario = 'idTeste';
+      const { pedidoRegistrado: pedidoRegistrado1 } = registrarPedidoDeTeste(
+        pedidosRespository,
+        idUsuario,
+      );
+      const { pedidoRegistrado: pedidoRegistrado2 } = registrarPedidoDeTeste(
+        pedidosRespository,
+        idUsuario,
+      );
+      const resposta = await pedidosRespository.carregarPedidos(idUsuario);
 
       expect(resposta).toBeInstanceOf(Array<Pedido>);
       expect(resposta.length).toEqual(2);
-      expect(resposta).toContainEqual(pedido1);
-      expect(resposta).toContainEqual(pedidoRegistrado);
+      expect(resposta).toContainEqual(pedidoRegistrado1);
+      expect(resposta).toContainEqual(pedidoRegistrado2);
 
-      expect((pedidosRespository as any).pedidos.size).toEqual(2);
+      expect((pedidosRespository as any).pedidos.size).toEqual(3);
     });
   });
 
@@ -114,6 +124,7 @@ describe('Pedidos Repositorio', () => {
     it('Retorno de produto atualizado ao inserir dados válido', async () => {
       const pedido = GeradorDeObjetos.criarPedido();
       pedido.id = pedido1.id;
+      pedido.idUsuario = pedido1.idUsuario;
       pedido.horaAbertura = pedido1.horaAbertura;
 
       jest
@@ -189,7 +200,7 @@ describe('Pedidos Repositorio', () => {
 
       jest
         .spyOn(cardapioRespository, 'validarListaIds')
-        .mockImplementation(mockErroValidacao);
+        .mockRejectedValue(new Error(`produto não encontrado`));
 
       jest.spyOn(cardapioRespository, 'marcarRelacoes').mockResolvedValue(null);
       jest
@@ -232,7 +243,7 @@ describe('Pedidos Repositorio', () => {
     it('Erro ao tentar remover relacao de produto da composição', async () => {
       jest
         .spyOn(cardapioRespository, 'removerRelacoes')
-        .mockImplementation(mockErroRelacao);
+        .mockRejectedValue(new Error(`produto não encontrado`));
 
       await expect(
         pedidosRespository.removerPedido(pedido1.id),
@@ -243,12 +254,18 @@ describe('Pedidos Repositorio', () => {
   });
 });
 
-function registrarPedidoDeTeste(pedidosRepositorio: PedidosRepository): {
+function registrarPedidoDeTeste(
+  pedidosRepositorio: PedidosRepository,
+  idUsuario?: string,
+): {
   pedidoRegistrado: Pedido;
   pedidoBanco: PedidoDB;
 } {
-  const pedidoRegistrado = GeradorDeObjetos.criarPedido();
-  const pedidoBanco = new PedidoDB(pedidoRegistrado.mesa);
+  const pedidoRegistrado = GeradorDeObjetos.criarPedido(false, idUsuario);
+  const pedidoBanco = new PedidoDB(
+    pedidoRegistrado.idUsuario,
+    pedidoRegistrado.mesa,
+  );
   pedidoBanco.atualizarDados(pedidoRegistrado);
   pedidoRegistrado.id = pedidoBanco.id;
   pedidoRegistrado.horaAbertura = pedidoBanco.horaAbertura;
@@ -256,11 +273,4 @@ function registrarPedidoDeTeste(pedidosRepositorio: PedidosRepository): {
   (pedidosRepositorio as any).pedidos //pela quebra de proteção "private"
     .set(pedidoBanco.id, pedidoBanco);
   return { pedidoRegistrado: pedidoRegistrado, pedidoBanco: pedidoBanco };
-}
-
-async function mockErroValidacao(idProdutos: string[]) {
-  throw new Error(`produto de id ${idProdutos[0]} não encontrado`);
-}
-async function mockErroRelacao(idPedido: string, idProdutos: string[]) {
-  throw new Error(`produto de id ${idProdutos[0]} não encontrado`);
 }

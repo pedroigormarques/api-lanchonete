@@ -65,10 +65,14 @@ export class GeradorDeObjetos {
     return produtoCardapio;
   }
 
-  static criarPedido(comId = false): Pedido {
+  static criarPedido(comId = false, idUsuario?: string): Pedido {
     const pedido = new Pedido();
 
     if (comId) pedido.id = faker.datatype.uuid();
+
+    idUsuario
+      ? (pedido.idUsuario = idUsuario)
+      : (pedido.idUsuario = faker.datatype.uuid());
 
     pedido.mesa = faker.datatype.number({ min: 1, max: 10 });
     pedido.valorConta = +faker.commerce.price();
@@ -77,10 +81,14 @@ export class GeradorDeObjetos {
     return pedido;
   }
 
-  static criarPedidoFechado(comId = false): PedidoFechado {
+  static criarPedidoFechado(comId = false, idUsuario?: string): PedidoFechado {
     const pedido = new PedidoFechado();
 
     if (comId) pedido.id = faker.datatype.uuid();
+
+    idUsuario
+      ? (pedido.idUsuario = idUsuario)
+      : (pedido.idUsuario = faker.datatype.uuid());
 
     pedido.horaAbertura = faker.date.recent();
     pedido.mesa = faker.datatype.number({ min: 1, max: 10 });
@@ -93,12 +101,17 @@ export class GeradorDeObjetos {
 
     const qtdProdutosEstoque = faker.datatype.number({ min: 2, max: 6 });
     for (let i = 0; i < qtdProdutosEstoque; i++) {
-      produtosEstoque.push(GeradorDeObjetos.criarProdutoEstoque(true));
+      produtosEstoque.push(
+        GeradorDeObjetos.criarProdutoEstoque(true, pedido.idUsuario),
+      );
     }
 
     const qtdProdutosCardapio = Math.floor(Math.random() * 3) + 1;
     for (let j = 0; j < qtdProdutosCardapio; j++) {
-      const produtoCardapio = GeradorDeObjetos.criarProdutoCardapio(true);
+      const produtoCardapio = GeradorDeObjetos.criarProdutoCardapio(
+        true,
+        pedido.idUsuario,
+      );
       const qtdProdCard = Math.floor(Math.random() * 3) + 1;
 
       pedido.produtosVendidos.set(produtoCardapio, qtdProdCard);
