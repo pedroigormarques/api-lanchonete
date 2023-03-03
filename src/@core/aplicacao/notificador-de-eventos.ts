@@ -41,7 +41,7 @@ export class NotificadorDeEventos<T extends itemDoBancoDeDados> {
     }
     const alteracoes = new Array<Notificacao<T>>();
     listaIds.forEach((id, index) => {
-      alteracoes.push(new Notificacao<T>(tipo, id, dados[index]));
+      alteracoes.push(new Notificacao<T>(tipo, id, dados?.at(index)));
     });
     const evento = new ListaEvento(alteracoes);
     this.emitirAlteracao(idUsuario, evento);
@@ -58,6 +58,11 @@ export class NotificadorDeEventos<T extends itemDoBancoDeDados> {
   }
 
   private async carregarDadosIniciais(idUsuario: string) {
+    if (typeof this.funcaoColetaDadosIniciais === 'undefined') {
+      throw new Error(
+        'O notificador não recebeu uma configuração correta para começar a ser utilizada',
+      );
+    }
     const dadosIniciais = await this.funcaoColetaDadosIniciais(idUsuario);
     //adiciona os dados na memória
     this.emitirAlteracaoConjuntoDeDados(
