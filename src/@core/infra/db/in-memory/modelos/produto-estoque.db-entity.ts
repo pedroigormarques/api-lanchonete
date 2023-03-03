@@ -15,7 +15,7 @@ export class ProdutoEstoqueDB extends ProdutoEstoque {
     produto.verificarSeDadosSaoValidosOuErro();
 
     if (this.unidade === produto.unidade || this.usadoPor.size === 0) {
-      super.registrarDados(produto);
+      super.atualizarDados(produto);
     } else {
       throw new Error(
         `Produto de id ${this.id} está sendo utilizado por algum produto do cardápio. Atualização cancelada`,

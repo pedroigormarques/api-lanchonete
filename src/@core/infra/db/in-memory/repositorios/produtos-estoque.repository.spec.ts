@@ -131,7 +131,10 @@ describe('Produto Estoque Repositorio', () => {
 
   describe('Atualizar Produto', () => {
     it('Retorno de produto atualizado ao inserir dados válido', async () => {
-      const produtoAux = GeradorDeObjetos.criarProdutoEstoque();
+      const produtoAux = GeradorDeObjetos.criarProdutoEstoque(
+        false,
+        produto1.idUsuario,
+      );
 
       produtoAux.id = produto1.id;
 
@@ -147,7 +150,10 @@ describe('Produto Estoque Repositorio', () => {
     });
 
     it('Erro ao não encontrar produto a ser atualizado com o id passado', async () => {
-      const produtoAux = GeradorDeObjetos.criarProdutoEstoque();
+      const produtoAux = GeradorDeObjetos.criarProdutoEstoque(
+        false,
+        produto1.idUsuario,
+      );
 
       await expect(
         estoqueRepositorio.atualizarProduto(produtoAux.id, produtoAux),
@@ -194,10 +200,16 @@ describe('Produto Estoque Repositorio', () => {
   describe('Atualizar Produtos', () => {
     it('Retorno de produtos atualizados ao inserir lista válida', async () => {
       const { produtoRegistrado: produto2, produtoBanco: produtoBanco2 } =
-        registrarProdutoDeTeste(estoqueRepositorio);
+        registrarProdutoDeTeste(estoqueRepositorio, produto1.idUsuario);
 
-      const produtoAux = GeradorDeObjetos.criarProdutoEstoque();
-      const produtoAux2 = GeradorDeObjetos.criarProdutoEstoque();
+      const produtoAux = GeradorDeObjetos.criarProdutoEstoque(
+        false,
+        produto1.idUsuario,
+      );
+      const produtoAux2 = GeradorDeObjetos.criarProdutoEstoque(
+        false,
+        produto1.idUsuario,
+      );
 
       produtoAux.id = produto1.id;
       produtoAux2.id = produto2.id;

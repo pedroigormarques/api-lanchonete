@@ -176,7 +176,10 @@ describe('Produto Cardapio Repositorio', () => {
 
   describe('Atualizar Produto', () => {
     it('Retorno de produto atualizado ao inserir dados válido', async () => {
-      const produto = GeradorDeObjetos.criarProdutoCardapio();
+      const produto = GeradorDeObjetos.criarProdutoCardapio(
+        false,
+        produto1.idUsuario,
+      );
       produto.id = produto1.id;
 
       jest.spyOn(estoqueRepositorio, 'validarListaIds').mockResolvedValue(null);
@@ -205,6 +208,7 @@ describe('Produto Cardapio Repositorio', () => {
 
       const produto = new ProdutoCardapio();
       produto.id = produto1.id;
+      produto.idUsuario = produto1.idUsuario;
 
       await expect(
         cardapioRepositorio.atualizarProduto(produto.id, produto),
@@ -215,7 +219,10 @@ describe('Produto Cardapio Repositorio', () => {
     });
 
     it('Erro ao passar composicao com produto invalido', async () => {
-      const produto = GeradorDeObjetos.criarProdutoCardapio();
+      const produto = GeradorDeObjetos.criarProdutoCardapio(
+        false,
+        produto1.idUsuario,
+      );
       produto.id = produto1.id;
 
       jest
@@ -238,7 +245,10 @@ describe('Produto Cardapio Repositorio', () => {
     });
 
     it('Erro ao passar composicao sem produto', async () => {
-      const produto = GeradorDeObjetos.criarProdutoCardapio();
+      const produto = GeradorDeObjetos.criarProdutoCardapio(
+        false,
+        produto1.idUsuario,
+      );
       produto.id = produto1.id;
       produto.composicao = new Map<string, number>();
 

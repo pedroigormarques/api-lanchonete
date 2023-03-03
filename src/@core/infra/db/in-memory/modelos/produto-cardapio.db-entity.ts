@@ -13,6 +13,6 @@ export class ProdutoCardapioDB extends ProdutoCardapio {
 
   atualizarDados(produto: ProdutoCardapio) {
     produto.verificarSeDadosSaoValidosOuErro();
-    super.registrarDados(produto);
+    super.atualizarDados(produto);
   }
 }
