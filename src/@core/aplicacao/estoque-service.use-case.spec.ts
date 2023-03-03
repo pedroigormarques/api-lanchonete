@@ -51,7 +51,7 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'cadastrarProduto')
         .mockResolvedValue(produtoResposta);
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       const dadosCriacao = {} as DadosBaseProdutoEstoque;
       dadosCriacao.idUsuario = idUsuarioTeste;
@@ -72,14 +72,14 @@ describe('Estoque Service', () => {
       expect(resposta.quantidade).toEqual(dadosCriacao.quantidade);
       expect(resposta.unidade).toEqual(dadosCriacao.unidade);
 
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(1);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(1);
     });
 
     it('Erro ao passar dados insuficientes ou dados incorretos', async () => {
       jest
         .spyOn(estoqueRepositorio, 'cadastrarProduto')
         .mockResolvedValue(null);
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await expect(
         estoqueService.cadastrarProdutoEstoque(
@@ -89,7 +89,7 @@ describe('Estoque Service', () => {
       ).rejects.toThrowError();
 
       expect(estoqueRepositorio.cadastrarProduto).toBeCalledTimes(0);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
     });
 
     it('Erro ao tentar cadastrar produto para outro usuário', async () => {
@@ -97,7 +97,7 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'cadastrarProduto')
         .mockResolvedValue(null);
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       const produtoAux = GeradorDeObjetos.criarProdutoEstoque(true);
       const dadosCriacao = {} as DadosBaseProdutoEstoque;
@@ -112,7 +112,7 @@ describe('Estoque Service', () => {
       ).rejects.toThrowError(ForbiddenException);
 
       expect(estoqueRepositorio.cadastrarProduto).toBeCalledTimes(0);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
     });
   });
 
@@ -132,7 +132,7 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'atualizarProduto')
         .mockImplementation(async (id, produto) => new ProdutoEstoque(produto));
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       const dadosAtualizacao = {
         quantidade: 25,
@@ -152,7 +152,7 @@ describe('Estoque Service', () => {
       expect(resposta.quantidade).toEqual(dadosAtualizacao.quantidade);
       expect(resposta.nomeProduto).toEqual(dadosAtualizacao.nomeProduto);
 
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(1);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(1);
     });
 
     it('Erro ao tentar atualizar id não existente', async () => {
@@ -164,7 +164,7 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'atualizarProduto')
         .mockResolvedValue(null);
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await expect(
         estoqueService.atualizarProdutoEstoque(
@@ -176,7 +176,7 @@ describe('Estoque Service', () => {
 
       expect(estoqueRepositorio.carregarProduto).toBeCalledTimes(1);
       expect(estoqueRepositorio.atualizarProduto).toBeCalledTimes(0);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
     });
 
     it('Erro ao tentar atualizar produto de outro usuário', async () => {
@@ -190,7 +190,7 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'atualizarProduto')
         .mockImplementation(async (id, produto) => new ProdutoEstoque(produto));
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await expect(
         estoqueService.atualizarProdutoEstoque(
@@ -202,7 +202,7 @@ describe('Estoque Service', () => {
 
       expect(estoqueRepositorio.carregarProduto).toBeCalledTimes(1);
       expect(estoqueRepositorio.atualizarProduto).toBeCalledTimes(0);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
     });
 
     it('Erro no processo de atualização', async () => {
@@ -220,7 +220,7 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'atualizarProduto')
         .mockRejectedValue(new Error('erro'));
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await expect(
         estoqueService.atualizarProdutoEstoque(
@@ -232,7 +232,7 @@ describe('Estoque Service', () => {
 
       expect(estoqueRepositorio.carregarProduto).toBeCalledTimes(1);
       expect(estoqueRepositorio.atualizarProduto).toBeCalledTimes(1);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
     });
   });
 
@@ -250,7 +250,9 @@ describe('Estoque Service', () => {
           produtos.map((p) => new ProdutoEstoque(p)),
         );
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest
+        .spyOn(estoqueService, 'emitirAlteracaoConjuntoDeDados')
+        .mockReturnValue(null);
 
       const resposta = await estoqueService.atualizarProdutosEstoque(
         idUsuarioTeste,
@@ -263,7 +265,7 @@ describe('Estoque Service', () => {
       expect(resposta).toContainEqual(listaProdutos[1]);
 
       expect(estoqueRepositorio.atualizarProdutos).toBeCalledTimes(1);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(1);
+      expect(estoqueService.emitirAlteracaoConjuntoDeDados).toBeCalledTimes(1);
     });
 
     it('Erro ao tentar atualizar algum produto de outro usuário', async () => {
@@ -279,14 +281,16 @@ describe('Estoque Service', () => {
           produtos.map((p) => new ProdutoEstoque(p)),
         );
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest
+        .spyOn(estoqueService, 'emitirAlteracaoConjuntoDeDados')
+        .mockReturnValue(null);
 
       await expect(
         estoqueService.atualizarProdutosEstoque(idUsuarioTeste, listaProdutos),
       ).rejects.toThrowError();
 
       expect(estoqueRepositorio.atualizarProdutos).toBeCalledTimes(0);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoConjuntoDeDados).toBeCalledTimes(0);
     });
 
     it('Erro no processo de atualização', async () => {
@@ -295,7 +299,9 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'atualizarProdutos')
         .mockRejectedValue(erroIdNaoEncontrado());
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest
+        .spyOn(estoqueService, 'emitirAlteracaoConjuntoDeDados')
+        .mockReturnValue(null);
 
       const listaProdutos = [
         GeradorDeObjetos.criarProdutoEstoque(true, idUsuarioTeste),
@@ -307,7 +313,7 @@ describe('Estoque Service', () => {
       ).rejects.toThrowError();
 
       expect(estoqueRepositorio.atualizarProdutos).toBeCalledTimes(1);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoConjuntoDeDados).toBeCalledTimes(0);
     });
   });
 
@@ -477,14 +483,14 @@ describe('Estoque Service', () => {
         .mockResolvedValue(produtoBanco);
       jest.spyOn(estoqueRepositorio, 'removerProduto').mockResolvedValue(null);
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await estoqueService.removerProdutoEstoque(
         idUsuarioTeste,
         produtoBanco.id,
       );
       expect(estoqueRepositorio.removerProduto).toBeCalledTimes(1);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(1);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(1);
     });
 
     it('Erro no processo de remoção', async () => {
@@ -501,14 +507,14 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'removerProduto')
         .mockRejectedValue(erroIdNaoEncontrado());
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await expect(
         estoqueService.removerProdutoEstoque(idUsuarioTeste, produtoBanco.id),
       ).rejects.toThrowError();
 
       expect(estoqueRepositorio.removerProduto).toBeCalledTimes(1);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
     });
 
     it('Erro ao tentar remover produto de outro usuário', async () => {
@@ -521,14 +527,14 @@ describe('Estoque Service', () => {
         .spyOn(estoqueRepositorio, 'removerProduto')
         .mockRejectedValue(erroIdNaoEncontrado());
 
-      jest.spyOn(estoqueService, 'emitirAlteracao').mockReturnValue(null);
+      jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await expect(
         estoqueService.removerProdutoEstoque('idTeste', produtoBanco.id),
       ).rejects.toThrowError();
 
       expect(estoqueRepositorio.removerProduto).toBeCalledTimes(0);
-      expect(estoqueService.emitirAlteracao).toBeCalledTimes(0);
+      expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
     });
   });
 

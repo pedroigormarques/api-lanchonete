@@ -279,23 +279,55 @@ describe('Produto Estoque Repositorio', () => {
   describe('Marcar Relacoes', () => {
     it('Criado marca de relação no produto ao inserir dados válidos', async () => {
       const idTeste = 'idTeste';
+      const idUsuarioTeste = 'idUsuarioTeste';
 
-      await estoqueRepositorio.marcarRelacoes(idTeste, [produto1.id]);
+      const { produtoRegistrado, produtoBanco } = registrarProdutoDeTeste(
+        estoqueRepositorio,
+        idUsuarioTeste,
+      );
 
-      expect(produto1Banco.usadoPor.size).toEqual(1);
-      expect(produto1Banco.usadoPor.has(idTeste)).toBeTruthy();
+      await estoqueRepositorio.marcarRelacoes(idTeste, idUsuarioTeste, [
+        produtoRegistrado.id,
+      ]);
+
+      expect(produtoBanco.usadoPor.size).toEqual(1);
+      expect(produtoBanco.usadoPor.has(idTeste)).toBeTruthy();
     });
 
     it('Erro ao não encontrar produto com algum dos ids passado', async () => {
       await expect(
-        estoqueRepositorio.marcarRelacoes('idTeste', ['a']),
+        estoqueRepositorio.marcarRelacoes('idTeste', 'idUsuarioTeste', ['a']),
       ).rejects.toThrowError();
     });
 
     it('Não marcar demais relações ao não encontrar algum dos produtos passado', async () => {
       const idTeste = 'idTeste';
+      const idUsuarioTeste = 'idUsuarioTeste';
+
+      const { produtoRegistrado, produtoBanco } = registrarProdutoDeTeste(
+        estoqueRepositorio,
+        idUsuarioTeste,
+      );
+
       await expect(
-        estoqueRepositorio.marcarRelacoes(idTeste, [produto1.id, 'a']),
+        estoqueRepositorio.marcarRelacoes(idTeste, idUsuarioTeste, [
+          produtoRegistrado.id,
+          'a',
+        ]),
+      ).rejects.toThrowError();
+
+      expect(produtoBanco.usadoPor.size).toEqual(0);
+      expect(produtoBanco.usadoPor.has(idTeste)).toBeFalsy();
+    });
+
+    it('Não marcar produtos de outro usuario', async () => {
+      const idTeste = 'idTeste';
+      const idUsuarioTeste = 'idUsuarioTeste';
+
+      await expect(
+        estoqueRepositorio.marcarRelacoes(idTeste, idUsuarioTeste, [
+          produto1.id,
+        ]),
       ).rejects.toThrowError();
 
       expect(produto1Banco.usadoPor.size).toEqual(0);
@@ -306,32 +338,50 @@ describe('Produto Estoque Repositorio', () => {
   describe('Remover Relacoes', () => {
     it('Removido marca de relação no produto ao inserir dados válidos', async () => {
       const idTeste = 'idTeste';
-      produto1Banco.usadoPor.add(idTeste);
+      const idUsuarioTeste = 'idUsuarioTeste';
 
-      await estoqueRepositorio.removerRelacoes(idTeste, [produto1.id]);
+      const { produtoRegistrado, produtoBanco } = registrarProdutoDeTeste(
+        estoqueRepositorio,
+        idUsuarioTeste,
+      );
+      produtoBanco.usadoPor.add(idTeste);
 
-      expect(produto1Banco.usadoPor.size).toEqual(0);
-      expect(produto1Banco.usadoPor.has(idTeste)).toBeFalsy();
+      await estoqueRepositorio.removerRelacoes(idTeste, idUsuarioTeste, [
+        produtoRegistrado.id,
+      ]);
+
+      expect(produtoBanco.usadoPor.size).toEqual(0);
+      expect(produtoBanco.usadoPor.has(idTeste)).toBeFalsy();
     });
 
     it('Erro ao não encontrar produto com algum dos ids passado', async () => {
       const idTeste = 'idTeste';
 
       await expect(
-        estoqueRepositorio.removerRelacoes(idTeste, ['a']),
+        estoqueRepositorio.removerRelacoes(idTeste, 'idUsuarioTeste', ['a']),
       ).rejects.toThrowError();
     });
 
     it('Não remover demais relações ao não encontrar algum dos produtos passado', async () => {
       const idTeste = 'idTeste';
-      produto1Banco.usadoPor.add(idTeste);
+      const idUsuarioTeste = 'idUsuarioTeste';
+
+      const { produtoRegistrado, produtoBanco } = registrarProdutoDeTeste(
+        estoqueRepositorio,
+        idUsuarioTeste,
+      );
+
+      produtoBanco.usadoPor.add(idTeste);
 
       await expect(
-        estoqueRepositorio.removerRelacoes(idTeste, [produto1.id, 'a']),
+        estoqueRepositorio.removerRelacoes(idTeste, idUsuarioTeste, [
+          produtoRegistrado.id,
+          'a',
+        ]),
       ).rejects.toThrowError();
 
-      expect(produto1Banco.usadoPor.size).toEqual(1);
-      expect(produto1Banco.usadoPor.has(idTeste)).toBeTruthy();
+      expect(produtoBanco.usadoPor.size).toEqual(1);
+      expect(produtoBanco.usadoPor.has(idTeste)).toBeTruthy();
     });
   });
 });

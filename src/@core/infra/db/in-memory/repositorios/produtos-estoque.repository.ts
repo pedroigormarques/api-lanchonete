@@ -1,3 +1,5 @@
+import { ForbiddenException } from '@nestjs/common';
+
 import { ProdutoEstoqueDB } from '../modelos/produto-estoque.db-entity';
 import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from './../../../contratos/produtos-estoque.repository.interface';
@@ -95,27 +97,41 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     this.produtos.delete(id);
   }
 
-  async marcarRelacoes(idProdutoCardapio: string, idProdutos: string[]) {
-    await this.validarListaIds(idProdutos);
+  async marcarRelacoes(
+    idProdutoCardapio: string,
+    idUsuarioProdutoCardapio: string,
+    idProdutos: string[],
+  ) {
+    await this.validarListaIds(idUsuarioProdutoCardapio, idProdutos);
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       produto.usadoPor.add(idProdutoCardapio);
     });
   }
 
-  async removerRelacoes(idProdutoCardapio: string, idProdutos: string[]) {
-    await this.validarListaIds(idProdutos);
+  async removerRelacoes(
+    idProdutoCardapio: string,
+    idUsuarioProdutoCardapio: string,
+    idProdutos: string[],
+  ) {
+    await this.validarListaIds(idUsuarioProdutoCardapio, idProdutos);
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       produto.usadoPor.delete(idProdutoCardapio);
     });
   }
 
-  async validarListaIds(idProdutos: string[]): Promise<void> {
+  async validarListaIds(
+    idUsuarioProdutoCardapio: string,
+    idProdutos: string[],
+  ): Promise<void> {
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
         throw this.erroProdutoNaoEncontrado(idProduto);
+      }
+      if (produto.idUsuario !== idUsuarioProdutoCardapio) {
+        throw new ForbiddenException();
       }
     });
   }
