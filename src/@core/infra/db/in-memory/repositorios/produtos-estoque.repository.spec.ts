@@ -79,11 +79,6 @@ describe('Produto Estoque Repositorio', () => {
       const resposta = await estoqueRepositorio.carregarProdutos(
         idUsuarioTeste,
       );
-      console.log(produto1);
-      console.log(produtoDoUsuario1);
-      console.log(produtoDoUsuario2);
-
-      console.log(resposta);
 
       expect(resposta).toBeInstanceOf(Array<ProdutoEstoque>);
       expect(resposta.length).toEqual(2);

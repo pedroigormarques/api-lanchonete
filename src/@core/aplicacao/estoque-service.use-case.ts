@@ -1,10 +1,8 @@
 import { ForbiddenException } from '@nestjs/common';
 
 import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
-import { ListaEvento } from '../dominio/lista-evento.entity';
 import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from '../infra/contratos/produtos-estoque.repository.interface';
-import { DocChangeEvent } from './../dominio/doc-change-event.entity';
 import { DadosBaseProdutoEstoque } from './../dominio/produto-estoque.entity';
 import { NotificadorDeEventos } from './notificador-de-eventos';
 
@@ -18,9 +16,9 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
   ): Promise<EstoqueService> {
     const estoqueService = new EstoqueService(estoqueRepositorio);
 
-    //Modificar a lógica do NotificadorDeEventos
-    //const dadosIniciais = await estoqueService.carregarProdutosEstoque();
-    //estoqueService.carregarDadosIniciais(dadosIniciais);
+    estoqueService.configurarFuncaoColetaDados(
+      estoqueService.carregarProdutosEstoque,
+    );
 
     return estoqueService;
   }
@@ -35,10 +33,12 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
 
     produto = await this.estoqueRepositorio.cadastrarProduto(produto);
 
-    const evento = new ListaEvento<ProdutoEstoque>([
-      new DocChangeEvent(TipoManipulacaoDado.Adicionado, produto.id, produto),
-    ]);
-    this.emitirAlteracao(evento);
+    this.emitirAlteracaoItem(
+      idUsuario,
+      TipoManipulacaoDado.Adicionado,
+      produto.id,
+      produto,
+    );
 
     return produto;
   }
@@ -55,13 +55,12 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
       produtos,
     );
 
-    const listaAtualizacoes = [] as DocChangeEvent<ProdutoEstoque>[];
-    produtosAtualizados.forEach(async (pe) => {
-      listaAtualizacoes.push(
-        new DocChangeEvent(TipoManipulacaoDado.Alterado, pe.id, pe),
-      );
-    });
-    this.emitirAlteracao(new ListaEvento<ProdutoEstoque>(listaAtualizacoes));
+    this.emitirAlteracaoConjuntoDeDados(
+      idUsuario,
+      TipoManipulacaoDado.Alterado,
+      produtosAtualizados.map((pe) => pe.id),
+      produtosAtualizados,
+    );
 
     return produtosAtualizados;
   }
@@ -82,10 +81,12 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
       produto,
     );
 
-    const evento = new ListaEvento<ProdutoEstoque>([
-      new DocChangeEvent(TipoManipulacaoDado.Alterado, idProduto, produto),
-    ]);
-    this.emitirAlteracao(evento);
+    this.emitirAlteracaoItem(
+      idUsuario,
+      TipoManipulacaoDado.Alterado,
+      idProduto,
+      produto,
+    );
 
     return produto;
   }
@@ -127,10 +128,11 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
 
     await this.estoqueRepositorio.removerProduto(idProduto);
 
-    const evento = new ListaEvento<ProdutoEstoque>([
-      new DocChangeEvent(TipoManipulacaoDado.Removido, idProduto),
-    ]);
-    this.emitirAlteracao(evento);
+    this.emitirAlteracaoItem(
+      idUsuario,
+      TipoManipulacaoDado.Removido,
+      idProduto,
+    );
 
     return;
   }

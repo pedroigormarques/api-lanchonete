@@ -1,33 +1,70 @@
 import { ReplaySubject } from 'rxjs';
 
-import { DocChangeEvent } from '../dominio/doc-change-event.entity';
 import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 import { ListaEvento } from '../dominio/lista-evento.entity';
+import { Notificacao } from './../dominio/notificacao.entity';
 
 type itemDoBancoDeDados = {
   id?: string;
 };
 
 export class NotificadorDeEventos<T extends itemDoBancoDeDados> {
-  private eventsSubject = new ReplaySubject<ListaEvento<T>>();
+  private eventsSubjects = new Map<string, ReplaySubject<ListaEvento<T>>>();
+  private funcaoColetaDadosIniciais: (idUsuario: string) => Promise<T[]>;
 
-  abrirConexao() {
-    return this.eventsSubject.asObservable();
+  async abrirConexao(idUsuario: string) {
+    if (!this.eventsSubjects.has(idUsuario)) {
+      this.eventsSubjects.set(idUsuario, new ReplaySubject<ListaEvento<T>>());
+      this.carregarDadosIniciais(idUsuario);
+    }
+    return this.eventsSubjects.get(idUsuario).asObservable();
   }
 
-  emitirAlteracao(evento: ListaEvento<T>) {
-    return this.eventsSubject.next(evento);
+  emitirAlteracaoItem(
+    idUsuario: string,
+    tipo: TipoManipulacaoDado,
+    id: string,
+    dado?: T,
+  ): void {
+    const evento = new ListaEvento([new Notificacao(tipo, id, dado)]);
+    this.emitirAlteracao(idUsuario, evento);
   }
 
-  protected carregarDadosIniciais(dadosIniciais: T[]) {
-    //adiciona os dados na memória
-    const listaItens = new Array<DocChangeEvent<T>>();
-    dadosIniciais.forEach((item) => {
-      listaItens.push(
-        new DocChangeEvent<T>(TipoManipulacaoDado.Adicionado, item.id, item),
-      );
+  emitirAlteracaoConjuntoDeDados(
+    idUsuario: string,
+    tipo: TipoManipulacaoDado,
+    listaIds: string[],
+    dados?: T[],
+  ) {
+    if (dados && dados.length !== listaIds.length) {
+      throw new Error('Conflito nos dados passados para gerar um evento');
+    }
+    const alteracoes = new Array<Notificacao<T>>();
+    listaIds.forEach((id, index) => {
+      alteracoes.push(new Notificacao<T>(tipo, id, dados[index]));
     });
-    const evento = new ListaEvento<T>(listaItens);
-    this.eventsSubject.next(evento);
+    const evento = new ListaEvento(alteracoes);
+    this.emitirAlteracao(idUsuario, evento);
+  }
+
+  protected configurarFuncaoColetaDados(
+    funcaoColeta: (idUsuario: string) => Promise<T[]>,
+  ): void {
+    this.funcaoColetaDadosIniciais = funcaoColeta;
+  }
+
+  private emitirAlteracao(idUsuario: string, evento: ListaEvento<T>): void {
+    this.eventsSubjects.get(idUsuario)?.next(evento);
+  }
+
+  private async carregarDadosIniciais(idUsuario: string) {
+    const dadosIniciais = await this.funcaoColetaDadosIniciais(idUsuario);
+    //adiciona os dados na memória
+    this.emitirAlteracaoConjuntoDeDados(
+      idUsuario,
+      TipoManipulacaoDado.Adicionado,
+      dadosIniciais.map((dado) => dado.id),
+      dadosIniciais,
+    );
   }
 }

@@ -4,9 +4,7 @@ import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
 import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { IPedidosFechadosRepository } from '../infra/contratos/pedidos-fechados.repository.interface';
 import { IPedidosRepository } from '../infra/contratos/pedidos.repository.interface';
-import { DocChangeEvent } from './../dominio/doc-change-event.entity';
 import { TipoManipulacaoDado } from './../dominio/enums/tipo-manipulacao-dado.enum';
-import { ListaEvento } from './../dominio/lista-evento.entity';
 import { DadosBasePedidoFechado } from './../dominio/pedido-fechado.entity';
 import { CardapioService } from './cardapio-service.use-case';
 import { EstoqueService } from './estoque-service.use-case';
@@ -34,27 +32,29 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
       cardapioService,
       estoqueService,
     );
-    const dadosIniciais = await pedidosService.carregarPedidos();
-    pedidosService.carregarDadosIniciais(dadosIniciais);
+    pedidosService.configurarFuncaoColetaDados(pedidosService.carregarPedidos);
     return pedidosService;
   }
 
   async cadastrarPedido(
+    idUsuario: string, //fazer toda lógica de autorização para o método
     dadosPedido: Pick<DadosBasePedido, 'mesa'>,
   ): Promise<Pedido> {
     let pedido = new Pedido(dadosPedido);
 
     pedido = await this.pedidosRepositorio.cadastrarPedido(pedido);
 
-    const evento = new ListaEvento<Pedido>([
-      new DocChangeEvent(TipoManipulacaoDado.Adicionado, pedido.id, pedido),
-    ]);
-    this.emitirAlteracao(evento);
+    this.emitirAlteracaoItem(
+      idUsuario,
+      TipoManipulacaoDado.Adicionado,
+      pedido.id,
+      pedido,
+    );
 
     return pedido;
   }
 
-  async carregarPedidos(): Promise<Pedido[]> {
+  async carregarPedidos(idUsuario: string): Promise<Pedido[]> {
     return await this.pedidosRepositorio.carregarPedidos();
   }
 
@@ -90,6 +90,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
       (produtoNoPedido ? pedido.produtosVendidos.get(idProdutoCardapio) : 0);
 
     const produtoCardapio = await this.cardapioService.carregarProdutoCardapio(
+      idUsuario,
       idProdutoCardapio,
     );
 
@@ -112,10 +113,12 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
 
     pedido = await this.pedidosRepositorio.atualizarPedido(idPedido, pedido);
 
-    const evento = new ListaEvento<Pedido>([
-      new DocChangeEvent(TipoManipulacaoDado.Alterado, pedido.id, pedido),
-    ]);
-    this.emitirAlteracao(evento);
+    this.emitirAlteracaoItem(
+      idUsuario,
+      TipoManipulacaoDado.Alterado,
+      pedido.id,
+      pedido,
+    );
 
     return pedido;
   }
@@ -134,7 +137,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     });
 
     const produtosVendidosCanceladosCompostos: Map<ProdutoCardapio, number> =
-      await this.comporProdutosVendidos(produtosVendidosCancelados);
+      await this.comporProdutosVendidos(idUsuario, produtosVendidosCancelados);
 
     const gastosProdutosEstoque: Map<string, number> =
       this.extrairQtdUsadaPorProdEstoque(produtosVendidosCanceladosCompostos);
@@ -144,10 +147,8 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     );
 
     await this.pedidosRepositorio.removerPedido(idPedido);
-    const evento = new ListaEvento<Pedido>([
-      new DocChangeEvent(TipoManipulacaoDado.Removido, idPedido),
-    ]);
-    this.emitirAlteracao(evento);
+
+    this.emitirAlteracaoItem(idUsuario, TipoManipulacaoDado.Removido, idPedido);
 
     return;
   }
@@ -164,6 +165,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     dadosPedido.valorConta = pedido.valorConta;
 
     dadosPedido.produtosVendidos = await this.comporProdutosVendidos(
+      idUsuario,
       pedido.produtosVendidos,
     );
 
@@ -174,10 +176,8 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     const pedidoFechado = new PedidoFechado(dadosPedido);
 
     await this.pedidosRepositorio.removerPedido(idPedido);
-    const evento = new ListaEvento<Pedido>([
-      new DocChangeEvent(TipoManipulacaoDado.Removido, idPedido),
-    ]);
-    this.emitirAlteracao(evento);
+
+    this.emitirAlteracaoItem(idUsuario, TipoManipulacaoDado.Removido, idPedido);
     return await this.pedidosFechadosRepositorio.cadastrarPedidoFechado(
       pedidoFechado,
     );
@@ -208,13 +208,17 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   }
 
   private async comporProdutosVendidos(
+    idUsuario: string,
     produtosVendidos: Map<string, number>,
   ): Promise<Map<ProdutoCardapio, number>> {
     const composicaoProdutosVendidos = new Map<ProdutoCardapio, number>();
 
     const listaIdsProdutos = [...produtosVendidos.keys()];
     const produtosCardapio =
-      await this.cardapioService.carregarProdutosCardapio(listaIdsProdutos);
+      await this.cardapioService.carregarProdutosCardapio(
+        idUsuario,
+        listaIdsProdutos,
+      );
 
     produtosCardapio.forEach((pc) => {
       composicaoProdutosVendidos.set(pc, produtosVendidos.get(pc.id));

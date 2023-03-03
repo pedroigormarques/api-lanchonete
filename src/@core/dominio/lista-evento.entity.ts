@@ -1,9 +1,9 @@
-import { DocChangeEvent } from './doc-change-event.entity';
+import { Notificacao } from './notificacao.entity';
 
 export class ListaEvento<T> {
-  alteracoes: DocChangeEvent<T>[];
+  alteracoes: Notificacao<T>[];
 
-  constructor(lista: DocChangeEvent<T>[]) {
+  constructor(lista: Notificacao<T>[]) {
     this.alteracoes = lista;
   }
 }
