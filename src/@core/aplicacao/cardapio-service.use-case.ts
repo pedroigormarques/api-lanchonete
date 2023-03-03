@@ -1,3 +1,5 @@
+import { ForbiddenException } from '@nestjs/common';
+
 import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
 import { IProdutosCardapioRepository } from '../infra/contratos/produtos-cardapio.repository.interface';
@@ -20,10 +22,12 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
   }
 
   async cadastrarProdutoCardapio(
-    idUsuario: string, //fazer toda lógica de autorização para o método
+    idUsuario: string,
     dadosProdutoCardapio: DadosBaseProdutoCardapio,
   ): Promise<ProdutoCardapio> {
     let produto = new ProdutoCardapio(dadosProdutoCardapio);
+
+    this.acaoEstaAutorizada(idUsuario, dadosProdutoCardapio);
 
     produto = await this.cardapioRepositorio.cadastrarProduto(produto);
 
@@ -38,11 +42,13 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
   }
 
   async atualizarProdutoCardapio(
-    idUsuario: string, //fazer toda lógica de autorização para o método
+    idUsuario: string,
     idProduto: string,
-    dadosProdutoCardapio: Partial<DadosBaseProdutoCardapio>,
+    dadosProdutoCardapio: Omit<Partial<DadosBaseProdutoCardapio>, 'idUsuario'>,
   ): Promise<ProdutoCardapio> {
     let produto = await this.cardapioRepositorio.carregarProduto(idProduto);
+
+    this.acaoEstaAutorizada(idUsuario, produto);
 
     produto.atualizarDados(dadosProdutoCardapio);
 
@@ -62,31 +68,42 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
   }
 
   async carregarProdutosCardapio(
-    idUsuario: string, //fazer toda lógica de autorização para o método
+    idUsuario: string,
     listaIds?: string[],
   ): Promise<ProdutoCardapio[]> {
     const produtosCardapio = await this.cardapioRepositorio.carregarProdutos(
+      idUsuario,
       listaIds,
     );
+
+    if (listaIds && listaIds.length !== produtosCardapio.length) {
+      throw this.erroAutorizacao();
+    }
 
     return produtosCardapio;
   }
 
   async carregarProdutoCardapio(
-    idUsuario: string, //fazer toda lógica de autorização para o método
+    idUsuario: string,
     idProduto: string,
   ): Promise<ProdutoCardapio> {
     const produtosCardapio = await this.cardapioRepositorio.carregarProduto(
       idProduto,
     );
 
+    this.acaoEstaAutorizada(idUsuario, produtosCardapio);
+
     return produtosCardapio;
   }
 
   async removerProdutoCardapio(
-    idUsuario: string, //fazer toda lógica de autorização para o método
+    idUsuario: string,
     idProduto: string,
   ): Promise<void> {
+    const produto = await this.cardapioRepositorio.carregarProduto(idProduto);
+
+    this.acaoEstaAutorizada(idUsuario, produto);
+
     await this.cardapioRepositorio.removerProduto(idProduto);
 
     this.emitirAlteracaoItem(
@@ -96,5 +113,18 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
     );
 
     return;
+  }
+
+  private acaoEstaAutorizada(
+    idUsuario: string,
+    dadoAutorizado: { idUsuario: string },
+  ) {
+    if (dadoAutorizado.idUsuario !== idUsuario) {
+      throw this.erroAutorizacao();
+    }
+  }
+
+  private erroAutorizacao() {
+    return new ForbiddenException();
   }
 }

@@ -3,7 +3,10 @@ import { ProdutoCardapio } from './../../dominio/produto-cardapio.entity';
 export interface IProdutosCardapioRepository {
   cadastrarProduto(produto: ProdutoCardapio): Promise<ProdutoCardapio>;
 
-  carregarProdutos(listaIds?: string[]): Promise<ProdutoCardapio[]>;
+  carregarProdutos(
+    idUsuario: string,
+    listaIds?: string[],
+  ): Promise<ProdutoCardapio[]>;
 
   carregarProduto(id: string): Promise<ProdutoCardapio>;
 

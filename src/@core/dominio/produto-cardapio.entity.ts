@@ -2,6 +2,7 @@ import { possuiUmValorValidoParaOEnum } from '../helper/manipular-enum.function'
 import { CATEGORIAS } from './enums/categorias.enum';
 
 export interface DadosBaseProdutoCardapio {
+  idUsuario: string;
   nomeProduto: string;
   categoria: CATEGORIAS;
   descricao: string;
@@ -11,6 +12,7 @@ export interface DadosBaseProdutoCardapio {
 
 export class ProdutoCardapio {
   id?: string;
+  idUsuario: string;
   nomeProduto: string;
   categoria: CATEGORIAS;
   descricao: string;
@@ -35,7 +37,9 @@ export class ProdutoCardapio {
     ProdutoCardapio.DadosSaoValidosParaRegistroOuErro(this);
   }
 
-  atualizarDados(dadosProduto: Partial<DadosBaseProdutoCardapio>) {
+  atualizarDados(
+    dadosProduto: Omit<Partial<DadosBaseProdutoCardapio>, 'idUsuario'>,
+  ) {
     if (dadosProduto.descricao) this.descricao = dadosProduto.descricao;
     if (dadosProduto.nomeProduto) this.nomeProduto = dadosProduto.nomeProduto;
 
@@ -69,6 +73,7 @@ export class ProdutoCardapio {
   ) {
     if (dadosProduto.id) this.id = dadosProduto.id;
 
+    this.idUsuario = dadosProduto.idUsuario;
     this.descricao = dadosProduto.descricao;
     this.nomeProduto = dadosProduto.nomeProduto;
 
@@ -81,6 +86,7 @@ export class ProdutoCardapio {
     dadosProduto: DadosBaseProdutoCardapio,
   ): boolean {
     if (
+      typeof dadosProduto.idUsuario !== 'string' ||
       typeof dadosProduto.descricao !== 'string' ||
       typeof dadosProduto.nomeProduto !== 'string' ||
       typeof dadosProduto.preco !== 'number' ||

@@ -43,10 +43,17 @@ export class GeradorDeObjetos {
     return produtoEstoque;
   }
 
-  static criarProdutoCardapio(comId = false): ProdutoCardapio {
+  static criarProdutoCardapio(
+    comId = false,
+    idUsuario?: string,
+  ): ProdutoCardapio {
     const produtoCardapio = new ProdutoCardapio();
 
     if (comId) produtoCardapio.id = faker.datatype.uuid();
+
+    idUsuario
+      ? (produtoCardapio.idUsuario = idUsuario)
+      : (produtoCardapio.idUsuario = faker.datatype.uuid());
 
     produtoCardapio.descricao = faker.commerce.productDescription();
     produtoCardapio.nomeProduto = faker.commerce.productName();

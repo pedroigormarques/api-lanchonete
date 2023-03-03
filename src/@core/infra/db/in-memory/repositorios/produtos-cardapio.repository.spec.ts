@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import { GeradorDeObjetos } from './../../../../../test/gerador-objetos.faker';
@@ -83,7 +84,7 @@ describe('Produto Cardapio Repositorio', () => {
 
       jest
         .spyOn(estoqueRepositorio, 'marcarRelacoes')
-        .mockImplementation(mockErroRelacao);
+        .mockRejectedValue(new Error(`produto não encontrado`));
 
       await expect(
         cardapioRepositorio.cadastrarProduto(produto),
@@ -123,38 +124,52 @@ describe('Produto Cardapio Repositorio', () => {
   });
 
   describe('Carregar Produtos', () => {
-    it('Retorno de produtos', async () => {
-      const { produtoRegistrado } =
-        registrarProdutoDeTeste(cardapioRepositorio);
-      const resposta = await cardapioRepositorio.carregarProdutos();
+    it('Retorno de produtos do usuário', async () => {
+      const idUsuarioTeste = 'idTeste';
+      const { produtoRegistrado: produtoRegistrado1 } = registrarProdutoDeTeste(
+        cardapioRepositorio,
+        idUsuarioTeste,
+      );
+      const { produtoRegistrado: produtoRegistrado2 } = registrarProdutoDeTeste(
+        cardapioRepositorio,
+        idUsuarioTeste,
+      );
+
+      const resposta = await cardapioRepositorio.carregarProdutos(
+        idUsuarioTeste,
+      );
 
       expect(resposta).toBeInstanceOf(Array<ProdutoCardapio>);
       expect(resposta.length).toEqual(2);
-      expect(resposta).toContainEqual(produto1);
-      expect(resposta).toContainEqual(produtoRegistrado);
+      expect(resposta).toContainEqual(produtoRegistrado1);
+      expect(resposta).toContainEqual(produtoRegistrado2);
 
-      expect((cardapioRepositorio as any).produtos.size).toEqual(2);
+      expect((cardapioRepositorio as any).produtos.size).toEqual(3);
     });
 
-    it('Retorno de produtos ao inserir lista com ids válidos', async () => {
-      const { produtoRegistrado: produto2 } =
-        registrarProdutoDeTeste(cardapioRepositorio);
-      registrarProdutoDeTeste(cardapioRepositorio);
+    it('Retorno de produtos ao inserir lista com ids válidos para o usuário', async () => {
+      const idUsuarioTeste = 'idTeste';
+      const { produtoRegistrado: produtoRegistrado1 } = registrarProdutoDeTeste(
+        cardapioRepositorio,
+        idUsuarioTeste,
+      );
+      registrarProdutoDeTeste(cardapioRepositorio, idUsuarioTeste);
 
-      const resposta = await cardapioRepositorio.carregarProdutos([
-        produto2.id,
-      ]);
+      const resposta = await cardapioRepositorio.carregarProdutos(
+        idUsuarioTeste,
+        [produtoRegistrado1.id],
+      );
 
       expect(resposta).toBeInstanceOf(Array<ProdutoCardapio>);
       expect(resposta.length).toEqual(1);
-      expect(resposta).toContainEqual(produto2);
+      expect(resposta).toContainEqual(produtoRegistrado1);
 
       expect((cardapioRepositorio as any).produtos.size).toEqual(3);
     });
 
     it('Erro ao não encontrar produto com um dos ids passados', async () => {
       await expect(
-        cardapioRepositorio.carregarProdutos(['a']),
+        cardapioRepositorio.carregarProdutos('idTeste', ['a']),
       ).rejects.toThrowError();
     });
   });
@@ -205,7 +220,7 @@ describe('Produto Cardapio Repositorio', () => {
 
       jest
         .spyOn(estoqueRepositorio, 'validarListaIds')
-        .mockImplementation(mockErroValidacao);
+        .mockRejectedValue(new Error(`produto não encontrado`));
 
       jest.spyOn(estoqueRepositorio, 'marcarRelacoes').mockResolvedValue(null);
       jest.spyOn(estoqueRepositorio, 'removerRelacoes').mockResolvedValue(null);
@@ -275,7 +290,7 @@ describe('Produto Cardapio Repositorio', () => {
     it('Erro ao tentar remover relacao de produto da composição', async () => {
       jest
         .spyOn(estoqueRepositorio, 'removerRelacoes')
-        .mockImplementation(mockErroRelacao);
+        .mockRejectedValue(new Error(`erro`));
 
       await expect(
         cardapioRepositorio.removerProduto(produto1.id),
@@ -287,24 +302,56 @@ describe('Produto Cardapio Repositorio', () => {
   describe('Marcar Relacoes', () => {
     it('Criado marca de relação no produto ao inserir dados válidos', async () => {
       const idTeste = 'idTeste';
+      const idUsuarioPedido = 'idUsuario';
 
-      await cardapioRepositorio.marcarRelacoes(idTeste, [produto1.id]);
+      const { produtoRegistrado, produtoBanco } = registrarProdutoDeTeste(
+        cardapioRepositorio,
+        idUsuarioPedido,
+      );
 
-      expect(produto1Banco.usadoPor.size).toEqual(1);
-      expect(produto1Banco.usadoPor.has(idTeste)).toBeTruthy();
+      await cardapioRepositorio.marcarRelacoes(idTeste, idUsuarioPedido, [
+        produtoRegistrado.id,
+      ]);
+
+      expect(produtoBanco.usadoPor.size).toEqual(1);
+      expect(produtoBanco.usadoPor.has(idTeste)).toBeTruthy();
     });
 
     it('Erro ao não encontrar produto com algum dos ids passado', async () => {
       await expect(
-        cardapioRepositorio.marcarRelacoes('idTeste', ['a']),
+        cardapioRepositorio.marcarRelacoes('idTeste', 'idUsuario', ['a']),
       ).rejects.toThrowError();
     });
 
     it('Não marcar demais relações ao não encontrar algum dos produtos passado', async () => {
       const idTeste = 'idTeste';
+      const idUsuarioPedido = 'idUsuario';
+
+      const { produtoRegistrado, produtoBanco } = registrarProdutoDeTeste(
+        cardapioRepositorio,
+        idUsuarioPedido,
+      );
+
       await expect(
-        cardapioRepositorio.marcarRelacoes(idTeste, [produto1.id, 'a']),
+        cardapioRepositorio.marcarRelacoes(idTeste, idUsuarioPedido, [
+          produtoRegistrado.id,
+          'a',
+        ]),
       ).rejects.toThrowError();
+
+      expect(produtoBanco.usadoPor.size).toEqual(0);
+      expect(produtoBanco.usadoPor.has(idTeste)).toBeFalsy();
+    });
+
+    it('Não marcar relação com produto de outro usuario', async () => {
+      const idTeste = 'idTeste';
+      const idUsuarioPedido = 'idUsuario';
+
+      await expect(
+        cardapioRepositorio.marcarRelacoes(idTeste, idUsuarioPedido, [
+          produto1.id,
+        ]),
+      ).rejects.toThrowError(ForbiddenException);
 
       expect(produto1Banco.usadoPor.size).toEqual(0);
       expect(produto1Banco.usadoPor.has(idTeste)).toBeFalsy();
@@ -314,9 +361,17 @@ describe('Produto Cardapio Repositorio', () => {
   describe('Remover Relacoes', () => {
     it('Removido marca de relação no produto ao inserir dados válidos', async () => {
       const idTeste = 'idTeste';
-      produto1Banco.usadoPor.add(idTeste);
+      const idUsuarioPedido = 'idUsuario';
 
-      await cardapioRepositorio.removerRelacoes(idTeste, [produto1.id]);
+      const { produtoRegistrado, produtoBanco } = registrarProdutoDeTeste(
+        cardapioRepositorio,
+        idUsuarioPedido,
+      );
+      produtoBanco.usadoPor.add(idTeste);
+
+      await cardapioRepositorio.removerRelacoes(idTeste, idUsuarioPedido, [
+        produtoRegistrado.id,
+      ]);
 
       expect(produto1Banco.usadoPor.size).toEqual(0);
       expect(produto1Banco.usadoPor.has(idTeste)).toBeFalsy();
@@ -326,42 +381,47 @@ describe('Produto Cardapio Repositorio', () => {
       const idTeste = 'idTeste';
 
       await expect(
-        cardapioRepositorio.removerRelacoes(idTeste, ['a']),
+        cardapioRepositorio.removerRelacoes(idTeste, 'idUsuario', ['a']),
       ).rejects.toThrowError();
     });
 
     it('Não remover demais relações ao não encontrar algum dos produtos passado', async () => {
       const idTeste = 'idTeste';
-      produto1Banco.usadoPor.add(idTeste);
+      const idUsuarioPedido = 'idUsuario';
+
+      const { produtoRegistrado, produtoBanco } = registrarProdutoDeTeste(
+        cardapioRepositorio,
+        idUsuarioPedido,
+      );
+
+      produtoBanco.usadoPor.add(idTeste);
 
       await expect(
-        cardapioRepositorio.removerRelacoes(idTeste, [produto1.id, 'a']),
+        cardapioRepositorio.removerRelacoes(idTeste, idUsuarioPedido, [
+          produtoRegistrado.id,
+          'a',
+        ]),
       ).rejects.toThrowError();
 
-      expect(produto1Banco.usadoPor.size).toEqual(1);
-      expect(produto1Banco.usadoPor.has(idTeste)).toBeTruthy();
+      expect(produtoBanco.usadoPor.size).toEqual(1);
+      expect(produtoBanco.usadoPor.has(idTeste)).toBeTruthy();
     });
   });
 });
 
 function registrarProdutoDeTeste(
   cardapioRepositorio: ProdutosCardapioRepository,
+  idUsuario?: string,
 ): { produtoRegistrado: ProdutoCardapio; produtoBanco: ProdutoCardapioDB } {
-  const produtoRegistrado = GeradorDeObjetos.criarProdutoCardapio();
+  const produtoRegistrado = GeradorDeObjetos.criarProdutoCardapio(
+    false,
+    idUsuario,
+  );
+
   const produtoBanco = new ProdutoCardapioDB(produtoRegistrado);
   produtoRegistrado.id = produtoBanco.id;
 
   (cardapioRepositorio as any).produtos //pela quebra de proteção "private"
     .set(produtoBanco.id, produtoBanco);
   return { produtoRegistrado, produtoBanco };
-}
-
-async function mockErroValidacao(idProdutos: string[]) {
-  throw new Error(`produto de id ${idProdutos[0]} não encontrado`);
-}
-async function mockErroRelacao(
-  idProdutoCardapio: string,
-  idProdutos: string[],
-) {
-  throw new Error(`produto de id ${idProdutos[0]} não encontrado`);
 }
