@@ -1,3 +1,4 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
 import { GeradorDeObjetos } from './../../test/gerador-objetos.faker';
@@ -33,35 +34,36 @@ describe('Usuario Service', () => {
     expect(usuarioService).toBeDefined();
   });
 
-  describe('Validar Usuario', () => {
-    it('Retorno de usuario com dados corretos', async () => {
-      const emailSimulado = 'teste@teste.com';
-      const senhaSimulada = 'teste';
+  describe('Logar Usuario', () => {
+    it('Retorno de usuario com o token ao passar dados corretos', async () => {
+      const usuarioAux = GeradorDeObjetos.criarUsuario(true);
+      const emailSimulado = usuarioAux.email;
+      const senhaSimulada = usuarioAux.senha;
 
-      const usuarioRespondido = GeradorDeObjetos.criarUsuario(true);
-      usuarioRespondido.email = emailSimulado;
       jest
         .spyOn(usuarioRespositorio, 'validarUsuario')
-        .mockResolvedValue(usuarioRespondido);
+        .mockResolvedValue(usuarioAux);
 
-      const resposta = await usuarioService.validarUsuario(
-        emailSimulado,
-        senhaSimulada,
-      );
+      const usuarioEsperado = { ...usuarioAux };
+      delete usuarioEsperado.senha;
 
-      expect(resposta).toBeInstanceOf(Usuario);
-      expect(resposta.email).toEqual(emailSimulado);
+      const resposta = await usuarioService.logar(emailSimulado, senhaSimulada);
+
+      expect(resposta.token).toBeDefined();
+      expect(resposta.token).toEqual('tokenTemporário');
+      expect(resposta.usuario).toBeDefined();
+      expect(resposta.usuario).toEqual(usuarioEsperado);
     });
 
-    it('Retornado null ao passar  dados incorretos', async () => {
+    it('erro ao passar  dados incorretos', async () => {
       const email = 'teste@teste.com';
       const senha = 'teste';
 
       jest.spyOn(usuarioRespositorio, 'validarUsuario').mockResolvedValue(null);
 
-      const resposta = await usuarioService.validarUsuario(email, senha);
-
-      expect(resposta).toBeNull();
+      await expect(usuarioService.logar(email, senha)).rejects.toThrowError(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -81,9 +83,7 @@ describe('Usuario Service', () => {
 
       const resposta = await usuarioService.registrarUsuario(dadosCriacao);
 
-      expect(resposta).toBeInstanceOf(Usuario);
       expect(resposta.id).toBeDefined();
-      expect(resposta.senha).toEqual(dadosCriacao.senha);
       expect(resposta.email).toEqual(dadosCriacao.email);
       expect(resposta.endereco).toEqual(dadosCriacao.endereco);
       expect(resposta.nomeLanchonete).toEqual(dadosCriacao.nomeLanchonete);
@@ -145,9 +145,7 @@ describe('Usuario Service', () => {
         dadosAtualizacao,
       );
 
-      expect(resposta).toBeInstanceOf(Usuario);
       expect(resposta.id).toEqual(usuarioBanco.id);
-      expect(resposta.senha).toEqual(usuarioBanco.senha);
       expect(resposta.endereco).toEqual(usuarioBanco.endereco);
       expect(resposta.email).toEqual(dadosAtualizacao.email);
       expect(resposta.nomeLanchonete).toEqual(dadosAtualizacao.nomeLanchonete);

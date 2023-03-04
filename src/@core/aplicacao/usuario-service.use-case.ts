@@ -1,27 +1,44 @@
+import { UnauthorizedException } from '@nestjs/common';
 import { IUsuarioRepository } from '../infra/contratos/usuario.repository.interface';
 import { DadosBaseUsuario, Usuario } from './../dominio/usuario.entity';
 
 export class UsuarioService {
   constructor(private usuarioRepositorio: IUsuarioRepository) {}
 
-  async validarUsuario(email: string, senha: string) {
-    return await this.usuarioRepositorio.validarUsuario(email, senha);
+  async logar(email: string, senha: string) {
+    const usuario = await this.usuarioRepositorio.validarUsuario(email, senha);
+
+    if (!usuario) {
+      throw new UnauthorizedException();
+    }
+
+    //criar sistema de token
+    const token = 'tokenTemporário';
+
+    return { token: token, usuario: usuario.gerarUsuarioDeRetorno() };
   }
 
   async registrarUsuario(dadosUsuario: DadosBaseUsuario) {
-    const usuario = new Usuario(dadosUsuario);
+    let usuario = new Usuario(dadosUsuario);
 
-    return await this.usuarioRepositorio.registrarUsuario(usuario);
+    usuario = await this.usuarioRepositorio.registrarUsuario(usuario);
+
+    return usuario.gerarUsuarioDeRetorno();
   }
 
   async atualizarUsuario(
     idUsuario: string,
     dadosUsuario: Partial<DadosBaseUsuario>,
   ) {
-    const usuario = await this.usuarioRepositorio.carregarUsuario(idUsuario);
+    let usuario = await this.usuarioRepositorio.carregarUsuario(idUsuario);
 
     usuario.atualizarDados(dadosUsuario);
 
-    return await this.usuarioRepositorio.atualizarUsuario(idUsuario, usuario);
+    usuario = await this.usuarioRepositorio.atualizarUsuario(
+      idUsuario,
+      usuario,
+    );
+
+    return usuario.gerarUsuarioDeRetorno();
   }
 }

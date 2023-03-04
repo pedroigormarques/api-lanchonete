@@ -5,6 +5,13 @@ export interface DadosBaseUsuario {
   nomeLanchonete: string;
 }
 
+export interface UsuarioRetornado {
+  id: string;
+  email: string;
+  endereco: string;
+  nomeLanchonete: string;
+}
+
 export class Usuario {
   id?: string;
   email: string;
@@ -39,6 +46,13 @@ export class Usuario {
 
   verificarSeDadosSaoValidosOuErro() {
     Usuario.DadosSaoValidosParaRegistroOuErro(this);
+  }
+
+  gerarUsuarioDeRetorno(): UsuarioRetornado {
+    const usuarioRegistrado = { ...this };
+    delete usuarioRegistrado.senha;
+
+    return usuarioRegistrado as UsuarioRetornado;
   }
 
   protected registrarDados(dadosUsuario: { id?: string } & DadosBaseUsuario) {
