@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { VerificadorDeAutorizacao } from './verificador-autorizacao';
 
 import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
@@ -27,7 +27,10 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
   ): Promise<ProdutoCardapio> {
     let produto = new ProdutoCardapio(dadosProdutoCardapio);
 
-    this.acaoEstaAutorizada(idUsuario, dadosProdutoCardapio);
+    VerificadorDeAutorizacao.verificarAutorização(
+      idUsuario,
+      dadosProdutoCardapio,
+    );
 
     produto = await this.cardapioRepositorio.cadastrarProduto(produto);
 
@@ -48,7 +51,7 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
   ): Promise<ProdutoCardapio> {
     let produto = await this.cardapioRepositorio.carregarProduto(idProduto);
 
-    this.acaoEstaAutorizada(idUsuario, produto);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, produto);
 
     produto.atualizarDados(dadosProdutoCardapio);
 
@@ -77,7 +80,7 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
     );
 
     if (listaIds && listaIds.length !== produtosCardapio.length) {
-      throw this.erroAutorizacao();
+      throw VerificadorDeAutorizacao.erroAutorizacao();
     }
 
     return produtosCardapio;
@@ -91,7 +94,7 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
       idProduto,
     );
 
-    this.acaoEstaAutorizada(idUsuario, produtosCardapio);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, produtosCardapio);
 
     return produtosCardapio;
   }
@@ -102,7 +105,7 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
   ): Promise<void> {
     const produto = await this.cardapioRepositorio.carregarProduto(idProduto);
 
-    this.acaoEstaAutorizada(idUsuario, produto);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, produto);
 
     await this.cardapioRepositorio.removerProduto(idProduto);
 
@@ -113,18 +116,5 @@ export class CardapioService extends NotificadorDeEventos<ProdutoCardapio> {
     );
 
     return;
-  }
-
-  private acaoEstaAutorizada(
-    idUsuario: string,
-    dadoAutorizado: { idUsuario: string },
-  ) {
-    if (dadoAutorizado.idUsuario !== idUsuario) {
-      throw this.erroAutorizacao();
-    }
-  }
-
-  private erroAutorizacao() {
-    return new ForbiddenException();
   }
 }

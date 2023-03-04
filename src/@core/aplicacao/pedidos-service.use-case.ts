@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { VerificadorDeAutorizacao } from './verificador-autorizacao';
 
 import { PedidoFechado } from '../dominio/pedido-fechado.entity';
 import { DadosBasePedido, Pedido } from '../dominio/pedido.entity';
@@ -44,7 +44,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   ): Promise<Pedido> {
     let pedido = new Pedido(dadosPedido);
 
-    this.acaoEstaAutorizada(idUsuario, pedido);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, pedido);
 
     pedido = await this.pedidosRepositorio.cadastrarPedido(pedido);
 
@@ -65,7 +65,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   async carregarPedido(idUsuario: string, idPedido: string): Promise<Pedido> {
     const pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
 
-    this.acaoEstaAutorizada(idUsuario, pedido);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, pedido);
 
     return pedido;
   }
@@ -84,7 +84,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
 
     let pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
 
-    this.acaoEstaAutorizada(idUsuario, pedido);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, pedido);
 
     const produtoNoPedido = pedido.produtosVendidos.has(idProdutoCardapio);
 
@@ -138,7 +138,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
       idPedido,
     );
 
-    this.acaoEstaAutorizada(idUsuario, pedido);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, pedido);
 
     const produtosVendidosCancelados = new Map<string, number>();
     pedido.produtosVendidos.forEach((idProdutoCardapio, qtdConsumida) => {
@@ -168,7 +168,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
   ): Promise<PedidoFechado> {
     const pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
 
-    this.acaoEstaAutorizada(idUsuario, pedido);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, pedido);
 
     const dadosPedido = {} as DadosBasePedidoFechado;
     dadosPedido.horaAbertura = pedido.horaAbertura;
@@ -262,18 +262,5 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     });
 
     return map;
-  }
-
-  private acaoEstaAutorizada(
-    idUsuario: string,
-    dadoAutorizado: { idUsuario: string },
-  ) {
-    if (dadoAutorizado.idUsuario !== idUsuario) {
-      throw this.erroAutorizacao();
-    }
-  }
-
-  private erroAutorizacao() {
-    return new ForbiddenException();
   }
 }

@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { VerificadorDeAutorizacao } from './verificador-autorizacao';
 
 import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
 import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
@@ -29,7 +29,10 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
   ): Promise<ProdutoEstoque> {
     let produto = new ProdutoEstoque(dadosProdutoEstoque);
 
-    this.acaoEstaAutorizada(idUsuario, dadosProdutoEstoque);
+    VerificadorDeAutorizacao.verificarAutorização(
+      idUsuario,
+      dadosProdutoEstoque,
+    );
 
     produto = await this.estoqueRepositorio.cadastrarProduto(produto);
 
@@ -48,7 +51,7 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
     produtos: ProdutoEstoque[],
   ): Promise<ProdutoEstoque[]> {
     produtos.forEach((produto) => {
-      this.acaoEstaAutorizada(idUsuario, produto);
+      VerificadorDeAutorizacao.verificarAutorização(idUsuario, produto);
     });
 
     const produtosAtualizados = await this.estoqueRepositorio.atualizarProdutos(
@@ -72,7 +75,7 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
   ): Promise<ProdutoEstoque> {
     let produto = await this.estoqueRepositorio.carregarProduto(idProduto);
 
-    this.acaoEstaAutorizada(idUsuario, produto);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, produto);
 
     produto.atualizarDados(dadosProdutoEstoque);
 
@@ -101,7 +104,7 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
     );
 
     if (listaIds && listaIds.length !== produtosEstoque.length) {
-      throw this.erroAutorizacao();
+      throw VerificadorDeAutorizacao.erroAutorizacao();
     }
 
     return produtosEstoque;
@@ -113,7 +116,7 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
   ): Promise<ProdutoEstoque> {
     const produto = await this.estoqueRepositorio.carregarProduto(idProduto);
 
-    this.acaoEstaAutorizada(idUsuario, produto);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, produto);
 
     return produto;
   }
@@ -124,7 +127,7 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
   ): Promise<void> {
     const produto = await this.estoqueRepositorio.carregarProduto(idProduto);
 
-    this.acaoEstaAutorizada(idUsuario, produto);
+    VerificadorDeAutorizacao.verificarAutorização(idUsuario, produto);
 
     await this.estoqueRepositorio.removerProduto(idProduto);
 
@@ -146,7 +149,7 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
     ]);
 
     produtosEstoque.forEach((pe) => {
-      this.acaoEstaAutorizada(idUsuario, pe);
+      VerificadorDeAutorizacao.verificarAutorização(idUsuario, pe);
 
       pe.quantidade -= gastosProdutosEstoque.get(pe.id);
       if (pe.quantidade < 0) {
@@ -157,18 +160,5 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
     });
 
     await this.atualizarProdutosEstoque(idUsuario, produtosEstoque);
-  }
-
-  private acaoEstaAutorizada(
-    idUsuario: string,
-    dadoAutorizado: { idUsuario: string },
-  ) {
-    if (dadoAutorizado.idUsuario !== idUsuario) {
-      throw this.erroAutorizacao();
-    }
-  }
-
-  private erroAutorizacao() {
-    return new ForbiddenException();
   }
 }
