@@ -54,7 +54,8 @@ export class NotificadorDeEventos<T extends itemDoBancoDeDados> {
   }
 
   private emitirAlteracao(idUsuario: string, evento: ListaEvento<T>): void {
-    this.eventsSubjects.get(idUsuario)?.next(evento);
+    if (this.eventsSubjects.has(idUsuario))
+      this.eventsSubjects.get(idUsuario).next(evento);
   }
 
   private async carregarDadosIniciais(idUsuario: string) {

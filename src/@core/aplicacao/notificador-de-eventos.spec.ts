@@ -279,7 +279,7 @@ describe('Notificador de Eventos', () => {
   });
 
   describe('emitirAlteracaoConjuntoDeDados', () => {
-    it('Emitir vários dados em uma notificação', async () => {
+    it('Emitir vários dados de alteração/adição em uma notificação', async () => {
       const idTeste = 'teste';
       const dados: Array<tipoTeste> = [
         { id: 'a', valor: 1 },
@@ -324,6 +324,51 @@ describe('Notificador de Eventos', () => {
         expect(notificacao.acao).toEqual(TipoManipulacaoDado.Alterado);
         expect(notificacao.id).toEqual(dados[index].id);
         expect(notificacao.data).toEqual(dados[index]);
+      });
+
+      inscricao.unsubscribe();
+    });
+
+    it('Emitir vários dados de remoção em uma notificação', async () => {
+      const idTeste = 'teste';
+      const listaIds = ['a', 'b', 'c'];
+
+      const subject = new ReplaySubject<ListaEvento<tipoTeste>>();
+      (notificadorDeEventos as any).eventsSubjects.set(idTeste, subject);
+
+      const conexao: Observable<ListaEvento<tipoTeste>> =
+        subject.asObservable();
+
+      const eventosRecebidos: ListaEvento<tipoTeste>[] = [];
+      let enviosFeito = 0;
+
+      const inscricao = conexao.subscribe({
+        next(value) {
+          eventosRecebidos.push(value);
+          enviosFeito++;
+        },
+        error(error) {
+          throw error;
+        },
+      });
+
+      expect(enviosFeito).toEqual(0);
+      expect(eventosRecebidos.length).toEqual(0);
+
+      notificadorDeEventos.emitirAlteracaoConjuntoDeDados(
+        idTeste,
+        TipoManipulacaoDado.Removido,
+        listaIds,
+      );
+
+      expect(enviosFeito).toEqual(1);
+      expect(eventosRecebidos.length).toEqual(1);
+      expect(eventosRecebidos[0].alteracoes.length).toEqual(3);
+
+      eventosRecebidos[0].alteracoes.forEach((notificacao, index) => {
+        expect(notificacao.acao).toEqual(TipoManipulacaoDado.Removido);
+        expect(notificacao.id).toEqual(listaIds[index]);
+        expect(notificacao.data).toBeUndefined();
       });
 
       inscricao.unsubscribe();
