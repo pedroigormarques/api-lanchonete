@@ -23,7 +23,7 @@ import { EstoqueModule } from './estoque.module';
         cardapioService: CardapioService,
         estoqueService: EstoqueService,
       ) =>
-        new PedidosService(
+        PedidosService.create(
           pedidosRepositorio,
           pedidosFechadosRepositorio,
           cardapioService,

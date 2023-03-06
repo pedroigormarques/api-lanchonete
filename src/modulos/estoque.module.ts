@@ -11,7 +11,7 @@ import { EstoqueController } from './../controllers/estoque.controller';
     {
       provide: EstoqueService,
       useFactory: (estoqueRepositorio: IProdutosEstoqueRepository) =>
-        new EstoqueService(estoqueRepositorio),
+        EstoqueService.create(estoqueRepositorio),
       inject: [ProdutosEstoqueRepository],
     },
   ],

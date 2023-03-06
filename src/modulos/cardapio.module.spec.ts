@@ -18,7 +18,7 @@ describe('Cardapio Module', () => {
         {
           provide: CardapioService,
           useFactory: (cardapioRepositorio: IProdutosCardapioRepository) =>
-            new CardapioService(cardapioRepositorio),
+            CardapioService.create(cardapioRepositorio),
           inject: [ProdutosCardapioRepository],
         },
       ],

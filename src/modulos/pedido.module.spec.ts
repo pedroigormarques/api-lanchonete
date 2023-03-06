@@ -29,7 +29,7 @@ describe('Pedido Module', () => {
             cardapioService: CardapioService,
             estoqueService: EstoqueService,
           ) =>
-            new PedidosService(
+            PedidosService.create(
               pedidosRepositorio,
               pedidosFechadosRepositorio,
               cardapioService,

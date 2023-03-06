@@ -11,7 +11,7 @@ import { CardapioController } from './../controllers/cardapio.controller';
     {
       provide: CardapioService,
       useFactory: (cardapioRepositorio: IProdutosCardapioRepository) =>
-        new CardapioService(cardapioRepositorio),
+        CardapioService.create(cardapioRepositorio),
       inject: [ProdutosCardapioRepository],
     },
   ],

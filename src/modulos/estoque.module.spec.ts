@@ -18,7 +18,7 @@ describe('Estoque Module', () => {
         {
           provide: EstoqueService,
           useFactory: (estoqueRepositorio: IProdutosEstoqueRepository) =>
-            new EstoqueService(estoqueRepositorio),
+            EstoqueService.create(estoqueRepositorio),
           inject: [ProdutosEstoqueRepository],
         },
       ],
