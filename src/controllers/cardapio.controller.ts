@@ -1,6 +1,8 @@
 import { CardapioService } from './../@core/aplicacao/cardapio-service.use-case';
-import { UpdateProdutoCardapioDto } from './../@core/dominio/DTOs/update-produto-cardapio.dto';
-import { CreateProdutoCardapioDto } from './../@core/dominio/DTOs/create-produto-cardapio.dto';
+import {
+  CreateProdutoCardapioDto,
+  UpdateProdutoCardapioDto,
+} from './Validation/produto-cardapio.dto';
 import { ProdutoCardapio } from './../@core/dominio/produto-cardapio.entity';
 import { ListaEvento } from './../@core/dominio/lista-evento.entity';
 import {
@@ -20,7 +22,7 @@ import { HttpCode } from '@nestjs/common/decorators';
 import { HttpStatus } from '@nestjs/common/enums';
 
 @Controller('cardapio')
-export class UsuarioController {
+export class CardapioController {
   constructor(private readonly cardapioService: CardapioService) {}
 
   @Sse('sse')

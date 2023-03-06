@@ -13,14 +13,16 @@ import {
   Sse,
   UseFilters,
 } from '@nestjs/common';
-import { UpdateProdutoEstoqueDto } from './../@core/dominio/DTOs/update-produto-estoque.dto';
-import { CreateProdutoEstoqueDto } from './../@core/dominio/DTOs/create-produto-estoque.dto';
+import {
+  CreateProdutoEstoqueDto,
+  UpdateProdutoEstoqueDto,
+} from './Validation/produto-estoque.dto';
 import { HttpExceptionFilter } from './../exception/exception-filter';
 import { EstoqueService } from './../@core/aplicacao/estoque-service.use-case';
 import { Observable } from 'rxjs';
 
 @Controller('estoque')
-export class UsuarioController {
+export class EstoqueController {
   constructor(private readonly estoqueService: EstoqueService) {}
 
   @Sse('sse')

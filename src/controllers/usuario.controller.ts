@@ -2,9 +2,8 @@ import { HttpExceptionFilter } from './../exception/exception-filter';
 import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
 import { Body, Controller, Post, Put, HttpStatus } from '@nestjs/common';
 
-import { CreateUsuarioDto } from '../@core/dominio/DTOs/create-usuario.dto';
+import { CreateUsuarioDto, UpdateUsuarioDto } from './Validation/usuario.dto';
 import { HttpCode, UseFilters } from '@nestjs/common/decorators';
-import { UpdateUsuarioDto } from 'src/@core/dominio/DTOs/update-usuario.dto';
 
 @Controller()
 export class UsuarioController {

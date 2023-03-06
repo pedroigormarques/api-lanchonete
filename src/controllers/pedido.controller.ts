@@ -1,6 +1,9 @@
 import { PedidoFechado } from './../@core/dominio/pedido-fechado.entity';
 import { Pedido } from './../@core/dominio/pedido.entity';
-import { CreatePedidoDto } from './../@core/dominio/DTOs/create-pedido.dto';
+import {
+  AtualizarItemPedidoDto,
+  CreatePedidoDto,
+} from './Validation/pedido.dto';
 import { PedidosService } from './../@core/aplicacao/pedidos-service.use-case';
 import { ListaEvento } from './../@core/dominio/lista-evento.entity';
 import {
@@ -18,7 +21,7 @@ import { HttpCode } from '@nestjs/common/decorators';
 import { HttpStatus } from '@nestjs/common/enums';
 
 @Controller()
-export class UsuarioController {
+export class PedidoController {
   constructor(private readonly pedidoService: PedidosService) {}
 
   @Sse('pedidos/sse')
@@ -49,7 +52,7 @@ export class UsuarioController {
   @UseFilters(HttpExceptionFilter)
   async atualizarQtdItemPedido(
     @Param() id: string,
-    @Body() dadosPedido: { idProdutoCardapio: string; novaQtd: number },
+    @Body() dadosPedido: AtualizarItemPedidoDto,
   ): Promise<Pedido> {
     return await this.pedidoService.alterarQtdItemDoPedido(
       'idLogado',
