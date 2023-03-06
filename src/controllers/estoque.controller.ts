@@ -16,7 +16,7 @@ import {
 import { Observable } from 'rxjs';
 
 import { EstoqueService } from './../@core/aplicacao/estoque-service.use-case';
-import { ListaEvento } from './../@core/dominio/lista-evento.entity';
+import { Evento } from '../@core/dominio/notificacao.entity';
 import { ProdutoEstoque } from './../@core/dominio/produto-estoque.entity';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
 import { HttpExceptionFilter } from './../exception/exception-filter';
@@ -33,7 +33,7 @@ export class EstoqueController {
   @UseGuards(JwtAuthGuard)
   async carregarEmissorEventos(
     @Request() req,
-  ): Promise<Observable<ListaEvento<ProdutoEstoque>>> {
+  ): Promise<Observable<Evento<ProdutoEstoque>>> {
     return this.estoqueService.abrirConexao(req.user.idUsuarioLogado);
   }
 

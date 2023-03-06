@@ -13,7 +13,7 @@ import { HttpStatus } from '@nestjs/common/enums';
 import { Observable } from 'rxjs';
 
 import { PedidosService } from './../@core/aplicacao/pedidos-service.use-case';
-import { ListaEvento } from './../@core/dominio/lista-evento.entity';
+import { Evento } from '../@core/dominio/notificacao.entity';
 import { PedidoFechado } from './../@core/dominio/pedido-fechado.entity';
 import { Pedido } from './../@core/dominio/pedido.entity';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
@@ -31,7 +31,7 @@ export class PedidoController {
   @UseGuards(JwtAuthGuard)
   async carregarEmissorEventos(
     @Request() req,
-  ): Promise<Observable<ListaEvento<Pedido>>> {
+  ): Promise<Observable<Evento<Pedido>>> {
     return this.pedidoService.abrirConexao(req.user.idUsuarioLogado);
   }
 

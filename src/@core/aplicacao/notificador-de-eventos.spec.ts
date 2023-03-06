@@ -1,7 +1,7 @@
+import { Evento } from './../dominio/notificacao.entity';
 import { Test } from '@nestjs/testing';
 import { Observable, ReplaySubject } from 'rxjs';
 
-import { ListaEvento } from '../dominio/lista-evento.entity';
 import { TipoManipulacaoDado } from './../dominio/enums/tipo-manipulacao-dado.enum';
 import { NotificadorDeEventos } from './notificador-de-eventos';
 
@@ -63,9 +63,9 @@ describe('Notificador de Eventos', () => {
 
   describe('carregarDadosIniciais', () => {
     const idUsuario = 'teste';
-    let subject: ReplaySubject<ListaEvento<tipoTeste>>;
+    let subject: ReplaySubject<Evento<tipoTeste>>;
     beforeEach(() => {
-      subject = new ReplaySubject<ListaEvento<tipoTeste>>();
+      subject = new ReplaySubject<Evento<tipoTeste>>();
       (notificadorDeEventos as any).eventsSubjects.set(idUsuario, subject);
     });
 
@@ -89,7 +89,7 @@ describe('Notificador de Eventos', () => {
       conexao
         .subscribe({
           next(value) {
-            const dadosRecebidos = value.alteracoes.map((n) => n.data);
+            const dadosRecebidos = value.data.map((n) => n.data);
             expect(dadosRecebidos).toEqual(dadosTeste);
             enviosFeito++;
           },
@@ -136,7 +136,7 @@ describe('Notificador de Eventos', () => {
       expect(observable).toBeInstanceOf(Observable);
       observable.subscribe({
         next(value) {
-          const dadosRecebidos = value.alteracoes.map((n) => n.data);
+          const dadosRecebidos = value.data.map((n) => n.data);
           expect(dadosRecebidos).toEqual(dadosTeste);
         },
       });
@@ -145,7 +145,7 @@ describe('Notificador de Eventos', () => {
     it('Abrir uma nova conexão para um usuário sendo utilizado', async () => {
       (notificadorDeEventos as any).eventsSubjects.set(
         idUsuario,
-        new ReplaySubject<ListaEvento<tipoTeste>>(),
+        new ReplaySubject<Evento<tipoTeste>>(),
       );
 
       const observable = await notificadorDeEventos.abrirConexao(idUsuario);
@@ -153,7 +153,7 @@ describe('Notificador de Eventos', () => {
       expect(observable).toBeInstanceOf(Observable);
       observable.subscribe({
         next(value) {
-          const dadosRecebidos = value.alteracoes.map((n) => n.data);
+          const dadosRecebidos = value.data.map((n) => n.data);
           expect(dadosRecebidos).toEqual(dadosTeste);
         },
       });
@@ -162,19 +162,18 @@ describe('Notificador de Eventos', () => {
 
   describe('emitirAlteracaoItem', () => {
     const idTeste = 'teste';
-    let subject: ReplaySubject<ListaEvento<tipoTeste>>;
+    let subject: ReplaySubject<Evento<tipoTeste>>;
     beforeEach(() => {
-      subject = new ReplaySubject<ListaEvento<tipoTeste>>();
+      subject = new ReplaySubject<Evento<tipoTeste>>();
       (notificadorDeEventos as any).eventsSubjects.set(idTeste, subject);
     });
 
     it('Emitir notificação de adição', async () => {
       const dados = { id: 'a', valor: 1 };
 
-      const conexao: Observable<ListaEvento<tipoTeste>> =
-        subject.asObservable();
+      const conexao: Observable<Evento<tipoTeste>> = subject.asObservable();
 
-      const eventosRecebidos = [] as ListaEvento<tipoTeste>[];
+      const eventosRecebidos = [] as Evento<tipoTeste>[];
       let enviosFeito = 0;
 
       const inscricao = conexao.subscribe({
@@ -199,9 +198,9 @@ describe('Notificador de Eventos', () => {
 
       expect(enviosFeito).toEqual(1);
       expect(eventosRecebidos.length).toEqual(1);
-      expect(eventosRecebidos[0].alteracoes[0].id).toEqual(dados.id);
-      expect(eventosRecebidos[0].alteracoes[0].data).toEqual(dados);
-      expect(eventosRecebidos[0].alteracoes[0].acao).toEqual('Adicionado');
+      expect(eventosRecebidos[0].data[0].id).toEqual(dados.id);
+      expect(eventosRecebidos[0].data[0].data).toEqual(dados);
+      expect(eventosRecebidos[0].data[0].acao).toEqual('Adicionado');
 
       inscricao.unsubscribe();
     });
@@ -209,10 +208,9 @@ describe('Notificador de Eventos', () => {
     it('Emitir notificação de atualização', async () => {
       const dados = { id: 'b', valor: 2 };
 
-      const conexao: Observable<ListaEvento<tipoTeste>> =
-        subject.asObservable();
+      const conexao: Observable<Evento<tipoTeste>> = subject.asObservable();
 
-      const eventosRecebidos = [] as ListaEvento<tipoTeste>[];
+      const eventosRecebidos = [] as Evento<tipoTeste>[];
       let enviosFeito = 0;
 
       const inscricao = conexao.subscribe({
@@ -236,18 +234,17 @@ describe('Notificador de Eventos', () => {
       );
       expect(enviosFeito).toEqual(1);
       expect(eventosRecebidos.length).toEqual(1);
-      expect(eventosRecebidos[0].alteracoes[0].id).toEqual(dados.id);
-      expect(eventosRecebidos[0].alteracoes[0].data).toEqual(dados);
-      expect(eventosRecebidos[0].alteracoes[0].acao).toEqual('Alterado');
+      expect(eventosRecebidos[0].data[0].id).toEqual(dados.id);
+      expect(eventosRecebidos[0].data[0].data).toEqual(dados);
+      expect(eventosRecebidos[0].data[0].acao).toEqual('Alterado');
 
       inscricao.unsubscribe();
     });
 
     it('Emitir notificação de remoção', async () => {
-      const conexao: Observable<ListaEvento<tipoTeste>> =
-        subject.asObservable();
+      const conexao: Observable<Evento<tipoTeste>> = subject.asObservable();
 
-      const eventosRecebidos = [] as ListaEvento<tipoTeste>[];
+      const eventosRecebidos = [] as Evento<tipoTeste>[];
       let enviosFeito = 0;
 
       const inscricao = conexao.subscribe({
@@ -271,8 +268,8 @@ describe('Notificador de Eventos', () => {
 
       expect(enviosFeito).toEqual(1);
       expect(eventosRecebidos.length).toEqual(1);
-      expect(eventosRecebidos[0].alteracoes[0].id).toEqual('c');
-      expect(eventosRecebidos[0].alteracoes[0].acao).toEqual('Removido');
+      expect(eventosRecebidos[0].data[0].id).toEqual('c');
+      expect(eventosRecebidos[0].data[0].acao).toEqual('Removido');
 
       inscricao.unsubscribe();
     });
@@ -287,13 +284,12 @@ describe('Notificador de Eventos', () => {
         { id: 'c', valor: 3 },
       ];
 
-      const subject = new ReplaySubject<ListaEvento<tipoTeste>>();
+      const subject = new ReplaySubject<Evento<tipoTeste>>();
       (notificadorDeEventos as any).eventsSubjects.set(idTeste, subject);
 
-      const conexao: Observable<ListaEvento<tipoTeste>> =
-        subject.asObservable();
+      const conexao: Observable<Evento<tipoTeste>> = subject.asObservable();
 
-      const eventosRecebidos: ListaEvento<tipoTeste>[] = [];
+      const eventosRecebidos: Evento<tipoTeste>[] = [];
       let enviosFeito = 0;
 
       const inscricao = conexao.subscribe({
@@ -318,9 +314,9 @@ describe('Notificador de Eventos', () => {
 
       expect(enviosFeito).toEqual(1);
       expect(eventosRecebidos.length).toEqual(1);
-      expect(eventosRecebidos[0].alteracoes.length).toEqual(3);
+      expect(eventosRecebidos[0].data.length).toEqual(3);
 
-      eventosRecebidos[0].alteracoes.forEach((notificacao, index) => {
+      eventosRecebidos[0].data.forEach((notificacao, index) => {
         expect(notificacao.acao).toEqual(TipoManipulacaoDado.Alterado);
         expect(notificacao.id).toEqual(dados[index].id);
         expect(notificacao.data).toEqual(dados[index]);
@@ -333,13 +329,12 @@ describe('Notificador de Eventos', () => {
       const idTeste = 'teste';
       const listaIds = ['a', 'b', 'c'];
 
-      const subject = new ReplaySubject<ListaEvento<tipoTeste>>();
+      const subject = new ReplaySubject<Evento<tipoTeste>>();
       (notificadorDeEventos as any).eventsSubjects.set(idTeste, subject);
 
-      const conexao: Observable<ListaEvento<tipoTeste>> =
-        subject.asObservable();
+      const conexao: Observable<Evento<tipoTeste>> = subject.asObservable();
 
-      const eventosRecebidos: ListaEvento<tipoTeste>[] = [];
+      const eventosRecebidos: Evento<tipoTeste>[] = [];
       let enviosFeito = 0;
 
       const inscricao = conexao.subscribe({
@@ -363,9 +358,9 @@ describe('Notificador de Eventos', () => {
 
       expect(enviosFeito).toEqual(1);
       expect(eventosRecebidos.length).toEqual(1);
-      expect(eventosRecebidos[0].alteracoes.length).toEqual(3);
+      expect(eventosRecebidos[0].data.length).toEqual(3);
 
-      eventosRecebidos[0].alteracoes.forEach((notificacao, index) => {
+      eventosRecebidos[0].data.forEach((notificacao, index) => {
         expect(notificacao.acao).toEqual(TipoManipulacaoDado.Removido);
         expect(notificacao.id).toEqual(listaIds[index]);
         expect(notificacao.data).toBeUndefined();
@@ -377,7 +372,7 @@ describe('Notificador de Eventos', () => {
     it('Erro ao passar dados inconsistentes', async () => {
       const idTeste = 'teste';
 
-      const subject = new ReplaySubject<ListaEvento<tipoTeste>>();
+      const subject = new ReplaySubject<Evento<tipoTeste>>();
       (notificadorDeEventos as any).eventsSubjects.set(idTeste, subject);
 
       expect(() =>

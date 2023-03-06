@@ -15,7 +15,7 @@ import { HttpStatus } from '@nestjs/common/enums';
 import { Observable } from 'rxjs';
 
 import { CardapioService } from './../@core/aplicacao/cardapio-service.use-case';
-import { ListaEvento } from './../@core/dominio/lista-evento.entity';
+import { Evento } from '../@core/dominio/notificacao.entity';
 import { ProdutoCardapio } from './../@core/dominio/produto-cardapio.entity';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
 import { HttpExceptionFilter } from './../exception/exception-filter';
@@ -32,7 +32,7 @@ export class CardapioController {
   @UseGuards(JwtAuthGuard)
   async carregarEmissorEventos(
     @Request() req,
-  ): Promise<Observable<ListaEvento<ProdutoCardapio>>> {
+  ): Promise<Observable<Evento<ProdutoCardapio>>> {
     return this.cardapioService.abrirConexao(req.user.idUsuarioLogado);
   }
 
