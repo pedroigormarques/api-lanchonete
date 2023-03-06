@@ -1,9 +1,17 @@
-import { HttpExceptionFilter } from './../exception/exception-filter';
-import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
-import { Body, Controller, Post, Put, HttpStatus } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpStatus,
+  Post,
+  Put,
+  Request,
+} from '@nestjs/common';
+import { HttpCode, UseFilters, UseGuards } from '@nestjs/common/decorators';
+import { JwtAuthGuard } from 'src/autenticacao/jwt.guard';
 
+import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
+import { HttpExceptionFilter } from './../exception/exception-filter';
 import { CreateUsuarioDto, UpdateUsuarioDto } from './Validation/usuario.dto';
-import { HttpCode, UseFilters } from '@nestjs/common/decorators';
 
 @Controller()
 export class UsuarioController {
@@ -30,10 +38,14 @@ export class UsuarioController {
 
   @Put('/atualizar')
   @UseFilters(HttpExceptionFilter)
-  @HttpCode(HttpStatus.OK)
-  // @UseGuards(JwtAuthGuard)
-  async atualizarUsuario(@Body() dadosUsuario: UpdateUsuarioDto) {
-    //fazer sistema de autenticação
-    return await this.usuarioService.atualizarUsuario('idLogado', dadosUsuario);
+  @UseGuards(JwtAuthGuard)
+  async atualizarUsuario(
+    @Request() req,
+    @Body() dadosUsuario: UpdateUsuarioDto,
+  ) {
+    return await this.usuarioService.atualizarUsuario(
+      req.user.idUsuarioLogado,
+      dadosUsuario,
+    );
   }
 }

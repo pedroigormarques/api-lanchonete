@@ -1,10 +1,3 @@
-import { CardapioService } from './../@core/aplicacao/cardapio-service.use-case';
-import {
-  CreateProdutoCardapioDto,
-  UpdateProdutoCardapioDto,
-} from './Validation/produto-cardapio.dto';
-import { ProdutoCardapio } from './../@core/dominio/produto-cardapio.entity';
-import { ListaEvento } from './../@core/dominio/lista-evento.entity';
 import {
   Body,
   Controller,
@@ -13,65 +6,94 @@ import {
   Param,
   Post,
   Put,
+  Request,
   Sse,
   UseFilters,
 } from '@nestjs/common';
-import { HttpExceptionFilter } from './../exception/exception-filter';
-import { Observable } from 'rxjs';
-import { HttpCode } from '@nestjs/common/decorators';
+import { HttpCode, UseGuards } from '@nestjs/common/decorators';
 import { HttpStatus } from '@nestjs/common/enums';
+import { Observable } from 'rxjs';
+import { JwtAuthGuard } from 'src/autenticacao/jwt.guard';
+
+import { CardapioService } from './../@core/aplicacao/cardapio-service.use-case';
+import { ListaEvento } from './../@core/dominio/lista-evento.entity';
+import { ProdutoCardapio } from './../@core/dominio/produto-cardapio.entity';
+import { HttpExceptionFilter } from './../exception/exception-filter';
+import {
+  CreateProdutoCardapioDto,
+  UpdateProdutoCardapioDto,
+} from './Validation/produto-cardapio.dto';
 
 @Controller('cardapio')
 export class CardapioController {
   constructor(private readonly cardapioService: CardapioService) {}
 
   @Sse('sse')
-  async carregarEmissorEventos(): Promise<
-    Observable<ListaEvento<ProdutoCardapio>>
-  > {
-    return this.cardapioService.abrirConexao('idLogado');
+  @UseGuards(JwtAuthGuard)
+  async carregarEmissorEventos(
+    @Request() req,
+  ): Promise<Observable<ListaEvento<ProdutoCardapio>>> {
+    return this.cardapioService.abrirConexao(req.user.idUsuarioLogado);
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
-  async carregarProdutos(): Promise<Array<ProdutoCardapio>> {
-    return await this.cardapioService.carregarProdutosCardapio('idLogado');
+  async carregarProdutos(@Request() req): Promise<Array<ProdutoCardapio>> {
+    return await this.cardapioService.carregarProdutosCardapio(
+      req.user.idUsuarioLogado,
+    );
   }
 
   @Post()
+  @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
   @HttpCode(HttpStatus.CREATED)
   async adicionarProduto(
+    @Request() req,
     @Body() dadosProduto: CreateProdutoCardapioDto,
   ): Promise<ProdutoCardapio> {
     return await this.cardapioService.cadastrarProdutoCardapio(
-      'idLogado',
+      req.user.idUsuarioLogado,
       dadosProduto,
     );
   }
 
   @Get(':id')
+  @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
-  async carregarProduto(@Param() id: string): Promise<ProdutoCardapio> {
-    return await this.cardapioService.carregarProdutoCardapio('idLogado', id);
+  async carregarProduto(
+    @Request() req,
+    @Param() id: string,
+  ): Promise<ProdutoCardapio> {
+    return await this.cardapioService.carregarProdutoCardapio(
+      req.user.idUsuarioLogado,
+      id,
+    );
   }
 
   @Put(':id')
+  @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
   async atualizarProduto(
+    @Request() req,
     @Param() id: string,
     @Body() dadosProduto: UpdateProdutoCardapioDto,
   ): Promise<ProdutoCardapio> {
     return await this.cardapioService.atualizarProdutoCardapio(
-      'idLogado',
+      req.user.idUsuarioLogado,
       id,
       dadosProduto,
     );
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
-  async removerProduto(@Param() id: string): Promise<void> {
-    return await this.cardapioService.removerProdutoCardapio('idLogado', id);
+  async removerProduto(@Request() req, @Param() id: string): Promise<void> {
+    return await this.cardapioService.removerProdutoCardapio(
+      req.user.idUsuarioLogado,
+      id,
+    );
   }
 }

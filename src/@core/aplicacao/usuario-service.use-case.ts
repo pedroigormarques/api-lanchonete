@@ -1,9 +1,14 @@
 import { UnauthorizedException } from '@nestjs/common';
+
 import { IUsuarioRepository } from '../infra/contratos/usuario.repository.interface';
+import { AutenticacaoService } from './../../autenticacao/autenticacao.service';
 import { DadosBaseUsuario, Usuario } from './../dominio/usuario.entity';
 
 export class UsuarioService {
-  constructor(private usuarioRepositorio: IUsuarioRepository) {}
+  constructor(
+    private usuarioRepositorio: IUsuarioRepository,
+    private autenticacaoService: AutenticacaoService,
+  ) {}
 
   async logar(email: string, senha: string) {
     const usuario = await this.usuarioRepositorio.validarUsuario(email, senha);
@@ -12,8 +17,7 @@ export class UsuarioService {
       throw new UnauthorizedException();
     }
 
-    //criar sistema de token
-    const token = 'tokenTemporário';
+    const { token } = await this.autenticacaoService.login(usuario);
 
     return { token: token, usuario: usuario.gerarUsuarioDeRetorno() };
   }

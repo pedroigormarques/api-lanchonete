@@ -1,22 +1,29 @@
 import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
+import { AutenticacaoModule } from './../../autenticacao/autenticacao.module';
+import { AutenticacaoService } from './../../autenticacao/autenticacao.service';
 import { GeradorDeObjetos } from './../../test/gerador-objetos.faker';
-import { Usuario, DadosBaseUsuario } from './../dominio/usuario.entity';
+import { DadosBaseUsuario, Usuario } from './../dominio/usuario.entity';
 import { UsuarioRepository } from './../infra/db/in-memory/repositorios/usuario.repository';
 import { UsuarioService } from './usuario-service.use-case';
 
 describe('Usuario Service', () => {
+  let autenticacaoService: AutenticacaoService;
   let usuarioService: UsuarioService;
   let usuarioRespositorio: UsuarioRepository;
+
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
+      imports: [AutenticacaoModule],
       providers: [
         {
           provide: UsuarioService,
-          useFactory: (usuarioRepositorio: UsuarioRepository) =>
-            new UsuarioService(usuarioRepositorio),
-          inject: [UsuarioRepository],
+          useFactory: (
+            usuarioRepositorio: UsuarioRepository,
+            autenticacaoService: AutenticacaoService,
+          ) => new UsuarioService(usuarioRepositorio, autenticacaoService),
+          inject: [UsuarioRepository, AutenticacaoService],
         },
         {
           provide: UsuarioRepository,
@@ -27,6 +34,8 @@ describe('Usuario Service', () => {
 
     usuarioRespositorio = moduleRef.get<UsuarioRepository>(UsuarioRepository);
     usuarioService = moduleRef.get<UsuarioService>(UsuarioService);
+    autenticacaoService =
+      moduleRef.get<AutenticacaoService>(AutenticacaoService);
   });
 
   it('instanciado', () => {
@@ -44,13 +53,18 @@ describe('Usuario Service', () => {
         .spyOn(usuarioRespositorio, 'validarUsuario')
         .mockResolvedValue(usuarioAux);
 
+      const tokenTeste = 'tokenDeTeste';
+      jest
+        .spyOn(autenticacaoService, 'login')
+        .mockResolvedValue({ token: tokenTeste });
+
       const usuarioEsperado = { ...usuarioAux };
       delete usuarioEsperado.senha;
 
       const resposta = await usuarioService.logar(emailSimulado, senhaSimulada);
 
       expect(resposta.token).toBeDefined();
-      expect(resposta.token).toEqual('tokenTemporário');
+      expect(resposta.token).toEqual(tokenTeste);
       expect(resposta.usuario).toBeDefined();
       expect(resposta.usuario).toEqual(usuarioEsperado);
     });
