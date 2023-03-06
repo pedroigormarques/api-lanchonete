@@ -7,9 +7,9 @@ import {
   Request,
 } from '@nestjs/common';
 import { HttpCode, UseFilters, UseGuards } from '@nestjs/common/decorators';
-import { JwtAuthGuard } from 'src/autenticacao/jwt.guard';
 
 import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
+import { JwtAuthGuard } from './../autenticacao/jwt.guard';
 import { HttpExceptionFilter } from './../exception/exception-filter';
 import { CreateUsuarioDto, UpdateUsuarioDto } from './Validation/usuario.dto';
 
@@ -24,7 +24,7 @@ export class UsuarioController {
     return await this.usuarioService.registrarUsuario(dadosUsuario);
   }
 
-  @Post('/login')
+  @Post('login')
   @UseFilters(HttpExceptionFilter)
   @HttpCode(HttpStatus.OK)
   async logar(@Body() credenciais: { email: string; senha: string }) {
@@ -36,7 +36,7 @@ export class UsuarioController {
     return dadosUsuario;
   }
 
-  @Put('/atualizar')
+  @Put('atualizar')
   @UseFilters(HttpExceptionFilter)
   @UseGuards(JwtAuthGuard)
   async atualizarUsuario(

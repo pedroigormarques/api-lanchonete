@@ -11,12 +11,12 @@ import {
 import { HttpCode, UseGuards } from '@nestjs/common/decorators';
 import { HttpStatus } from '@nestjs/common/enums';
 import { Observable } from 'rxjs';
-import { JwtAuthGuard } from 'src/autenticacao/jwt.guard';
 
 import { PedidosService } from './../@core/aplicacao/pedidos-service.use-case';
 import { ListaEvento } from './../@core/dominio/lista-evento.entity';
 import { PedidoFechado } from './../@core/dominio/pedido-fechado.entity';
 import { Pedido } from './../@core/dominio/pedido.entity';
+import { JwtAuthGuard } from './../autenticacao/jwt.guard';
 import { HttpExceptionFilter } from './../exception/exception-filter';
 import {
   AtualizarItemPedidoDto,
@@ -59,7 +59,10 @@ export class PedidoController {
   @Get('pedidos/:id')
   @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
-  async carregarPedido(@Request() req, @Param() id: string): Promise<Pedido> {
+  async carregarPedido(
+    @Request() req,
+    @Param('id') id: string,
+  ): Promise<Pedido> {
     return await this.pedidoService.carregarPedido(
       req.user.idUsuarioLogado,
       id,
@@ -71,7 +74,7 @@ export class PedidoController {
   @UseFilters(HttpExceptionFilter)
   async atualizarQtdItemPedido(
     @Request() req,
-    @Param() id: string,
+    @Param('id') id: string,
     @Body() dadosPedido: AtualizarItemPedidoDto,
   ): Promise<Pedido> {
     return await this.pedidoService.alterarQtdItemDoPedido(
@@ -85,7 +88,7 @@ export class PedidoController {
   @Post('pedidos/:id/deletar')
   @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
-  async deletarPedido(@Request() req, @Param() id: string): Promise<void> {
+  async deletarPedido(@Request() req, @Param('id') id: string): Promise<void> {
     return await this.pedidoService.deletarPedido(req.user.idUsuarioLogado, id);
   }
 
@@ -94,7 +97,7 @@ export class PedidoController {
   @UseFilters(HttpExceptionFilter)
   async fecharPedido(
     @Request() req,
-    @Param() id: string,
+    @Param('id') id: string,
   ): Promise<PedidoFechado> {
     return await this.pedidoService.fecharPedido(req.user.idUsuarioLogado, id);
   }

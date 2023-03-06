@@ -65,7 +65,7 @@ export class EstoqueController {
   @UseFilters(HttpExceptionFilter)
   async carregarProduto(
     @Request() req,
-    @Param() id: string,
+    @Param('id') id: string,
   ): Promise<ProdutoEstoque> {
     return await this.estoqueService.carregarProdutoEstoque(
       req.user.idUsuarioLogado,
@@ -78,7 +78,7 @@ export class EstoqueController {
   @UseFilters(HttpExceptionFilter)
   async atualizarProduto(
     @Request() req,
-    @Param() id: string,
+    @Param('id') id: string,
     @Body() dadosProduto: UpdateProdutoEstoqueDto,
   ): Promise<ProdutoEstoque> {
     return await this.estoqueService.atualizarProdutoEstoque(
@@ -91,7 +91,7 @@ export class EstoqueController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
-  async removerProduto(@Request() req, @Param() id: string): Promise<void> {
+  async removerProduto(@Request() req, @Param('id') id: string): Promise<void> {
     return await this.estoqueService.removerProdutoEstoque(
       req.user.idUsuarioLogado,
       id,

@@ -13,11 +13,11 @@ import {
 import { HttpCode, UseGuards } from '@nestjs/common/decorators';
 import { HttpStatus } from '@nestjs/common/enums';
 import { Observable } from 'rxjs';
-import { JwtAuthGuard } from 'src/autenticacao/jwt.guard';
 
 import { CardapioService } from './../@core/aplicacao/cardapio-service.use-case';
 import { ListaEvento } from './../@core/dominio/lista-evento.entity';
 import { ProdutoCardapio } from './../@core/dominio/produto-cardapio.entity';
+import { JwtAuthGuard } from './../autenticacao/jwt.guard';
 import { HttpExceptionFilter } from './../exception/exception-filter';
 import {
   CreateProdutoCardapioDto,
@@ -64,7 +64,7 @@ export class CardapioController {
   @UseFilters(HttpExceptionFilter)
   async carregarProduto(
     @Request() req,
-    @Param() id: string,
+    @Param('id') id: string,
   ): Promise<ProdutoCardapio> {
     return await this.cardapioService.carregarProdutoCardapio(
       req.user.idUsuarioLogado,
@@ -77,7 +77,7 @@ export class CardapioController {
   @UseFilters(HttpExceptionFilter)
   async atualizarProduto(
     @Request() req,
-    @Param() id: string,
+    @Param('id') id: string,
     @Body() dadosProduto: UpdateProdutoCardapioDto,
   ): Promise<ProdutoCardapio> {
     return await this.cardapioService.atualizarProdutoCardapio(
@@ -90,7 +90,7 @@ export class CardapioController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @UseFilters(HttpExceptionFilter)
-  async removerProduto(@Request() req, @Param() id: string): Promise<void> {
+  async removerProduto(@Request() req, @Param('id') id: string): Promise<void> {
     return await this.cardapioService.removerProdutoCardapio(
       req.user.idUsuarioLogado,
       id,
