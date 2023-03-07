@@ -1,6 +1,7 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
 import { ProdutoEstoqueDB } from '../modelos/produto-estoque.db-entity';
+import { ForbiddenException } from './../../../../custom-exception/forbidden-exception.error';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
 import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from './../../../contratos/produtos-estoque.repository.interface';
 
@@ -24,7 +25,9 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
       listaIds.forEach((idProduto) => {
         const produto = this.produtos.get(idProduto);
         if (!produto) {
-          throw this.erroProdutoNaoEncontrado(idProduto);
+          throw new Error(
+            `Produto de id ${idProduto} presente na lista passada não foi encontrado no estoque`,
+          );
         }
         if (produto.idUsuario === idUsuario) {
           listaProdutos.push(new ProdutoEstoque(produto));
@@ -70,7 +73,9 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     produtosEstoque.forEach((pe) => {
       const produtoAtualizado = this.produtos.get(pe.id);
       if (!produtoAtualizado) {
-        throw this.erroProdutoNaoEncontrado(pe.id);
+        throw new Error(
+          `Produto de id ${pe.id} presente na lista de produtos não foi encontrado no estoque`,
+        );
       }
       pe.verificarSeDadosSaoValidosOuErro();
     });
@@ -89,7 +94,7 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     }
 
     if (produto.usadoPor.size > 0) {
-      throw new Error(
+      throw new UnprocessableEntityException(
         `Produto de id ${id} está sendo utilizado por algum produto do cardápio. Remoção cancelada`,
       );
     }
@@ -128,7 +133,9 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
-        throw this.erroProdutoNaoEncontrado(idProduto);
+        throw new Error(
+          `Produto de id ${idProduto} presente no produto do cardapio não encontrado no estoque`,
+        );
       }
       if (produto.idUsuario !== idUsuarioProdutoCardapio) {
         throw new ForbiddenException();
@@ -137,6 +144,8 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
   }
 
   private erroProdutoNaoEncontrado(id: string) {
-    return new Error(`produto de id ${id} não encontrado`);
+    return new NotFoundException(
+      `Produto de id ${id} não encontrado no estoque`,
+    );
   }
 }

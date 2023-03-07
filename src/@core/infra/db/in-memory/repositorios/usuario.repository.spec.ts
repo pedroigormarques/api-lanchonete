@@ -4,6 +4,9 @@ import { GeradorDeObjetos } from '../../../../../test/gerador-objetos.faker';
 import { Usuario } from './../../../../dominio/usuario.entity';
 import { UsuarioDB } from './../modelos/usuario.db-entity';
 import { UsuarioRepository } from './usuario.repository';
+import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
 
 describe('Usuario Repositorio', () => {
   let usuarioRepositorio: UsuarioRepository;
@@ -55,12 +58,13 @@ describe('Usuario Repositorio', () => {
       expect(resposta.senha).toEqual(usuarioTeste.senha);
       expect(resposta.id).toBeDefined();
     });
+
     it('Erro ao passar dados insuficientes', async () => {
       const usuario = new Usuario();
 
       await expect(
         usuarioRepositorio.registrarUsuario(usuario),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
     });
 
     it('Erro ao passar um email já cadastrado', async () => {
@@ -69,7 +73,7 @@ describe('Usuario Repositorio', () => {
 
       await expect(
         usuarioRepositorio.registrarUsuario(usuario),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
     });
   });
 
@@ -87,13 +91,13 @@ describe('Usuario Repositorio', () => {
       expect(resposta).toEqual(usuarioComDadosNovos);
     });
 
-    it('Erro ao passar dados inválidos inválido', async () => {
+    it('Erro ao passar dados inválidos', async () => {
       const usuario = new Usuario();
       usuario.id = usuario1.id;
 
       await expect(
         usuarioRepositorio.atualizarUsuario(usuario.id, usuario),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect((usuarioRepositorio as any).usuarios.get(usuario1.id)).toEqual(
         usuario1,
@@ -103,7 +107,7 @@ describe('Usuario Repositorio', () => {
     it('Erro ao passar id de usuario inválido', async () => {
       await expect(
         usuarioRepositorio.atualizarUsuario('a', usuario1),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(NotFoundException);
     });
 
     it('Erro ao tentar atualizar com outro email em uso', async () => {
@@ -113,7 +117,7 @@ describe('Usuario Repositorio', () => {
 
       await expect(
         usuarioRepositorio.atualizarUsuario(usuario2.id, usuario2),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
 
       expect((usuarioRepositorio as any).usuarios.get(usuario2.id)).toEqual(
         esperado,
@@ -131,7 +135,7 @@ describe('Usuario Repositorio', () => {
     it('Erro ao passar id de usuario inválido', async () => {
       await expect(
         usuarioRepositorio.carregarUsuario('a'),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(NotFoundException);
     });
   });
 });

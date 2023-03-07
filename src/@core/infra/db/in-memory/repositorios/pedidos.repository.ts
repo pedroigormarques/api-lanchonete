@@ -1,3 +1,4 @@
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
 import { Pedido } from './../../../../dominio/pedido.entity';
 import { IPedidosRepository } from './../../../contratos/pedidos.repository.interface';
 import { PedidoDB } from './../modelos/pedido.db-entity';
@@ -88,6 +89,6 @@ export class PedidosRepository implements IPedidosRepository {
   }
 
   private erroProdutoNaoEncontrado(id: string) {
-    return new Error(`Pedido de id ${id} não encontrado`);
+    return new NotFoundException(`Pedido de id ${id} não encontrado`);
   }
 }

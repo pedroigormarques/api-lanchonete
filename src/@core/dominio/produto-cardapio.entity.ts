@@ -1,3 +1,4 @@
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
 import { possuiUmValorValidoParaOEnum } from '../helper/manipular-enum.function';
 import { CATEGORIAS } from './enums/categorias.enum';
 
@@ -51,20 +52,24 @@ export class ProdutoCardapio {
   setPreco(preco: number) {
     if (preco > 0) this.preco = preco;
     else {
-      throw new Error('Preco invalido. Coloque um valor maior que zero');
+      throw new BadRequestException(
+        'Preco invalido. Coloque um valor maior que zero',
+      );
     }
   }
 
   setCategoria(categoria: CATEGORIAS) {
     if (possuiUmValorValidoParaOEnum(categoria, CATEGORIAS))
       this.categoria = categoria;
-    else throw new Error('Categoria informada não registrada');
+    else throw new BadRequestException('Categoria informada não registrada');
   }
 
   setComposicao(composicao: Map<string, number>) {
     if (composicao.size > 0) this.composicao = new Map(composicao.entries());
     else {
-      throw new Error('Composicao invalida. Coloque ao menos um produto');
+      throw new BadRequestException(
+        'Composicao invalida. Coloque ao menos um produto do estoque',
+      );
     }
   }
 
@@ -104,6 +109,8 @@ export class ProdutoCardapio {
     dadosProduto: DadosBaseProdutoCardapio,
   ) {
     if (!ProdutoCardapio.possuiTodosOsDadosValidos(dadosProduto))
-      throw new Error('Dados incorretos/insuficientes');
+      throw new BadRequestException(
+        'Dados incorretos/insuficientes para o produto do cardapio',
+      );
   }
 }

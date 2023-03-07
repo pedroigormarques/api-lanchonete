@@ -1,3 +1,4 @@
+import { BadRequestException } from '../custom-exception/bad-request-exception.error';
 import { possuiUmValorValidoParaOEnum } from '../helper/manipular-enum.function';
 import { UNIDADES } from './enums/unidades.enum';
 
@@ -47,15 +48,15 @@ export class ProdutoEstoque {
   setQuantidade(qtd: number) {
     if (qtd >= 0) this.quantidade = qtd;
     else {
-      throw new Error(
-        'Quantidade invalida. Coloque um valor maior ou igual a zero',
+      throw new BadRequestException(
+        'Quantidade invalida para o produto estocado. Coloque um valor maior ou igual a zero.',
       );
     }
   }
 
   setUnidade(unidade: UNIDADES) {
     if (possuiUmValorValidoParaOEnum(unidade, UNIDADES)) this.unidade = unidade;
-    else throw new Error('Unidade informada não registrada');
+    else throw new BadRequestException('Unidade informada não registrada');
   }
 
   protected registrarDados(
@@ -89,6 +90,8 @@ export class ProdutoEstoque {
     dadosProduto: DadosBaseProdutoEstoque,
   ) {
     if (!ProdutoEstoque.possuiTodosOsDadosValidos(dadosProduto))
-      throw new Error('Dados incorretos/insuficientes');
+      throw new BadRequestException(
+        'Dados incorretos/insuficientes para o produto do estoque',
+      );
   }
 }

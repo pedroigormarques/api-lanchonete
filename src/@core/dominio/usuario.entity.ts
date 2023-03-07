@@ -1,3 +1,5 @@
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
+
 export interface DadosBaseUsuario {
   email: string;
   senha: string;
@@ -82,6 +84,8 @@ export class Usuario {
 
   private static DadosSaoValidosParaRegistroOuErro(dados: DadosBaseUsuario) {
     if (!Usuario.possuiTodosOsDadosValidos(dados))
-      throw new Error('Dados incorretos/insuficientes');
+      throw new BadRequestException(
+        'Dados incorretos/insuficientes para o usuário',
+      );
   }
 }

@@ -1,3 +1,4 @@
+import { UnprocessableEntityException } from '../custom-exception/unprocessable-entity-exception.error';
 import { VerificadorDeAutorizacao } from './verificador-autorizacao';
 
 import { TipoManipulacaoDado } from '../dominio/enums/tipo-manipulacao-dado.enum';
@@ -153,7 +154,7 @@ export class EstoqueService extends NotificadorDeEventos<ProdutoEstoque> {
 
       pe.quantidade -= gastosProdutosEstoque.get(pe.id);
       if (pe.quantidade < 0) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           `Quantidade insuficiente do produto ${pe.nomeProduto} no estoque`,
         );
       }

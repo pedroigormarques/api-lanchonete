@@ -1,3 +1,8 @@
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
+import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
+import { ForbiddenException } from './../../../../custom-exception/forbidden-exception.error';
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
+
 import { Test } from '@nestjs/testing';
 
 import { GeradorDeObjetos } from '../../../../../test/gerador-objetos.faker';
@@ -52,7 +57,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.cadastrarProduto(produto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
     });
 
     it('Erro ao passar quantidade menor que 0 com dados válidos', async () => {
@@ -61,7 +66,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.cadastrarProduto(produto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
     });
   });
 
@@ -125,7 +130,7 @@ describe('Produto Estoque Repositorio', () => {
     it('Erro ao não encontrar produto com o id passado', async () => {
       await expect(
         estoqueRepositorio.carregarProduto('a'),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(NotFoundException);
     });
   });
 
@@ -157,7 +162,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.atualizarProduto(produtoAux.id, produtoAux),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(NotFoundException);
 
       expect(
         new ProdutoEstoque(
@@ -173,7 +178,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.atualizarProduto(produto.id, produto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect(
         (estoqueRepositorio as any).produtos.get(produto1.id).quantidade,
@@ -254,7 +259,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.atualizarProdutos([produtoAux]),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect(
         new ProdutoEstoque(
@@ -274,9 +279,9 @@ describe('Produto Estoque Repositorio', () => {
     });
 
     it('Erro ao não encontrar produto com o id passado', async () => {
-      await expect(
-        estoqueRepositorio.removerProduto('a'),
-      ).rejects.toThrowError();
+      await expect(estoqueRepositorio.removerProduto('a')).rejects.toThrowError(
+        NotFoundException,
+      );
     });
 
     it('Erro ao tentar remover produto sendo utilizado', async () => {
@@ -284,7 +289,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.removerProduto(produto1.id),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
     });
   });
 
@@ -340,7 +345,7 @@ describe('Produto Estoque Repositorio', () => {
         estoqueRepositorio.marcarRelacoes(idTeste, idUsuarioTeste, [
           produto1.id,
         ]),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ForbiddenException);
 
       expect(produto1Banco.usadoPor.size).toEqual(0);
       expect(produto1Banco.usadoPor.has(idTeste)).toBeFalsy();

@@ -1,5 +1,6 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
+import { ForbiddenException } from './../../../../custom-exception/forbidden-exception.error';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
 import { ProdutoCardapio } from './../../../../dominio/produto-cardapio.entity';
 import { IProdutosCardapioRepository } from './../../../contratos/produtos-cardapio.repository.interface';
 import { ProdutoCardapioDB } from './../modelos/produto-cardapio.db-entity';
@@ -35,7 +36,9 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       listaIds.forEach((idProduto) => {
         const produto = this.produtos.get(idProduto);
         if (!produto) {
-          throw this.erroProdutoNaoEncontrado(idProduto);
+          throw new Error(
+            `Produto de id ${idProduto} presente na lista passada não foi encontrado no cardapio`,
+          );
         }
         if (produto.idUsuario === idUsuario) {
           listaProdutos.push(new ProdutoCardapio(produto));
@@ -146,7 +149,9 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
-        throw this.erroProdutoNaoEncontrado(idProduto);
+        throw new Error(
+          `Produto de id ${idProduto} presente no pedido não encontrado no cardapio`,
+        );
       }
       if (produto.idUsuario !== idUsuarioPedido) {
         throw new ForbiddenException();
@@ -155,12 +160,14 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
   }
 
   private erroProdutoNaoEncontrado(id: string) {
-    return new Error(`produto de id ${id} não encontrado`);
+    return new NotFoundException(
+      `Produto de id ${id} não encontrado no cardapio`,
+    );
   }
 
   private erroProdutoSendoUtilizado(id: string) {
-    return new Error(
-      `produto de id ${id} está sendo utilizado em algum pedido aberto`,
+    return new UnprocessableEntityException(
+      `Produto de id ${id} está sendo utilizado em algum pedido aberto`,
     );
   }
 }

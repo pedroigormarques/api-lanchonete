@@ -1,6 +1,8 @@
-import { UnauthorizedException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
+import { UnauthorizedException } from './../custom-exception/unauthorized-exception.error';
+import { ErroDetalhado } from './../custom-exception/exception-detalhado.error';
 import { AutenticacaoModule } from './../../autenticacao/autenticacao.module';
 import { AutenticacaoService } from './../../autenticacao/autenticacao.service';
 import { GeradorDeObjetos } from './../../test/gerador-objetos.faker';
@@ -110,7 +112,7 @@ describe('Usuario Service', () => {
 
       await expect(
         usuarioService.registrarUsuario({} as DadosBaseUsuario),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect(usuarioRespositorio.registrarUsuario).toBeCalledTimes(0);
     });
@@ -121,7 +123,7 @@ describe('Usuario Service', () => {
       jest
         .spyOn(usuarioRespositorio, 'registrarUsuario')
         .mockImplementation(() => {
-          throw new Error('Email já sendo utilizado');
+          throw new ErroDetalhado('', 0, 'Email já sendo utilizado');
         });
 
       const dadosCriacao = {} as DadosBaseUsuario;
@@ -132,7 +134,7 @@ describe('Usuario Service', () => {
 
       await expect(
         usuarioService.registrarUsuario(dadosCriacao),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
       expect(usuarioRespositorio.registrarUsuario).toBeCalledTimes(1);
     });
   });
@@ -169,7 +171,7 @@ describe('Usuario Service', () => {
       jest
         .spyOn(usuarioRespositorio, 'carregarUsuario')
         .mockImplementation(() => {
-          throw new Error('Id nao encontrado');
+          throw new ErroDetalhado('', 0, 'Id nao encontrado');
         });
       jest
         .spyOn(usuarioRespositorio, 'atualizarUsuario')
@@ -179,7 +181,7 @@ describe('Usuario Service', () => {
 
       await expect(
         usuarioService.atualizarUsuario('a', dadosAtualizacao),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(usuarioRespositorio.carregarUsuario).toBeCalledTimes(1);
       expect(usuarioRespositorio.atualizarUsuario).toBeCalledTimes(0);
@@ -196,7 +198,7 @@ describe('Usuario Service', () => {
       jest
         .spyOn(usuarioRespositorio, 'atualizarUsuario')
         .mockImplementation(() => {
-          throw new Error('Email já sendo utilizado');
+          throw new ErroDetalhado('', 0, 'Email já sendo utilizado');
         });
 
       const dadosAtualizacao = {} as Partial<DadosBaseUsuario>;
@@ -204,7 +206,7 @@ describe('Usuario Service', () => {
 
       await expect(
         usuarioService.atualizarUsuario(usuarioAux.id, dadosAtualizacao),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
       expect(usuarioRespositorio.carregarUsuario).toBeCalledTimes(1);
       expect(usuarioRespositorio.atualizarUsuario).toBeCalledTimes(1);
     });

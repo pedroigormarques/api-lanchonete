@@ -1,5 +1,7 @@
 import { Usuario } from '../../../../dominio/usuario.entity';
 import { IUsuarioRepository } from '../../../contratos/usuario.repository.interface';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
 import { UsuarioDB } from './../modelos/usuario.db-entity';
 
 export class UsuarioRepository implements IUsuarioRepository {
@@ -31,7 +33,7 @@ export class UsuarioRepository implements IUsuarioRepository {
     const usuarioAtualizado = this.usuarios.get(id);
 
     if (!usuarioAtualizado) {
-      throw new Error('usuário não encontrado');
+      throw new NotFoundException('Usuário não encontrado');
     }
 
     usuario.verificarSeDadosSaoValidosOuErro();
@@ -47,7 +49,7 @@ export class UsuarioRepository implements IUsuarioRepository {
   async carregarUsuario(id: string): Promise<Usuario> {
     const usuario = this.usuarios.get(id);
     if (!usuario) {
-      throw new Error('usuário não encontrado');
+      throw new NotFoundException('Usuário não encontrado');
     }
     return new Usuario(usuario);
   }
@@ -55,7 +57,9 @@ export class UsuarioRepository implements IUsuarioRepository {
   private validarEmail(email: string) {
     this.usuarios.forEach((usuarioDB) => {
       if (usuarioDB.email === email) {
-        throw new Error('Email já cadastrado no sistema');
+        throw new UnprocessableEntityException(
+          'Email já cadastrado no sistema',
+        );
       }
     });
   }

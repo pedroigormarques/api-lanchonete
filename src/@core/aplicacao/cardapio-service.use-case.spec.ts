@@ -1,10 +1,16 @@
-import { ForbiddenException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
+import { ForbiddenException } from './../custom-exception/forbidden-exception.error';
+import { ErroDetalhado } from './../custom-exception/exception-detalhado.error';
 import { IProdutosCardapioRepository } from '../infra/contratos/produtos-cardapio.repository.interface';
 import { ProdutosCardapioRepository } from '../infra/db/in-memory/repositorios/produtos-cardapio.repository';
+import { NotFoundException } from './../custom-exception/not-found-exception.error';
 import { GeradorDeObjetos } from './../../test/gerador-objetos.faker';
-import { DadosBaseProdutoCardapio, ProdutoCardapio } from './../dominio/produto-cardapio.entity';
+import {
+  DadosBaseProdutoCardapio,
+  ProdutoCardapio,
+} from './../dominio/produto-cardapio.entity';
 import { CardapioService } from './cardapio-service.use-case';
 
 describe('Cardapio Service', () => {
@@ -89,7 +95,7 @@ describe('Cardapio Service', () => {
           'idteste',
           {} as DadosBaseProdutoCardapio,
         ),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect(cardapioRepositorio.cadastrarProduto).toBeCalledTimes(0);
       expect(cardapioService.emitirAlteracaoItem).toBeCalledTimes(0);
@@ -184,7 +190,7 @@ describe('Cardapio Service', () => {
           'a',
           {} as DadosBaseProdutoCardapio,
         ),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(cardapioRepositorio.carregarProduto).toBeCalledTimes(1);
       expect(cardapioRepositorio.atualizarProduto).toBeCalledTimes(0);
@@ -231,7 +237,7 @@ describe('Cardapio Service', () => {
 
       jest
         .spyOn(cardapioRepositorio, 'atualizarProduto')
-        .mockRejectedValue(new Error('erro'));
+        .mockRejectedValue(erroIdNaoEncontrado());
 
       jest.spyOn(cardapioService, 'emitirAlteracaoItem').mockReturnValue(null);
 
@@ -241,7 +247,7 @@ describe('Cardapio Service', () => {
           produtoBanco.id,
           {} as DadosBaseProdutoCardapio,
         ),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(cardapioRepositorio.carregarProduto).toBeCalledTimes(1);
       expect(cardapioRepositorio.atualizarProduto).toBeCalledTimes(1);
@@ -278,7 +284,7 @@ describe('Cardapio Service', () => {
 
       await expect(
         cardapioService.carregarProdutoCardapio('idteste', 'a'),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(cardapioRepositorio.carregarProduto).toBeCalledTimes(1);
     });
@@ -293,7 +299,7 @@ describe('Cardapio Service', () => {
 
       await expect(
         cardapioService.carregarProdutoCardapio(idUsuario, produtoBanco.id),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ForbiddenException);
 
       expect(cardapioRepositorio.carregarProduto).toBeCalledTimes(1);
     });
@@ -398,7 +404,7 @@ describe('Cardapio Service', () => {
 
       await expect(
         cardapioService.carregarProdutosCardapio('idteste', ['a']),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(cardapioRepositorio.carregarProdutos).toBeCalledTimes(1);
     });
@@ -445,7 +451,7 @@ describe('Cardapio Service', () => {
 
       await expect(
         cardapioService.removerProdutoCardapio(idUsuario, produtoBanco.id),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(cardapioRepositorio.carregarProduto).toBeCalledTimes(1);
       expect(cardapioRepositorio.removerProduto).toBeCalledTimes(1);
@@ -476,5 +482,5 @@ describe('Cardapio Service', () => {
 });
 
 function erroIdNaoEncontrado() {
-  return new Error('Produto com o id passado não foi encontrado');
+  return new NotFoundException('Produto com o id passado não foi encontrado');
 }

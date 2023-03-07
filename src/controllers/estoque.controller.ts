@@ -19,7 +19,7 @@ import { EstoqueService } from './../@core/aplicacao/estoque-service.use-case';
 import { Evento } from '../@core/dominio/notificacao.entity';
 import { ProdutoEstoque } from './../@core/dominio/produto-estoque.entity';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
-import { HttpExceptionFilter } from './../exception/exception-filter';
+import { ErroDetalhadoEHttpExceptionFilter } from './../exception/exception-filter';
 import {
   CreateProdutoEstoqueDto,
   UpdateProdutoEstoqueDto,
@@ -39,7 +39,7 @@ export class EstoqueController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async carregarProdutos(@Request() req): Promise<Array<ProdutoEstoque>> {
     return await this.estoqueService.carregarProdutosEstoque(
       req.user.idUsuarioLogado,
@@ -48,7 +48,7 @@ export class EstoqueController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   @HttpCode(HttpStatus.CREATED)
   async adicionarProduto(
     @Request() req,
@@ -62,7 +62,7 @@ export class EstoqueController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async carregarProduto(
     @Request() req,
     @Param('id') id: string,
@@ -75,7 +75,7 @@ export class EstoqueController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async atualizarProduto(
     @Request() req,
     @Param('id') id: string,
@@ -90,7 +90,7 @@ export class EstoqueController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async removerProduto(@Request() req, @Param('id') id: string): Promise<void> {
     return await this.estoqueService.removerProdutoEstoque(
       req.user.idUsuarioLogado,

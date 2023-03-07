@@ -7,9 +7,10 @@ import {
   Request,
   Sse,
   UseFilters,
+  HttpCode,
+  UseGuards,
+  HttpStatus,
 } from '@nestjs/common';
-import { HttpCode, UseGuards } from '@nestjs/common/decorators';
-import { HttpStatus } from '@nestjs/common/enums';
 import { Observable } from 'rxjs';
 
 import { PedidosService } from './../@core/aplicacao/pedidos-service.use-case';
@@ -17,7 +18,7 @@ import { Evento } from '../@core/dominio/notificacao.entity';
 import { PedidoFechado } from './../@core/dominio/pedido-fechado.entity';
 import { Pedido } from './../@core/dominio/pedido.entity';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
-import { HttpExceptionFilter } from './../exception/exception-filter';
+import { ErroDetalhadoEHttpExceptionFilter } from './../exception/exception-filter';
 import {
   AtualizarItemPedidoDto,
   CreatePedidoDto,
@@ -37,14 +38,14 @@ export class PedidoController {
 
   @Get('pedidos')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async carregarPedidos(@Request() req): Promise<Array<Pedido>> {
     return await this.pedidoService.carregarPedidos(req.user.idUsuarioLogado);
   }
 
   @Post('pedidos')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   @HttpCode(HttpStatus.CREATED)
   async adicionarPedido(
     @Request() req,
@@ -58,7 +59,7 @@ export class PedidoController {
 
   @Get('pedidos/:id')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async carregarPedido(
     @Request() req,
     @Param('id') id: string,
@@ -71,7 +72,7 @@ export class PedidoController {
 
   @Post('pedidos/:id')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async atualizarQtdItemPedido(
     @Request() req,
     @Param('id') id: string,
@@ -87,14 +88,14 @@ export class PedidoController {
 
   @Post('pedidos/:id/deletar')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async deletarPedido(@Request() req, @Param('id') id: string): Promise<void> {
     return await this.pedidoService.deletarPedido(req.user.idUsuarioLogado, id);
   }
 
   @Post('pedidos/:id/fechar')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async fecharPedido(
     @Request() req,
     @Param('id') id: string,
@@ -104,7 +105,7 @@ export class PedidoController {
 
   @Get('pedidosFechados')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async carregarPedidosFechados(@Request() req): Promise<Array<PedidoFechado>> {
     return await this.pedidoService.carregarPedidosFechados(
       req.user.idUsuarioLogado,

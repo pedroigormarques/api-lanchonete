@@ -5,27 +5,29 @@ import {
   Post,
   Put,
   Request,
+  HttpCode,
+  UseFilters,
+  UseGuards,
 } from '@nestjs/common';
-import { HttpCode, UseFilters, UseGuards } from '@nestjs/common/decorators';
 
 import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
-import { HttpExceptionFilter } from './../exception/exception-filter';
+import { ErroDetalhadoEHttpExceptionFilter } from './../exception/exception-filter';
 import { CreateUsuarioDto, UpdateUsuarioDto } from './Validation/usuario.dto';
 
-@Controller()
+@Controller('usuario')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
 
-  @Post('/registrar')
-  @UseFilters(HttpExceptionFilter)
+  @Post('registrar')
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   @HttpCode(HttpStatus.CREATED)
   async registrarUsuario(@Body() dadosUsuario: CreateUsuarioDto) {
     return await this.usuarioService.registrarUsuario(dadosUsuario);
   }
 
   @Post('login')
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   @HttpCode(HttpStatus.OK)
   async logar(@Body() credenciais: { email: string; senha: string }) {
     const dadosUsuario = await this.usuarioService.logar(
@@ -37,7 +39,7 @@ export class UsuarioController {
   }
 
   @Put('atualizar')
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   @UseGuards(JwtAuthGuard)
   async atualizarUsuario(
     @Request() req,

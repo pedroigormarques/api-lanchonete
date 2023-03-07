@@ -1,5 +1,6 @@
 import { VerificadorDeAutorizacao } from './verificador-autorizacao';
-
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
+import { UnprocessableEntityException } from '../custom-exception/unprocessable-entity-exception.error';
 import { PedidoFechado } from '../dominio/pedido-fechado.entity';
 import { DadosBasePedido, Pedido } from '../dominio/pedido.entity';
 import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
@@ -77,7 +78,7 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     novaQuantidade: number,
   ): Promise<Pedido> {
     if (novaQuantidade < 0) {
-      throw new Error(
+      throw new BadRequestException(
         'Quantidade invalida. Coloque um valor maior ou igual a zero',
       );
     }
@@ -90,8 +91,8 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
 
     if (novaQuantidade === 0 && !produtoNoPedido) {
       // caso em que não tiver o produto no pedido e ainda sim quiser remover
-      throw new Error(
-        'Produto não está presente neste pedido para executar uma remoção.',
+      throw new UnprocessableEntityException(
+        `Produto de id ${idProdutoCardapio} não está presente neste pedido para executar uma remoção.`,
       );
     }
 

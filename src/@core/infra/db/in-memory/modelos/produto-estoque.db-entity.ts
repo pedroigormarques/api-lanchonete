@@ -1,6 +1,7 @@
 import { randomUUID } from 'crypto';
 
 import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
 
 export class ProdutoEstoqueDB extends ProdutoEstoque {
   usadoPor = new Set<string>();
@@ -17,8 +18,8 @@ export class ProdutoEstoqueDB extends ProdutoEstoque {
     if (this.unidade === produto.unidade || this.usadoPor.size === 0) {
       super.atualizarDados(produto);
     } else {
-      throw new Error(
-        `Produto de id ${this.id} está sendo utilizado por algum produto do cardápio. Atualização cancelada`,
+      throw new UnprocessableEntityException(
+        `Produto do estoque de id ${this.id} está sendo utilizado por algum produto do cardápio. Atualização cancelada`,
       );
     }
   }

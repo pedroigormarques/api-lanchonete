@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { UnauthorizedException } from './../custom-exception/unauthorized-exception.error';
 
 import { IUsuarioRepository } from '../infra/contratos/usuario.repository.interface';
 import { AutenticacaoService } from './../../autenticacao/autenticacao.service';

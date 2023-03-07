@@ -1,4 +1,6 @@
 import { Test } from '@nestjs/testing';
+import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
 
 import { GeradorDeObjetos } from './../../../../../test/gerador-objetos.faker';
 import { Pedido } from './../../../../dominio/pedido.entity';
@@ -67,7 +69,7 @@ describe('Pedidos Repositorio', () => {
       const pedido = new Pedido();
       await expect(
         pedidosRespository.cadastrarPedido(pedido),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect((pedidosRespository as any).pedidos.size).toEqual(1); //1 do criado para auxilio dos teste
     });
@@ -78,28 +80,28 @@ describe('Pedidos Repositorio', () => {
 
       await expect(
         pedidosRespository.cadastrarPedido(pedido),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect((pedidosRespository as any).pedidos.size).toEqual(1); //1 do criado para auxilio dos teste
     });
   });
 
   describe('Carregar Pedido', () => {
-    it('Retorno de produto ao inserir id válido', async () => {
+    it('Retorno de pedido ao inserir id válido', async () => {
       const resposta = await pedidosRespository.carregarPedido(pedido1.id);
 
       expect(resposta).toEqual(pedido1);
     });
 
-    it('Erro ao não encontrar produto com o id passado', async () => {
-      await expect(
-        pedidosRespository.carregarPedido('a'),
-      ).rejects.toThrowError();
+    it('Erro ao não encontrar pedido com o id passado', async () => {
+      await expect(pedidosRespository.carregarPedido('a')).rejects.toThrowError(
+        NotFoundException,
+      );
     });
   });
 
   describe('Carregar Pedidos', () => {
-    it('Retorno de produtos', async () => {
+    it('Retorno de pedidos', async () => {
       const idUsuario = 'idTeste';
       const { pedidoRegistrado: pedidoRegistrado1 } = registrarPedidoDeTeste(
         pedidosRespository,
@@ -121,7 +123,7 @@ describe('Pedidos Repositorio', () => {
   });
 
   describe('Atualizar Pedido', () => {
-    it('Retorno de produto atualizado ao inserir dados válido', async () => {
+    it('Retorno de pedido atualizado ao inserir dados válido', async () => {
       const pedido = GeradorDeObjetos.criarPedido();
       pedido.id = pedido1.id;
       pedido.idUsuario = pedido1.idUsuario;
@@ -144,13 +146,13 @@ describe('Pedidos Repositorio', () => {
       expect(resposta).toEqual(pedido);
     });
 
-    it('Erro ao não encontrar produto a ser atualizado com o id passado', async () => {
+    it('Erro ao não encontrar pedido a ser atualizado com o id passado', async () => {
       await expect(
         pedidosRespository.atualizarPedido('a', pedido1),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(NotFoundException);
     });
 
-    it('Erro ao passar produto com dados basicos inválidos', async () => {
+    it('Erro ao passar pedido com dados basicos inválidos', async () => {
       jest
         .spyOn(cardapioRespository, 'validarListaIds')
         .mockResolvedValue(null);
@@ -168,13 +170,13 @@ describe('Pedidos Repositorio', () => {
 
       await expect(
         pedidosRespository.atualizarPedido(pedido.id, pedido),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect(cardapioRespository.removerRelacoes).toBeCalledTimes(0);
       expect(cardapioRespository.marcarRelacoes).toBeCalledTimes(0);
     });
 
-    it('Erro ao passar produto com produtos vendidos inválidos', async () => {
+    it('Erro ao passar pedido com produtos vendidos inválidos', async () => {
       jest
         .spyOn(cardapioRespository, 'validarListaIds')
         .mockResolvedValue(null);
@@ -194,7 +196,7 @@ describe('Pedidos Repositorio', () => {
       expect(cardapioRespository.marcarRelacoes).toBeCalledTimes(0);
     });
 
-    it('Erro ao passar composicao com produto invalido', async () => {
+    it('Erro ao passar produtos vendidos com produto invalido', async () => {
       const pedido = GeradorDeObjetos.criarPedido();
       pedido.id = pedido1.id;
 
@@ -221,7 +223,7 @@ describe('Pedidos Repositorio', () => {
   });
 
   describe('Remover Pedido', () => {
-    it('Remoção do produto ao inserir id válido', async () => {
+    it('Remoção do pedido ao inserir id válido', async () => {
       jest
         .spyOn(cardapioRespository, 'removerRelacoes')
         .mockResolvedValue(null);
@@ -232,10 +234,10 @@ describe('Pedidos Repositorio', () => {
       expect((pedidosRespository as any).pedidos.has(pedido1.id)).toBeFalsy();
     });
 
-    it('Erro ao não encontrar produto com o id passado', async () => {
-      await expect(
-        pedidosRespository.removerPedido('a'),
-      ).rejects.toThrowError();
+    it('Erro ao não encontrar pedido com o id passado', async () => {
+      await expect(pedidosRespository.removerPedido('a')).rejects.toThrowError(
+        NotFoundException,
+      );
 
       expect((pedidosRespository as any).pedidos.size).toEqual(1);
     });

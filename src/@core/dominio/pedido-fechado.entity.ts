@@ -1,3 +1,4 @@
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
 import { ProdutoCardapio } from './produto-cardapio.entity';
 import { ProdutoEstoque } from './produto-estoque.entity';
 
@@ -86,6 +87,8 @@ export class PedidoFechado {
     dadosPedidoFechado: DadosBasePedidoFechado,
   ) {
     if (!PedidoFechado.possuiTodosOsDadosValidos(dadosPedidoFechado))
-      throw new Error('Dados incorretos/insuficientes');
+      throw new BadRequestException(
+        'Dados incorretos/insuficientes para o pedido fechado',
+      );
   }
 }

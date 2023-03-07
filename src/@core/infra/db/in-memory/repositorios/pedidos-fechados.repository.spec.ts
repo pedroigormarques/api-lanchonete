@@ -1,5 +1,6 @@
 import { Test } from '@nestjs/testing';
 
+import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
 import { PedidoFechadoDB } from '../modelos/pedido-fechado.db-entity';
 import { GeradorDeObjetos } from './../../../../../test/gerador-objetos.faker';
 import { PedidoFechado } from './../../../../dominio/pedido-fechado.entity';
@@ -57,7 +58,7 @@ describe('Pedidos Fechados Repositorio', () => {
       const pedidoFechado = new PedidoFechado();
       await expect(
         pedidosFechadosRepository.cadastrarPedidoFechado(pedidoFechado),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect((pedidosFechadosRepository as any).pedidosFechados.size).toEqual(
         1,
@@ -70,7 +71,7 @@ describe('Pedidos Fechados Repositorio', () => {
 
       await expect(
         pedidosFechadosRepository.cadastrarPedidoFechado(pedidoFechado),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect((pedidosFechadosRepository as any).pedidosFechados.size).toEqual(
         1,

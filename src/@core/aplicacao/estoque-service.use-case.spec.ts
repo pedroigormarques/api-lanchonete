@@ -1,6 +1,9 @@
-import { ForbiddenException } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
+import { ForbiddenException } from './../custom-exception/forbidden-exception.error';
+import { UnprocessableEntityException } from '../custom-exception/unprocessable-entity-exception.error';
+import { ErroDetalhado } from './../custom-exception/exception-detalhado.error';
 import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { IProdutosEstoqueRepository } from '../infra/contratos/produtos-estoque.repository.interface';
 import { GeradorDeObjetos } from './../../test/gerador-objetos.faker';
@@ -86,7 +89,7 @@ describe('Estoque Service', () => {
           'idTeste',
           {} as DadosBaseProdutoEstoque,
         ),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect(estoqueRepositorio.cadastrarProduto).toBeCalledTimes(0);
       expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
@@ -158,7 +161,7 @@ describe('Estoque Service', () => {
     it('Erro ao tentar atualizar id não existente', async () => {
       jest
         .spyOn(estoqueRepositorio, 'carregarProduto')
-        .mockRejectedValue(erroIdNaoEncontrado());
+        .mockRejectedValue(erroDetalhadoGenerico());
 
       jest
         .spyOn(estoqueRepositorio, 'atualizarProduto')
@@ -172,7 +175,7 @@ describe('Estoque Service', () => {
           'a',
           {} as DadosBaseProdutoEstoque,
         ),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueRepositorio.carregarProduto).toBeCalledTimes(1);
       expect(estoqueRepositorio.atualizarProduto).toBeCalledTimes(0);
@@ -218,7 +221,7 @@ describe('Estoque Service', () => {
 
       jest
         .spyOn(estoqueRepositorio, 'atualizarProduto')
-        .mockRejectedValue(new Error('erro'));
+        .mockRejectedValue(new ErroDetalhado('', 0, 'erro'));
 
       jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
@@ -228,7 +231,7 @@ describe('Estoque Service', () => {
           produtoAux.id,
           {} as DadosBaseProdutoEstoque,
         ),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueRepositorio.carregarProduto).toBeCalledTimes(1);
       expect(estoqueRepositorio.atualizarProduto).toBeCalledTimes(1);
@@ -287,7 +290,7 @@ describe('Estoque Service', () => {
 
       await expect(
         estoqueService.atualizarProdutosEstoque(idUsuarioTeste, listaProdutos),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ForbiddenException);
 
       expect(estoqueRepositorio.atualizarProdutos).toBeCalledTimes(0);
       expect(estoqueService.emitirAlteracaoConjuntoDeDados).toBeCalledTimes(0);
@@ -297,7 +300,7 @@ describe('Estoque Service', () => {
       const idUsuarioTeste = 'idTeste';
       jest
         .spyOn(estoqueRepositorio, 'atualizarProdutos')
-        .mockRejectedValue(erroIdNaoEncontrado());
+        .mockRejectedValue(erroDetalhadoGenerico());
 
       jest
         .spyOn(estoqueService, 'emitirAlteracaoConjuntoDeDados')
@@ -310,7 +313,7 @@ describe('Estoque Service', () => {
 
       await expect(
         estoqueService.atualizarProdutosEstoque(idUsuarioTeste, listaProdutos),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueRepositorio.atualizarProdutos).toBeCalledTimes(1);
       expect(estoqueService.emitirAlteracaoConjuntoDeDados).toBeCalledTimes(0);
@@ -349,7 +352,7 @@ describe('Estoque Service', () => {
 
       await expect(
         estoqueService.carregarProdutoEstoque('idTeste', produtoBanco.id),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ForbiddenException);
 
       expect(estoqueRepositorio.carregarProduto).toBeCalledTimes(1);
     });
@@ -357,11 +360,11 @@ describe('Estoque Service', () => {
     it('Erro ao não encontrar produto com o id passado', async () => {
       jest
         .spyOn(estoqueRepositorio, 'carregarProduto')
-        .mockRejectedValue(erroIdNaoEncontrado());
+        .mockRejectedValue(erroDetalhadoGenerico());
 
       await expect(
         estoqueService.carregarProdutoEstoque('idTeste', 'a'),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueRepositorio.carregarProduto).toBeCalledTimes(1);
     });
@@ -460,11 +463,11 @@ describe('Estoque Service', () => {
     it('Erro ao não encontrar produto com um dos ids passados', async () => {
       jest
         .spyOn(estoqueRepositorio, 'carregarProdutos')
-        .mockRejectedValue(erroIdNaoEncontrado());
+        .mockRejectedValue(erroDetalhadoGenerico());
 
       await expect(
         estoqueService.carregarProdutosEstoque('idTeste', ['a']),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueRepositorio.carregarProdutos).toBeCalledTimes(1);
     });
@@ -505,13 +508,13 @@ describe('Estoque Service', () => {
         .mockResolvedValue(produtoBanco);
       jest
         .spyOn(estoqueRepositorio, 'removerProduto')
-        .mockRejectedValue(erroIdNaoEncontrado());
+        .mockRejectedValue(erroDetalhadoGenerico());
 
       jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await expect(
         estoqueService.removerProdutoEstoque(idUsuarioTeste, produtoBanco.id),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueRepositorio.removerProduto).toBeCalledTimes(1);
       expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
@@ -525,13 +528,13 @@ describe('Estoque Service', () => {
         .mockResolvedValue(produtoBanco);
       jest
         .spyOn(estoqueRepositorio, 'removerProduto')
-        .mockRejectedValue(erroIdNaoEncontrado());
+        .mockRejectedValue(erroDetalhadoGenerico());
 
       jest.spyOn(estoqueService, 'emitirAlteracaoItem').mockReturnValue(null);
 
       await expect(
         estoqueService.removerProdutoEstoque('idTeste', produtoBanco.id),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueRepositorio.removerProduto).toBeCalledTimes(0);
       expect(estoqueService.emitirAlteracaoItem).toBeCalledTimes(0);
@@ -595,7 +598,7 @@ describe('Estoque Service', () => {
 
       await expect(
         estoqueService.atualizarProdutosComGastos(idUsuarioTeste, gasto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
 
       expect(estoqueService.carregarProdutosEstoque).toBeCalledTimes(1);
       expect(estoqueService.atualizarProdutosEstoque).toBeCalledTimes(0);
@@ -604,7 +607,7 @@ describe('Estoque Service', () => {
     it('Erro por não conseguir carregar os produtos', async () => {
       jest
         .spyOn(estoqueService, 'carregarProdutosEstoque')
-        .mockRejectedValue(new Error('erro'));
+        .mockRejectedValue(erroDetalhadoGenerico());
 
       jest
         .spyOn(estoqueService, 'atualizarProdutosEstoque')
@@ -615,7 +618,7 @@ describe('Estoque Service', () => {
 
       await expect(
         estoqueService.atualizarProdutosComGastos('idTeste', gasto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueService.carregarProdutosEstoque).toBeCalledTimes(1);
       expect(estoqueService.atualizarProdutosEstoque).toBeCalledTimes(0);
@@ -637,11 +640,11 @@ describe('Estoque Service', () => {
 
       jest
         .spyOn(estoqueService, 'atualizarProdutosEstoque')
-        .mockRejectedValue(new Error('erro'));
+        .mockRejectedValue(erroDetalhadoGenerico());
 
       await expect(
         estoqueService.atualizarProdutosComGastos(idUsuarioTeste, gasto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect(estoqueService.carregarProdutosEstoque).toBeCalledTimes(1);
       expect(estoqueService.atualizarProdutosEstoque).toBeCalledTimes(1);
@@ -649,6 +652,6 @@ describe('Estoque Service', () => {
   });
 });
 
-function erroIdNaoEncontrado() {
-  return new Error('Produto com o id passado não foi encontrado');
+function erroDetalhadoGenerico() {
+  return new ErroDetalhado('erro', 0, 'erro');
 }

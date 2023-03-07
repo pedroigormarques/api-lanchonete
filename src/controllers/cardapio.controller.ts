@@ -8,17 +8,18 @@ import {
   Put,
   Request,
   Sse,
+  HttpStatus,
   UseFilters,
+  HttpCode,
+  UseGuards,
 } from '@nestjs/common';
-import { HttpCode, UseGuards } from '@nestjs/common/decorators';
-import { HttpStatus } from '@nestjs/common/enums';
 import { Observable } from 'rxjs';
 
 import { CardapioService } from './../@core/aplicacao/cardapio-service.use-case';
 import { Evento } from '../@core/dominio/notificacao.entity';
 import { ProdutoCardapio } from './../@core/dominio/produto-cardapio.entity';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
-import { HttpExceptionFilter } from './../exception/exception-filter';
+import { ErroDetalhadoEHttpExceptionFilter } from './../exception/exception-filter';
 import {
   CreateProdutoCardapioDto,
   UpdateProdutoCardapioDto,
@@ -38,7 +39,7 @@ export class CardapioController {
 
   @Get()
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async carregarProdutos(@Request() req): Promise<Array<ProdutoCardapio>> {
     return await this.cardapioService.carregarProdutosCardapio(
       req.user.idUsuarioLogado,
@@ -47,7 +48,7 @@ export class CardapioController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   @HttpCode(HttpStatus.CREATED)
   async adicionarProduto(
     @Request() req,
@@ -61,7 +62,7 @@ export class CardapioController {
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async carregarProduto(
     @Request() req,
     @Param('id') id: string,
@@ -74,7 +75,7 @@ export class CardapioController {
 
   @Put(':id')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async atualizarProduto(
     @Request() req,
     @Param('id') id: string,
@@ -89,7 +90,7 @@ export class CardapioController {
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  @UseFilters(HttpExceptionFilter)
+  @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   async removerProduto(@Request() req, @Param('id') id: string): Promise<void> {
     return await this.cardapioService.removerProdutoCardapio(
       req.user.idUsuarioLogado,

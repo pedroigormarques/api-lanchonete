@@ -1,3 +1,5 @@
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
+
 export interface DadosBasePedido {
   idUsuario: string;
   mesa: number;
@@ -54,14 +56,16 @@ export class Pedido {
   setMesa(mesa: number) {
     if (mesa > 0) this.mesa = mesa;
     else {
-      throw new Error('Mesa invalida. Coloque um valor maior que zero');
+      throw new BadRequestException(
+        'Mesa invalida. Coloque um valor maior que zero',
+      );
     }
   }
 
   setValorConta(valorConta: number) {
     if (valorConta >= 0) this.valorConta = valorConta;
     else {
-      throw new Error(
+      throw new BadRequestException(
         'Valor da conta invalido. Coloque um valor maior ou igual a zero',
       );
     }
@@ -117,6 +121,8 @@ export class Pedido {
     dadosPedido: Pick<DadosBasePedido, 'mesa' | 'idUsuario'> | DadosBasePedido,
   ) {
     if (!Pedido.possuiTodosOsDadosValidos(dadosPedido))
-      throw new Error('Dados incorretos/insuficientes');
+      throw new BadRequestException(
+        'Dados incorretos/insuficientes para o pedido',
+      );
   }
 }

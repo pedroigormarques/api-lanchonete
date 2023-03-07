@@ -1,4 +1,7 @@
-import { ForbiddenException } from '@nestjs/common';
+import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
+import { ForbiddenException } from './../../../../custom-exception/forbidden-exception.error';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
 import { Test } from '@nestjs/testing';
 
 import { GeradorDeObjetos } from './../../../../../test/gerador-objetos.faker';
@@ -74,7 +77,7 @@ describe('Produto Cardapio Repositorio', () => {
       const produto = new ProdutoCardapio();
       await expect(
         cardapioRepositorio.cadastrarProduto(produto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect((cardapioRepositorio as any).produtos.size).toEqual(1); //1 do criado para auxilio dos teste
     });
@@ -84,7 +87,7 @@ describe('Produto Cardapio Repositorio', () => {
 
       jest
         .spyOn(estoqueRepositorio, 'marcarRelacoes')
-        .mockRejectedValue(new Error(`produto não encontrado`));
+        .mockRejectedValue(new Error(`Produto não encontrado`));
 
       await expect(
         cardapioRepositorio.cadastrarProduto(produto),
@@ -101,7 +104,7 @@ describe('Produto Cardapio Repositorio', () => {
 
       await expect(
         cardapioRepositorio.cadastrarProduto(produto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect(estoqueRepositorio.marcarRelacoes).toBeCalledTimes(0);
 
@@ -119,7 +122,7 @@ describe('Produto Cardapio Repositorio', () => {
     it('Erro ao não encontrar produto com o id passado', async () => {
       await expect(
         cardapioRepositorio.carregarProduto('a'),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(NotFoundException);
     });
   });
 
@@ -198,7 +201,7 @@ describe('Produto Cardapio Repositorio', () => {
     it('Erro ao não encontrar produto a ser atualizado com o id passado', async () => {
       await expect(
         cardapioRepositorio.atualizarProduto('a', produto1),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(NotFoundException);
     });
 
     it('Erro ao passar produto com dados inválidos', async () => {
@@ -212,7 +215,7 @@ describe('Produto Cardapio Repositorio', () => {
 
       await expect(
         cardapioRepositorio.atualizarProduto(produto.id, produto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect(estoqueRepositorio.removerRelacoes).toBeCalledTimes(0);
       expect(estoqueRepositorio.marcarRelacoes).toBeCalledTimes(0);
@@ -258,7 +261,7 @@ describe('Produto Cardapio Repositorio', () => {
 
       await expect(
         cardapioRepositorio.atualizarProduto(produto.id, produto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(BadRequestException);
 
       expect([...produto1Banco.composicao.keys()]).toEqual([
         ...produto1.composicao.keys(),
@@ -284,7 +287,7 @@ describe('Produto Cardapio Repositorio', () => {
     it('Erro ao não encontrar produto com o id passado', async () => {
       await expect(
         cardapioRepositorio.removerProduto('a'),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(NotFoundException);
 
       expect((cardapioRepositorio as any).produtos.size).toEqual(1);
     });
@@ -294,7 +297,7 @@ describe('Produto Cardapio Repositorio', () => {
 
       await expect(
         cardapioRepositorio.removerProduto(produto1.id),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
     });
 
     it('Erro ao tentar remover relacao de produto da composição', async () => {

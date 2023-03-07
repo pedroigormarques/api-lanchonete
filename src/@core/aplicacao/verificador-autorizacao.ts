@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { ForbiddenException } from './../custom-exception/forbidden-exception.error';
 
 export class VerificadorDeAutorizacao {
   static verificarAutorização(
