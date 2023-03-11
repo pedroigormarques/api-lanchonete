@@ -38,13 +38,13 @@ export class PedidosRepository implements IPedidosRepository {
   }
 
   async atualizarPedido(id: string, pedido: Pedido): Promise<Pedido> {
+    pedido.verificarSeDadosSaoValidosOuErro();
+
     const pedidoAtualizado = this.pedidos.get(id);
 
     if (!pedidoAtualizado) {
       throw this.erroProdutoNaoEncontrado(id);
     }
-
-    pedido.verificarSeDadosSaoValidosOuErro();
 
     const listaUsoAtual = [...pedido.produtosVendidos.keys()];
     await this.cardapioRepositorio.validarListaIds(

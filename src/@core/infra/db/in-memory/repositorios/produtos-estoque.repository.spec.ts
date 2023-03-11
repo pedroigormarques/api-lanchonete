@@ -1,11 +1,10 @@
-import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
-import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
-import { ForbiddenException } from './../../../../custom-exception/forbidden-exception.error';
-import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
-
 import { Test } from '@nestjs/testing';
 
 import { GeradorDeObjetos } from '../../../../../test/gerador-objetos.faker';
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
+import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
+import { ForbiddenException } from './../../../../custom-exception/forbidden-exception.error';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
 import { UNIDADES } from './../../../../dominio/enums/unidades.enum';
 import { ProdutoEstoque } from './../../../../dominio/produto-estoque.entity';
 import { ProdutoEstoqueDB } from './../modelos/produto-estoque.db-entity';
@@ -116,7 +115,7 @@ describe('Produto Estoque Repositorio', () => {
       const idUsuarioTeste = 'idTeste';
       await expect(
         estoqueRepositorio.carregarProdutos(idUsuarioTeste, ['a']),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
     });
   });
 
@@ -194,7 +193,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.atualizarProduto(produto.id, produto),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
 
       expect(
         (estoqueRepositorio as any).produtos.get(produto1.id).unidade,
@@ -241,7 +240,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.atualizarProdutos([produtoAux, produtoAux2]),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
 
       expect(
         new ProdutoEstoque(
@@ -314,7 +313,7 @@ describe('Produto Estoque Repositorio', () => {
     it('Erro ao não encontrar produto com algum dos ids passado', async () => {
       await expect(
         estoqueRepositorio.marcarRelacoes('idTeste', 'idUsuarioTeste', ['a']),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
     });
 
     it('Não marcar demais relações ao não encontrar algum dos produtos passado', async () => {
@@ -331,7 +330,7 @@ describe('Produto Estoque Repositorio', () => {
           produtoRegistrado.id,
           'a',
         ]),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
 
       expect(produtoBanco.usadoPor.size).toEqual(0);
       expect(produtoBanco.usadoPor.has(idTeste)).toBeFalsy();
@@ -376,7 +375,7 @@ describe('Produto Estoque Repositorio', () => {
 
       await expect(
         estoqueRepositorio.removerRelacoes(idTeste, 'idUsuarioTeste', ['a']),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
     });
 
     it('Não remover demais relações ao não encontrar algum dos produtos passado', async () => {
@@ -395,7 +394,7 @@ describe('Produto Estoque Repositorio', () => {
           produtoRegistrado.id,
           'a',
         ]),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(UnprocessableEntityException);
 
       expect(produtoBanco.usadoPor.size).toEqual(1);
       expect(produtoBanco.usadoPor.has(idTeste)).toBeTruthy();

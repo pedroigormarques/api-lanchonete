@@ -25,7 +25,7 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
       listaIds.forEach((idProduto) => {
         const produto = this.produtos.get(idProduto);
         if (!produto) {
-          throw new Error(
+          throw new UnprocessableEntityException(
             `Produto de id ${idProduto} presente na lista passada não foi encontrado no estoque`,
           );
         }
@@ -73,7 +73,7 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     produtosEstoque.forEach((pe) => {
       const produtoAtualizado = this.produtos.get(pe.id);
       if (!produtoAtualizado) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           `Produto de id ${pe.id} presente na lista de produtos não foi encontrado no estoque`,
         );
       }
@@ -133,7 +133,7 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           `Produto de id ${idProduto} presente no produto do cardapio não encontrado no estoque`,
         );
       }

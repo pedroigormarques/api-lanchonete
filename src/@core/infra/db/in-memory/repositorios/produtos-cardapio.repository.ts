@@ -36,7 +36,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
       listaIds.forEach((idProduto) => {
         const produto = this.produtos.get(idProduto);
         if (!produto) {
-          throw new Error(
+          throw new UnprocessableEntityException(
             `Produto de id ${idProduto} presente na lista passada não foi encontrado no cardapio`,
           );
         }
@@ -149,7 +149,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
     idProdutos.forEach((idProduto) => {
       const produto = this.produtos.get(idProduto);
       if (!produto) {
-        throw new Error(
+        throw new UnprocessableEntityException(
           `Produto de id ${idProduto} presente no pedido não encontrado no cardapio`,
         );
       }

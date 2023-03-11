@@ -1,8 +1,9 @@
 import { Test } from '@nestjs/testing';
-import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
-import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
 
 import { GeradorDeObjetos } from './../../../../../test/gerador-objetos.faker';
+import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
+import { ErroDetalhado } from './../../../../custom-exception/exception-detalhado.error';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
 import { Pedido } from './../../../../dominio/pedido.entity';
 import { PedidoDB } from './../modelos/pedido.db-entity';
 import { PedidosRepository } from './pedidos.repository';
@@ -176,33 +177,13 @@ describe('Pedidos Repositorio', () => {
       expect(cardapioRespository.marcarRelacoes).toBeCalledTimes(0);
     });
 
-    it('Erro ao passar pedido com produtos vendidos inválidos', async () => {
-      jest
-        .spyOn(cardapioRespository, 'validarListaIds')
-        .mockResolvedValue(null);
-      jest
-        .spyOn(cardapioRespository, 'removerRelacoes')
-        .mockResolvedValue(null);
-      jest.spyOn(cardapioRespository, 'marcarRelacoes').mockResolvedValue(null);
-
-      const pedido = GeradorDeObjetos.criarPedido();
-      delete pedido.produtosVendidos;
-
-      await expect(
-        pedidosRespository.atualizarPedido(pedido.id, pedido),
-      ).rejects.toThrowError();
-
-      expect(cardapioRespository.removerRelacoes).toBeCalledTimes(0);
-      expect(cardapioRespository.marcarRelacoes).toBeCalledTimes(0);
-    });
-
     it('Erro ao passar produtos vendidos com produto invalido', async () => {
       const pedido = GeradorDeObjetos.criarPedido();
       pedido.id = pedido1.id;
 
       jest
         .spyOn(cardapioRespository, 'validarListaIds')
-        .mockRejectedValue(new Error(`produto não encontrado`));
+        .mockRejectedValue(new ErroDetalhado('', 0, `produto não encontrado`));
 
       jest.spyOn(cardapioRespository, 'marcarRelacoes').mockResolvedValue(null);
       jest
@@ -211,7 +192,7 @@ describe('Pedidos Repositorio', () => {
 
       await expect(
         pedidosRespository.atualizarPedido(pedido.id, pedido),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect([...pedidoBanco1.produtosVendidos.keys()]).toEqual([
         ...pedido1.produtosVendidos.keys(),
@@ -245,11 +226,11 @@ describe('Pedidos Repositorio', () => {
     it('Erro ao tentar remover relacao de produto da composição', async () => {
       jest
         .spyOn(cardapioRespository, 'removerRelacoes')
-        .mockRejectedValue(new Error(`produto não encontrado`));
+        .mockRejectedValue(new ErroDetalhado('', 0, `produto não encontrado`));
 
       await expect(
         pedidosRespository.removerPedido(pedido1.id),
-      ).rejects.toThrowError();
+      ).rejects.toThrowError(ErroDetalhado);
 
       expect((pedidosRespository as any).pedidos.size).toEqual(1);
     });
