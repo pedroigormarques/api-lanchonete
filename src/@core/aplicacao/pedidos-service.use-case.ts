@@ -1,5 +1,3 @@
-import { VerificadorDeAutorizacao } from './verificador-autorizacao';
-import { BadRequestException } from './../custom-exception/bad-request-exception.error';
 import { UnprocessableEntityException } from '../custom-exception/unprocessable-entity-exception.error';
 import { PedidoFechado } from '../dominio/pedido-fechado.entity';
 import { DadosBasePedido, Pedido } from '../dominio/pedido.entity';
@@ -7,11 +5,13 @@ import { ProdutoCardapio } from '../dominio/produto-cardapio.entity';
 import { ProdutoEstoque } from '../dominio/produto-estoque.entity';
 import { IPedidosFechadosRepository } from '../infra/contratos/pedidos-fechados.repository.interface';
 import { IPedidosRepository } from '../infra/contratos/pedidos.repository.interface';
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
 import { TipoManipulacaoDado } from './../dominio/enums/tipo-manipulacao-dado.enum';
 import { DadosBasePedidoFechado } from './../dominio/pedido-fechado.entity';
 import { CardapioService } from './cardapio-service.use-case';
 import { EstoqueService } from './estoque-service.use-case';
 import { NotificadorDeEventos } from './notificador-de-eventos';
+import { VerificadorDeAutorizacao } from './verificador-autorizacao';
 
 export class PedidosService extends NotificadorDeEventos<Pedido> {
   constructor(
@@ -170,6 +170,11 @@ export class PedidosService extends NotificadorDeEventos<Pedido> {
     const pedido = await this.pedidosRepositorio.carregarPedido(idPedido);
 
     VerificadorDeAutorizacao.verificarAutorização(idUsuario, pedido);
+
+    if (pedido.valorConta === 0)
+      throw new UnprocessableEntityException(
+        'O pedido nao possui itens. Para removê-lo, use a opção de deletar',
+      );
 
     const dadosPedido = {} as DadosBasePedidoFechado;
     dadosPedido.horaAbertura = pedido.horaAbertura;

@@ -18,7 +18,6 @@ export class MapInterceptor implements NestInterceptor {
   }
 }
 
-//https://wanago.io/2020/06/08/api-nestjs-serializing-response-interceptors/
 function filtroDeTipo(value: unknown): unknown {
   if (Array.isArray(value)) {
     return value.map(conversorDeMap);

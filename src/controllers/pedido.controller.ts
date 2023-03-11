@@ -2,19 +2,19 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   Post,
   Request,
   Sse,
   UseFilters,
-  HttpCode,
   UseGuards,
-  HttpStatus,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
-import { PedidosService } from './../@core/aplicacao/pedidos-service.use-case';
 import { Evento } from '../@core/dominio/notificacao.entity';
+import { PedidosService } from './../@core/aplicacao/pedidos-service.use-case';
 import { PedidoFechado } from './../@core/dominio/pedido-fechado.entity';
 import { Pedido } from './../@core/dominio/pedido.entity';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
@@ -73,6 +73,7 @@ export class PedidoController {
   @Post('pedidos/:id')
   @UseGuards(JwtAuthGuard)
   @UseFilters(ErroDetalhadoEHttpExceptionFilter)
+  @HttpCode(HttpStatus.OK)
   async atualizarQtdItemPedido(
     @Request() req,
     @Param('id') id: string,
@@ -89,6 +90,7 @@ export class PedidoController {
   @Post('pedidos/:id/deletar')
   @UseGuards(JwtAuthGuard)
   @UseFilters(ErroDetalhadoEHttpExceptionFilter)
+  @HttpCode(HttpStatus.OK)
   async deletarPedido(@Request() req, @Param('id') id: string): Promise<void> {
     return await this.pedidoService.deletarPedido(req.user.idUsuarioLogado, id);
   }
@@ -96,6 +98,7 @@ export class PedidoController {
   @Post('pedidos/:id/fechar')
   @UseGuards(JwtAuthGuard)
   @UseFilters(ErroDetalhadoEHttpExceptionFilter)
+  @HttpCode(HttpStatus.OK)
   async fecharPedido(
     @Request() req,
     @Param('id') id: string,
