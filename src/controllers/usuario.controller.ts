@@ -1,11 +1,11 @@
 import {
   Body,
   Controller,
+  HttpCode,
   HttpStatus,
   Post,
   Put,
   Request,
-  HttpCode,
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
@@ -13,7 +13,11 @@ import {
 import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
 import { ErroDetalhadoEHttpExceptionFilter } from './../exception/exception-filter';
-import { CreateUsuarioDto, UpdateUsuarioDto } from './Validation/usuario.dto';
+import {
+  CreateUsuarioDto,
+  LoginUsuarioDto,
+  UpdateUsuarioDto,
+} from './Validation/usuario.dto';
 
 @Controller('usuario')
 export class UsuarioController {
@@ -26,10 +30,10 @@ export class UsuarioController {
     return await this.usuarioService.registrarUsuario(dadosUsuario);
   }
 
-  @Post('login')
+  @Post('entrar')
   @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   @HttpCode(HttpStatus.OK)
-  async logar(@Body() credenciais: { email: string; senha: string }) {
+  async logar(@Body() credenciais: LoginUsuarioDto) {
     const dadosUsuario = await this.usuarioService.logar(
       credenciais.email,
       credenciais.senha,

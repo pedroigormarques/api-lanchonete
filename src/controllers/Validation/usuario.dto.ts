@@ -1,6 +1,5 @@
-import { IsEmail, IsString, MinLength, IsNotEmpty } from 'class-validator';
-
-import { PartialType } from '@nestjs/mapped-types';
+import { PartialType, PickType } from '@nestjs/mapped-types';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 export class CreateUsuarioDto {
   @IsEmail()
@@ -18,5 +17,10 @@ export class CreateUsuarioDto {
   @IsNotEmpty()
   nomeLanchonete: string;
 }
+
+export class LoginUsuarioDto extends PickType(CreateUsuarioDto, [
+  'email',
+  'senha',
+]) {}
 
 export class UpdateUsuarioDto extends PartialType(CreateUsuarioDto) {}
