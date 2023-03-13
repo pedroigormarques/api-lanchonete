@@ -5,8 +5,6 @@ import { EstoqueService } from './../@core/aplicacao/estoque-service.use-case';
 import { PedidosService } from './../@core/aplicacao/pedidos-service.use-case';
 import { IPedidosFechadosRepository } from './../@core/infra/contratos/pedidos-fechados.repository.interface';
 import { IPedidosRepository } from './../@core/infra/contratos/pedidos.repository.interface';
-import { PedidosFechadosRepository } from './../@core/infra/db/in-memory/repositorios/pedidos-fechados.repository';
-import { PedidosRepository } from './../@core/infra/db/in-memory/repositorios/pedidos.repository';
 import { PedidoController } from './../controllers/pedido.controller';
 import { CardapioModule } from './cardapio.module';
 import { EstoqueModule } from './estoque.module';
@@ -30,8 +28,8 @@ import { EstoqueModule } from './estoque.module';
           estoqueService,
         ),
       inject: [
-        PedidosRepository,
-        PedidosFechadosRepository,
+        'IPedidosRepository',
+        'IPedidosFechadosRepository',
         CardapioService,
         EstoqueService,
       ],

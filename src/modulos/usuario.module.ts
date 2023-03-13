@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 
 import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
 import { IUsuarioRepository } from './../@core/infra/contratos/usuario.repository.interface';
-import { UsuarioRepository } from './../@core/infra/db/in-memory/repositorios/usuario.repository';
 import { AutenticacaoModule } from './../autenticacao/autenticacao.module';
 import { AutenticacaoService } from './../autenticacao/autenticacao.service';
 import { UsuarioController } from './../controllers/usuario.controller';
@@ -17,7 +16,7 @@ import { UsuarioController } from './../controllers/usuario.controller';
         usuarioRepositorio: IUsuarioRepository,
         autenticacaoService: AutenticacaoService,
       ) => new UsuarioService(usuarioRepositorio, autenticacaoService),
-      inject: [UsuarioRepository, AutenticacaoService],
+      inject: ['IUsuarioRepository', AutenticacaoService],
     },
   ],
   exports: [UsuarioService],

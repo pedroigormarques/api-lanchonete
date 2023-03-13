@@ -9,8 +9,15 @@ import { UsuarioRepository } from './../@core/infra/db/in-memory/repositorios/us
 @Global()
 @Module({
   providers: [
-    { provide: UsuarioRepository, useClass: UsuarioRepository },
-    { provide: ProdutosEstoqueRepository, useClass: ProdutosEstoqueRepository },
+    { provide: 'IUsuarioRepository', useClass: UsuarioRepository },
+    {
+      provide: 'IProdutosEstoqueRepository',
+      useClass: ProdutosEstoqueRepository,
+    },
+    {
+      provide: ProdutosEstoqueRepository,
+      useClass: ProdutosEstoqueRepository,
+    },
     {
       provide: ProdutosCardapioRepository,
       useFactory: (estoque: ProdutosEstoqueRepository) =>
@@ -18,22 +25,28 @@ import { UsuarioRepository } from './../@core/infra/db/in-memory/repositorios/us
       inject: [ProdutosEstoqueRepository],
     },
     {
-      provide: PedidosRepository,
+      provide: 'IProdutosCardapioRepository',
+      useFactory: (estoque: ProdutosEstoqueRepository) =>
+        new ProdutosCardapioRepository(estoque),
+      inject: [ProdutosEstoqueRepository],
+    },
+    {
+      provide: 'IPedidosRepository',
       useFactory: (cardapio: ProdutosCardapioRepository) =>
         new PedidosRepository(cardapio),
       inject: [ProdutosCardapioRepository],
     },
     {
-      provide: PedidosFechadosRepository,
+      provide: 'IPedidosFechadosRepository',
       useClass: PedidosFechadosRepository,
     },
   ],
   exports: [
-    UsuarioRepository,
-    ProdutosEstoqueRepository,
-    ProdutosCardapioRepository,
-    PedidosRepository,
-    PedidosFechadosRepository,
+    'IUsuarioRepository',
+    'IProdutosEstoqueRepository',
+    'IProdutosCardapioRepository',
+    'IPedidosRepository',
+    'IPedidosFechadosRepository',
   ],
 })
 export class RepositorioInMemoryModule {}
