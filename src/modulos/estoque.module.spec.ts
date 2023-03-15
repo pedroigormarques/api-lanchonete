@@ -2,7 +2,6 @@ import { Test } from '@nestjs/testing';
 
 import { EstoqueService } from './../@core/aplicacao/estoque-service.use-case';
 import { IProdutosEstoqueRepository } from './../@core/infra/contratos/produtos-estoque.repository.interface';
-import { ProdutosEstoqueRepository } from './../@core/infra/db/in-memory/repositorios/produtos-estoque.repository';
 import { EstoqueController } from './../controllers/estoque.controller';
 import { EstoqueModule } from './estoque.module';
 import { RepositorioInMemoryModule } from './repositorio-in-memory.module';
@@ -19,7 +18,7 @@ describe('Estoque Module', () => {
           provide: EstoqueService,
           useFactory: (estoqueRepositorio: IProdutosEstoqueRepository) =>
             EstoqueService.create(estoqueRepositorio),
-          inject: [ProdutosEstoqueRepository],
+          inject: ['IProdutosEstoqueRepository'],
         },
       ],
       exports: [EstoqueService],

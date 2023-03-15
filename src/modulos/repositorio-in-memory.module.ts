@@ -10,13 +10,14 @@ import { UsuarioRepository } from './../@core/infra/db/in-memory/repositorios/us
 @Module({
   providers: [
     { provide: 'IUsuarioRepository', useClass: UsuarioRepository },
-    {
-      provide: 'IProdutosEstoqueRepository',
-      useClass: ProdutosEstoqueRepository,
-    },
+
     {
       provide: ProdutosEstoqueRepository,
       useClass: ProdutosEstoqueRepository,
+    },
+    {
+      provide: 'IProdutosEstoqueRepository',
+      useExisting: ProdutosEstoqueRepository,
     },
     {
       provide: ProdutosCardapioRepository,
@@ -26,9 +27,7 @@ import { UsuarioRepository } from './../@core/infra/db/in-memory/repositorios/us
     },
     {
       provide: 'IProdutosCardapioRepository',
-      useFactory: (estoque: ProdutosEstoqueRepository) =>
-        new ProdutosCardapioRepository(estoque),
-      inject: [ProdutosEstoqueRepository],
+      useExisting: ProdutosCardapioRepository,
     },
     {
       provide: 'IPedidosRepository',

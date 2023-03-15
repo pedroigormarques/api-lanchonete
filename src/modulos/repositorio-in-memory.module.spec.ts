@@ -17,10 +17,15 @@ describe('Repositorio In Memory Module', () => {
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
       providers: [
-        { provide: UsuarioRepository, useClass: UsuarioRepository },
+        { provide: 'IUsuarioRepository', useClass: UsuarioRepository },
+
         {
           provide: ProdutosEstoqueRepository,
           useClass: ProdutosEstoqueRepository,
+        },
+        {
+          provide: 'IProdutosEstoqueRepository',
+          useExisting: ProdutosEstoqueRepository,
         },
         {
           provide: ProdutosCardapioRepository,
@@ -29,35 +34,39 @@ describe('Repositorio In Memory Module', () => {
           inject: [ProdutosEstoqueRepository],
         },
         {
-          provide: PedidosRepository,
+          provide: 'IProdutosCardapioRepository',
+          useExisting: ProdutosCardapioRepository,
+        },
+        {
+          provide: 'IPedidosRepository',
           useFactory: (cardapio: ProdutosCardapioRepository) =>
             new PedidosRepository(cardapio),
           inject: [ProdutosCardapioRepository],
         },
         {
-          provide: PedidosFechadosRepository,
+          provide: 'IPedidosFechadosRepository',
           useClass: PedidosFechadosRepository,
         },
       ],
       exports: [
-        UsuarioRepository,
-        ProdutosEstoqueRepository,
-        ProdutosCardapioRepository,
-        PedidosRepository,
-        PedidosFechadosRepository,
+        'IUsuarioRepository',
+        'IProdutosEstoqueRepository',
+        'IProdutosCardapioRepository',
+        'IPedidosRepository',
+        'IPedidosFechadosRepository',
       ],
     }).compile();
 
-    usuarioRespository = moduleRef.get<UsuarioRepository>(UsuarioRepository);
+    usuarioRespository = moduleRef.get<UsuarioRepository>('IUsuarioRepository');
     produtosEstoqueRepository = moduleRef.get<ProdutosEstoqueRepository>(
-      ProdutosEstoqueRepository,
+      'IProdutosEstoqueRepository',
     );
     produtosCardapioRepository = moduleRef.get<ProdutosCardapioRepository>(
-      ProdutosCardapioRepository,
+      'IProdutosCardapioRepository',
     );
-    pedidosRepository = moduleRef.get<PedidosRepository>(PedidosRepository);
+    pedidosRepository = moduleRef.get<PedidosRepository>('IPedidosRepository');
     pedidosFechadosRepository = moduleRef.get<PedidosFechadosRepository>(
-      PedidosFechadosRepository,
+      'IPedidosFechadosRepository',
     );
   });
 
