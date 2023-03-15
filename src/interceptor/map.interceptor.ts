@@ -7,6 +7,7 @@ import {
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { isEvento } from './../@core/dominio/notificacao.entity';
 import { PedidoFechado } from './../@core/dominio/pedido-fechado.entity';
 import { Pedido } from './../@core/dominio/pedido.entity';
 import { ProdutoCardapio } from './../@core/dominio/produto-cardapio.entity';
@@ -19,6 +20,11 @@ export class MapInterceptor implements NestInterceptor {
 }
 
 function filtroDeTipo(value: unknown): unknown {
+  if (isEvento(value)) {
+    value.data.forEach((a) => (a.data = conversorDeMap(a.data)));
+    return value;
+  }
+
   if (Array.isArray(value)) {
     return value.map(conversorDeMap);
   }
@@ -56,9 +62,15 @@ function transformarPedido(pedido: Pedido) {
 }
 
 function transformarPedidoFechado(pedidoFechado: PedidoFechado) {
+  console.log(
+    [...pedidoFechado.produtosUtilizados.entries()].map((o) => ({ ...o })),
+  );
+
   return {
     ...pedidoFechado,
-    produtosUtilizados: [...pedidoFechado.produtosUtilizados.entries()],
+    produtosUtilizados: [...pedidoFechado.produtosUtilizados.entries()].map(
+      (item) => [{ ...item[0] }, item[1]],
+    ),
     produtosVendidos: [...pedidoFechado.produtosVendidos.entries()].map(
       (value) =>
         [transformarProdutoCardapio(value[0]), value[1]] as [object, number],
