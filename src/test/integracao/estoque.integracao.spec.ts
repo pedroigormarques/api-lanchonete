@@ -1,5 +1,6 @@
 import * as request from 'supertest';
 
+import { UNIDADES } from './../../@core/dominio/enums/unidades.enum';
 import { ProdutoEstoque } from './../../@core/dominio/produto-estoque.entity';
 import { AuxiliadorTesteIntegracao } from './auxiliador-teste-integracao';
 import { ErrosVerificacao } from './erros-verificacao';
@@ -193,16 +194,20 @@ describe('Estoque', () => {
         1,
       );
       const idProdutoUsado = [...aux.composicao.keys()][0];
-
-      const dados = {
-        unidade: 'L', // ver caso em que a unidade é a mesma da alterada------------------------------------------
-      };
-
       const rotaTeste = `/estoque/${idProdutoUsado}`;
+
+      const { body: produtoEstoque } = await request(auxiliar.httpServer)
+        .get(rotaTeste)
+        .auth(usuarioTeste.token, { type: 'bearer' })
+        .send()
+        .expect(200);
+
+      const unidade =
+        produtoEstoque.unidade === UNIDADES.L ? UNIDADES.ml : UNIDADES.L;
       const { body } = await request(auxiliar.httpServer)
         .put(rotaTeste)
         .auth(usuarioTeste.token, { type: 'bearer' })
-        .send(dados)
+        .send({ unidade })
         .expect(422);
 
       expect(body).toEqual(
@@ -210,12 +215,7 @@ describe('Estoque', () => {
       );
 
       //para teste do GetProdutos
-      const { body: produtoAux } = await request(auxiliar.httpServer)
-        .get(rotaTeste)
-        .auth(usuarioTeste.token, { type: 'bearer' })
-        .send()
-        .expect(200);
-      produtosCadastrados.push(produtoAux);
+      produtosCadastrados.push(produtoEstoque);
     });
 
     it('Erro ao atualizar para outro usuário - 403', async () => {
