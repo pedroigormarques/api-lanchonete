@@ -62,10 +62,6 @@ function transformarPedido(pedido: Pedido) {
 }
 
 function transformarPedidoFechado(pedidoFechado: PedidoFechado) {
-  console.log(
-    [...pedidoFechado.produtosUtilizados.entries()].map((o) => ({ ...o })),
-  );
-
   return {
     ...pedidoFechado,
     produtosUtilizados: [...pedidoFechado.produtosUtilizados.entries()].map(
