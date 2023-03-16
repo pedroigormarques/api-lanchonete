@@ -1,4 +1,4 @@
-import { DynamicModule, Module } from '@nestjs/common';
+import { DynamicModule, Module, Global } from '@nestjs/common';
 
 import { MongoDbRepositoryModule } from './../@core/infra/db/mongodb/mongo-db.module';
 import { RepositorioInMemoryModule } from './repositorio-in-memory.module';
@@ -14,7 +14,7 @@ export class GerenciadorRepositoriosModule {
         retorno.exports = [RepositorioInMemoryModule];
       }
     } else {
-      retorno.imports = [MongoDbRepositoryModule.forRoot(process.env.NODE_ENV)];
+      retorno.imports = [MongoDbRepositoryModule];
       retorno.exports = [MongoDbRepositoryModule];
     }
 

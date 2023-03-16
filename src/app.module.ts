@@ -1,6 +1,9 @@
 import { Module, ValidationPipe } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 
+import config from './app.config';
+import { carregarConfiguracao } from './app.config.interface';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AutenticacaoModule } from './autenticacao/autenticacao.module';
@@ -14,6 +17,10 @@ import { UsuarioModule } from './modulos/usuario.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      load: [carregarConfiguracao(config)],
+      isGlobal: true,
+    }),
     AutenticacaoModule,
     UsuarioModule,
     EstoqueModule,
