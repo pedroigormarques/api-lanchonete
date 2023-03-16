@@ -1,0 +1,151 @@
+import { Test } from '@nestjs/testing';
+
+import { GeradorDeObjetos } from '../../../../../test/gerador-objetos.faker';
+import { Usuario } from './../../../../dominio/usuario.entity';
+import { UsuarioDB } from './../modelos/usuario.db-entity';
+import { UsuarioRepository } from './usuario.repository';
+import { BadRequestException } from './../../../../custom-exception/bad-request-exception.error';
+import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
+import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
+
+describe('Usuario Repositorio', () => {
+  let usuarioRepositorio: UsuarioRepository;
+  let usuario1: Usuario;
+
+  beforeEach(async () => {
+    const moduleRef = await Test.createTestingModule({
+      providers: [UsuarioRepository],
+    }).compile();
+
+    usuarioRepositorio = moduleRef.get<UsuarioRepository>(UsuarioRepository);
+
+    //registrando ao menos um usuario antes de cada teste para os testes de validação, update e carregamento
+    usuario1 = registrarUsuarioDeTeste(usuarioRepositorio);
+  });
+
+  it('Instanciado', () => {
+    expect(usuarioRepositorio).toBeDefined();
+  });
+
+  describe('Validar Usuario', () => {
+    it('Retorno de usuário ao inserir dados válido', async () => {
+      const { email, senha } = usuario1;
+
+      const resposta = await usuarioRepositorio.validarUsuario(email, senha);
+
+      expect(resposta).toBeInstanceOf(Usuario);
+      expect(resposta).toEqual(usuario1);
+    });
+    it('null ao não encontrar usuario com esses dados', async () => {
+      const email = 'a@a.com';
+      const senha = 'teste';
+
+      const resposta = await usuarioRepositorio.validarUsuario(email, senha);
+
+      expect(resposta).toBeNull();
+    });
+  });
+
+  describe('Registrar Usuario', () => {
+    it('Registro realizado com dados válidos', async () => {
+      const usuarioTeste = GeradorDeObjetos.criarUsuario();
+      const resposta = await usuarioRepositorio.registrarUsuario(usuarioTeste);
+
+      expect(resposta).toBeInstanceOf(Usuario);
+      expect(resposta.email).toEqual(usuarioTeste.email);
+      expect(resposta.endereco).toEqual(usuarioTeste.endereco);
+      expect(resposta.nomeLanchonete).toEqual(usuarioTeste.nomeLanchonete);
+      expect(resposta.senha).toEqual(usuarioTeste.senha);
+      expect(resposta.id).toBeDefined();
+    });
+
+    it('Erro ao passar dados insuficientes', async () => {
+      const usuario = new Usuario();
+
+      await expect(
+        usuarioRepositorio.registrarUsuario(usuario),
+      ).rejects.toThrowError(BadRequestException);
+    });
+
+    it('Erro ao passar um email já cadastrado', async () => {
+      const usuario = GeradorDeObjetos.criarUsuario();
+      usuario.email = usuario1.email;
+
+      await expect(
+        usuarioRepositorio.registrarUsuario(usuario),
+      ).rejects.toThrowError(UnprocessableEntityException);
+    });
+  });
+
+  describe('Atualizar Usuario', () => {
+    it('Retorno de usuario atualizado com os dados passados', async () => {
+      const usuarioComDadosNovos = new Usuario(usuario1);
+
+      usuarioComDadosNovos.email = 'teste@teste.com';
+
+      const resposta = await usuarioRepositorio.atualizarUsuario(
+        usuarioComDadosNovos.id,
+        usuarioComDadosNovos,
+      );
+
+      expect(resposta).toEqual(usuarioComDadosNovos);
+    });
+
+    it('Erro ao passar dados inválidos', async () => {
+      const usuario = new Usuario();
+      usuario.id = usuario1.id;
+
+      await expect(
+        usuarioRepositorio.atualizarUsuario(usuario.id, usuario),
+      ).rejects.toThrowError(BadRequestException);
+
+      expect((usuarioRepositorio as any).usuarios.get(usuario1.id)).toEqual(
+        usuario1,
+      );
+    });
+
+    it('Erro ao passar id de usuario inválido', async () => {
+      await expect(
+        usuarioRepositorio.atualizarUsuario('a', usuario1),
+      ).rejects.toThrowError(NotFoundException);
+    });
+
+    it('Erro ao tentar atualizar com outro email em uso', async () => {
+      const usuario2 = registrarUsuarioDeTeste(usuarioRepositorio);
+      const esperado = { ...usuario2 };
+      usuario2.email = usuario1.email;
+
+      await expect(
+        usuarioRepositorio.atualizarUsuario(usuario2.id, usuario2),
+      ).rejects.toThrowError(UnprocessableEntityException);
+
+      expect((usuarioRepositorio as any).usuarios.get(usuario2.id)).toEqual(
+        esperado,
+      );
+    });
+  });
+
+  describe('Carregar Usuario', () => {
+    it('Retorno de usuario ao passar id válido', async () => {
+      const resposta = await usuarioRepositorio.carregarUsuario(usuario1.id);
+
+      expect(resposta).toEqual(usuario1);
+    });
+
+    it('Erro ao passar id de usuario inválido', async () => {
+      await expect(
+        usuarioRepositorio.carregarUsuario('a'),
+      ).rejects.toThrowError(NotFoundException);
+    });
+  });
+});
+
+function registrarUsuarioDeTeste(usuarioRepositorio: UsuarioRepository) {
+  const usuarioTeste = GeradorDeObjetos.criarUsuario();
+  const usuarioBanco = new UsuarioDB(usuarioTeste);
+  usuarioTeste.id = usuarioBanco.id;
+
+  (usuarioRepositorio as any).usuarios //pela quebra de proteção "private"
+    .set(usuarioBanco.id, usuarioBanco);
+  return usuarioTeste;
+}
