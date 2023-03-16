@@ -8,8 +8,8 @@ import { ErroDetalhadoEHttpExceptionFilter } from './exception/exception-filter'
 import { MapInterceptor } from './interceptor/map.interceptor';
 import { CardapioModule } from './modulos/cardapio.module';
 import { EstoqueModule } from './modulos/estoque.module';
+import { GerenciadorRepositoriosModule } from './modulos/gerenciador-repositorio.module';
 import { PedidoModule } from './modulos/pedido.module';
-import { RepositorioInMemoryModule } from './modulos/repositorio-in-memory.module';
 import { UsuarioModule } from './modulos/usuario.module';
 
 @Module({
@@ -19,7 +19,7 @@ import { UsuarioModule } from './modulos/usuario.module';
     EstoqueModule,
     CardapioModule,
     PedidoModule,
-    RepositorioInMemoryModule,
+    GerenciadorRepositoriosModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [
