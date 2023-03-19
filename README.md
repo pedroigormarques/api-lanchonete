@@ -1,8 +1,9 @@
 # API - Lanchonete
 
-## Description
+## Descrição
 
 Esta API foi elaborada para estudo e treinamento. As funcionalidades disponibilizadas por ela buscam atender, principalmente, o controle do estoque de várias lanchonetes. Dessa forma, utilizando um sistema de autenticação, é possível interagir com as rotas do estoque, do cardápio e dos pedidos de cada uma das lanchonetes de modo individual e seguro.
+
 Para seu desenvolvimento, foi utilizado como linguagem o **TypeScript** e como ferramenta o **NestJs**. A princípio, sua organização foi pensada para buscar atingir uma arquitetura limpa e baseada em testes. No caso da persistência dos dados, foi utilizado o banco de dados **MongoDB**.
 
 ## API em execução para testes
@@ -21,7 +22,7 @@ Também deve ser criado 3 arquivos contendo as variáveis de ambiente para cada 
 
 ## Rodando a API
 
-Comandos para rodar a API localnente:
+Comandos para rodar a API localmente:
 
 ```bash
 # Como desenvolvedor
