@@ -1,3 +1,4 @@
+import { ConfigService, ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -6,7 +7,6 @@ import { Usuario } from './../@core/dominio/usuario.entity';
 import { GeradorDeObjetos } from './../test/gerador-objetos.faker';
 import { AutenticacaoModule } from './autenticacao.module';
 import { AutenticacaoService } from './autenticacao.service';
-import { jwtConstants } from './constantes';
 import { JwtStrategy } from './jwt.strategy';
 
 describe('Autenticacao - Service e module', () => {
@@ -16,9 +16,16 @@ describe('Autenticacao - Service e module', () => {
     modulo = await Test.createTestingModule({
       imports: [
         PassportModule,
-        JwtModule.register({
-          secret: jwtConstants.secret,
-          signOptions: { expiresIn: '60s' },
+        ConfigModule.forRoot({
+          envFilePath: '.test.env',
+          isGlobal: true,
+        }),
+        JwtModule.registerAsync({
+          useFactory: async (config: ConfigService) => ({
+            secret: config.getOrThrow('JWT_CONSTANTS_SECRET'),
+            signOptions: { expiresIn: config.getOrThrow('JWT_EXPIRES_IN') },
+          }),
+          inject: [ConfigService],
         }),
       ],
       providers: [AutenticacaoService, JwtStrategy],
@@ -35,7 +42,13 @@ describe('Autenticacao - Service e module', () => {
 
   it('Modulo instanciado', async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AutenticacaoModule],
+      imports: [
+        AutenticacaoModule,
+        ConfigModule.forRoot({
+          envFilePath: '.test.env',
+          isGlobal: true,
+        }),
+      ],
     }).compile();
 
     expect(moduleRef).toBeDefined();

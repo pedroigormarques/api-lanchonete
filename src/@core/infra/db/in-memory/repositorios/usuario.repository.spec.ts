@@ -1,4 +1,5 @@
 import { Test } from '@nestjs/testing';
+import * as bcrypt from 'bcrypt';
 
 import { GeradorDeObjetos } from '../../../../../test/gerador-objetos.faker';
 import { Usuario } from './../../../../dominio/usuario.entity';
@@ -11,6 +12,7 @@ import { UnprocessableEntityException } from '../../../../custom-exception/unpro
 describe('Usuario Repositorio', () => {
   let usuarioRepositorio: UsuarioRepository;
   let usuario1: Usuario;
+  let usuarioBanco1: UsuarioDB;
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -20,7 +22,9 @@ describe('Usuario Repositorio', () => {
     usuarioRepositorio = moduleRef.get<UsuarioRepository>(UsuarioRepository);
 
     //registrando ao menos um usuario antes de cada teste para os testes de validação, update e carregamento
-    usuario1 = registrarUsuarioDeTeste(usuarioRepositorio);
+    const aux = await registrarUsuarioDeTeste(usuarioRepositorio);
+    usuario1 = aux.usuarioTeste;
+    usuarioBanco1 = aux.usuarioBanco;
   });
 
   it('Instanciado', () => {
@@ -34,7 +38,7 @@ describe('Usuario Repositorio', () => {
       const resposta = await usuarioRepositorio.validarUsuario(email, senha);
 
       expect(resposta).toBeInstanceOf(Usuario);
-      expect(resposta).toEqual(usuario1);
+      expect(resposta).toEqual(usuarioBanco1);
     });
     it('null ao não encontrar usuario com esses dados', async () => {
       const email = 'a@a.com';
@@ -55,7 +59,9 @@ describe('Usuario Repositorio', () => {
       expect(resposta.email).toEqual(usuarioTeste.email);
       expect(resposta.endereco).toEqual(usuarioTeste.endereco);
       expect(resposta.nomeLanchonete).toEqual(usuarioTeste.nomeLanchonete);
-      expect(resposta.senha).toEqual(usuarioTeste.senha);
+      expect(
+        await bcrypt.compare(usuarioTeste.senha, resposta.senha),
+      ).toBeTruthy();
       expect(resposta.id).toBeDefined();
     });
 
@@ -79,7 +85,7 @@ describe('Usuario Repositorio', () => {
 
   describe('Atualizar Usuario', () => {
     it('Retorno de usuario atualizado com os dados passados', async () => {
-      const usuarioComDadosNovos = new Usuario(usuario1);
+      const usuarioComDadosNovos = new Usuario(usuarioBanco1);
 
       usuarioComDadosNovos.email = 'teste@teste.com';
 
@@ -91,16 +97,37 @@ describe('Usuario Repositorio', () => {
       expect(resposta).toEqual(usuarioComDadosNovos);
     });
 
+    it('Retorno de usuario com senha atualizada', async () => {
+      const usuarioComDadosNovos = new Usuario(usuarioBanco1);
+
+      usuarioComDadosNovos.senha = 'senha123';
+
+      const resposta = await usuarioRepositorio.atualizarUsuario(
+        usuarioComDadosNovos.id,
+        usuarioComDadosNovos,
+      );
+
+      const esperado = { ...usuarioComDadosNovos };
+      delete esperado.senha;
+
+      expect(resposta).toEqual(expect.objectContaining(esperado));
+      expect(
+        await bcrypt.compare(usuarioComDadosNovos.senha, resposta.senha),
+      ).toBeTruthy();
+    });
+
     it('Erro ao passar dados inválidos', async () => {
       const usuario = new Usuario();
       usuario.id = usuario1.id;
+
+      const esperado = { ...usuarioBanco1 };
 
       await expect(
         usuarioRepositorio.atualizarUsuario(usuario.id, usuario),
       ).rejects.toThrowError(BadRequestException);
 
       expect((usuarioRepositorio as any).usuarios.get(usuario1.id)).toEqual(
-        usuario1,
+        esperado,
       );
     });
 
@@ -111,15 +138,17 @@ describe('Usuario Repositorio', () => {
     });
 
     it('Erro ao tentar atualizar com outro email em uso', async () => {
-      const usuario2 = registrarUsuarioDeTeste(usuarioRepositorio);
-      const esperado = { ...usuario2 };
-      usuario2.email = usuario1.email;
+      const { usuarioTeste, usuarioBanco } = await registrarUsuarioDeTeste(
+        usuarioRepositorio,
+      );
+      const esperado = { ...usuarioBanco };
+      usuarioTeste.email = usuario1.email;
 
       await expect(
-        usuarioRepositorio.atualizarUsuario(usuario2.id, usuario2),
+        usuarioRepositorio.atualizarUsuario(usuarioTeste.id, usuarioTeste),
       ).rejects.toThrowError(UnprocessableEntityException);
 
-      expect((usuarioRepositorio as any).usuarios.get(usuario2.id)).toEqual(
+      expect((usuarioRepositorio as any).usuarios.get(usuarioTeste.id)).toEqual(
         esperado,
       );
     });
@@ -129,7 +158,7 @@ describe('Usuario Repositorio', () => {
     it('Retorno de usuario ao passar id válido', async () => {
       const resposta = await usuarioRepositorio.carregarUsuario(usuario1.id);
 
-      expect(resposta).toEqual(usuario1);
+      expect(resposta).toEqual(usuarioBanco1);
     });
 
     it('Erro ao passar id de usuario inválido', async () => {
@@ -140,12 +169,17 @@ describe('Usuario Repositorio', () => {
   });
 });
 
-function registrarUsuarioDeTeste(usuarioRepositorio: UsuarioRepository) {
+async function registrarUsuarioDeTeste(usuarioRepositorio: UsuarioRepository) {
   const usuarioTeste = GeradorDeObjetos.criarUsuario();
   const usuarioBanco = new UsuarioDB(usuarioTeste);
+  const hash = await bcrypt.hash(
+    usuarioTeste.senha,
+    (usuarioRepositorio as any).saltRounds,
+  );
+  usuarioBanco.senha = hash;
   usuarioTeste.id = usuarioBanco.id;
 
   (usuarioRepositorio as any).usuarios //pela quebra de proteção "private"
     .set(usuarioBanco.id, usuarioBanco);
-  return usuarioTeste;
+  return { usuarioTeste, usuarioBanco };
 }

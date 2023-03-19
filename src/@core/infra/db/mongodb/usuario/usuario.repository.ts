@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { Model } from 'mongoose';
 
 import { NotFoundException } from './../../../../../@core/custom-exception/not-found-exception.error';
@@ -11,6 +12,8 @@ import { UsuarioMongoDB } from './usuario.model';
 
 @Injectable()
 export class UsuarioRepository implements IUsuarioRepository {
+  private saltRounds = 10;
+
   constructor(
     @InjectModel('Usuario')
     private readonly usuarioModel: Model<UsuarioMongoDB>,
@@ -19,7 +22,7 @@ export class UsuarioRepository implements IUsuarioRepository {
   async validarUsuario(email: string, senha: string): Promise<Usuario> {
     const usuario = await this.usuarioModel.findOne({ email });
 
-    if (usuario && usuario.senha === senha) {
+    if (usuario && (await bcrypt.compare(senha, usuario.senha))) {
       return this.gerarUsuario(usuario);
     }
     return null;
@@ -27,9 +30,13 @@ export class UsuarioRepository implements IUsuarioRepository {
 
   async registrarUsuario(usuario: Usuario): Promise<Usuario> {
     usuario.verificarSeDadosSaoValidosOuErro();
+
+    const hash = await bcrypt.hash(usuario.senha, this.saltRounds);
+
     const usuarioAux = new this.usuarioModel({
       ...usuario,
       _id: randomUUID(),
+      senha: hash,
     });
     try {
       const usuarioRegistrado = await usuarioAux.save();
@@ -53,8 +60,12 @@ export class UsuarioRepository implements IUsuarioRepository {
 
     usuario.verificarSeDadosSaoValidosOuErro();
 
+    if (usuarioAtualizado.senha !== usuario.senha) {
+      const hash = await bcrypt.hash(usuario.senha, this.saltRounds);
+      usuarioAtualizado.senha = hash;
+    }
+
     usuarioAtualizado.email = usuario.email;
-    usuarioAtualizado.senha = usuario.senha;
     usuarioAtualizado.endereco = usuario.endereco;
     usuarioAtualizado.nomeLanchonete = usuario.nomeLanchonete;
 
