@@ -33,5 +33,6 @@ lerna-debug.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
-src/app.config.ts
-src/autenticacao/constantes.ts
+.env
+.e2e.env
+.dev.env

@@ -1,3 +1,4 @@
+import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
 import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
@@ -13,7 +14,14 @@ describe('Usuario Module', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AutenticacaoModule, RepositorioInMemoryModule],
+      imports: [
+        ConfigModule.forRoot({
+          envFilePath: '.test.env',
+          isGlobal: true,
+        }),
+        AutenticacaoModule,
+        RepositorioInMemoryModule,
+      ],
       controllers: [UsuarioController],
       providers: [
         {
@@ -37,7 +45,15 @@ describe('Usuario Module', () => {
 
   it('Modulo instanciado', async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [UsuarioModule, AutenticacaoModule, RepositorioInMemoryModule],
+      imports: [
+        ConfigModule.forRoot({
+          envFilePath: '.test.env',
+          isGlobal: true,
+        }),
+        UsuarioModule,
+        AutenticacaoModule,
+        RepositorioInMemoryModule,
+      ],
     }).compile();
 
     expect(moduleRef).toBeDefined();

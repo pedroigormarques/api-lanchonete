@@ -1,3 +1,4 @@
+import { ConfigModule } from '@nestjs/config';
 import { Test } from '@nestjs/testing';
 
 import { BadRequestException } from './../custom-exception/bad-request-exception.error';
@@ -17,7 +18,13 @@ describe('Usuario Service', () => {
 
   beforeEach(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [AutenticacaoModule],
+      imports: [
+        ConfigModule.forRoot({
+          envFilePath: '.test.env',
+          isGlobal: true,
+        }),
+        AutenticacaoModule,
+      ],
       providers: [
         {
           provide: UsuarioService,
