@@ -3,9 +3,11 @@ import { IUsuarioRepository } from '../../../contratos/usuario.repository.interf
 import { NotFoundException } from './../../../../custom-exception/not-found-exception.error';
 import { UnprocessableEntityException } from '../../../../custom-exception/unprocessable-entity-exception.error';
 import { UsuarioDB } from './../modelos/usuario.db-entity';
+import * as bcrypt from 'bcrypt';
 
 export class UsuarioRepository implements IUsuarioRepository {
   private usuarios = new Map<string, UsuarioDB>();
+  private saltRounds = 10;
 
   async validarUsuario(email: string, senha: string): Promise<Usuario> {
     let usuario: UsuarioDB;
@@ -13,7 +15,7 @@ export class UsuarioRepository implements IUsuarioRepository {
       if (u.email === email) usuario = u;
     });
 
-    if (usuario && usuario.senha === senha) {
+    if (usuario && (await bcrypt.compare(senha, usuario.senha))) {
       return new Usuario(usuario);
     }
     return null;
@@ -23,6 +25,8 @@ export class UsuarioRepository implements IUsuarioRepository {
     this.validarEmail(usuario.email);
 
     const usuarioRegistrado = new UsuarioDB(usuario);
+    const hash = await bcrypt.hash(usuario.senha, this.saltRounds);
+    usuarioRegistrado.senha = hash;
     const id = usuarioRegistrado.id;
 
     this.usuarios.set(id, usuarioRegistrado);
@@ -41,7 +45,13 @@ export class UsuarioRepository implements IUsuarioRepository {
     if (usuario.email !== usuarioAtualizado.email)
       this.validarEmail(usuario.email);
 
+    const senhaRegistrada = usuarioAtualizado.senha;
     usuarioAtualizado.atualizarDadosBase(usuario);
+
+    if (senhaRegistrada !== usuario.senha) {
+      const hash = await bcrypt.hash(usuario.senha, this.saltRounds);
+      usuarioAtualizado.senha = hash;
+    }
 
     return new Usuario(usuarioAtualizado);
   }
