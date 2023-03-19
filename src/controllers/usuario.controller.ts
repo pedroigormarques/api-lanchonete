@@ -9,6 +9,7 @@ import {
   UseFilters,
   UseGuards,
 } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
 import { UsuarioService } from './../@core/aplicacao/usuario-service.use-case';
 import { JwtAuthGuard } from './../autenticacao/jwt.guard';
@@ -19,6 +20,7 @@ import {
   UpdateUsuarioDto,
 } from './Validation/usuario.dto';
 
+@ApiTags('Usuario')
 @Controller('usuario')
 export class UsuarioController {
   constructor(private readonly usuarioService: UsuarioService) {}
@@ -42,6 +44,7 @@ export class UsuarioController {
     return dadosUsuario;
   }
 
+  @ApiBearerAuth()
   @Put('atualizar')
   @UseFilters(ErroDetalhadoEHttpExceptionFilter)
   @UseGuards(JwtAuthGuard)

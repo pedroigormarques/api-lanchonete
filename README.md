@@ -1,73 +1,50 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# API - Lanchonete
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Esta API foi elaborada para estudo e treinamento. As funcionalidades disponibilizadas por ela buscam atender, principalmente, o controle do estoque de várias lanchonetes. Dessa forma, utilizando um sistema de autenticação, é possível interagir com as rotas do estoque, do cardápio e dos pedidos de cada uma das lanchonetes de modo individual e seguro.
+Para seu desenvolvimento, foi utilizado como linguagem o **TypeScript** e como ferramenta o **NestJs**. A princípio, sua organização foi pensada para buscar atingir uma arquitetura limpa e baseada em testes. No caso da persistência dos dados, foi utilizado o banco de dados **MongoDB**.
 
-## Installation
+## API em execução para testes
+
+Para testar suas funcionalidades, o link de acesso para um deploy em funcionamento se encontra em **[https://api-lanchonete.onrender.com](https://api-lanchonete.onrender.com)**. Para consultar as rotas disponíveis, acesse **[https://api-lanchonete.onrender.com/api](https://api-lanchonete.onrender.com/api)**
+
+## Instalação
+
+Comando para instalar a API:
 
 ```bash
 $ npm install
 ```
 
-## Running the app
+Também deve ser criado 3 arquivos contendo as variáveis de ambiente para cada necessidade: `.env`, `.dev.test` e `.e2e.test`. As variáveis necessárias em cada uma delas são: `URL_BANCO`, `NOME_DATABASE`, `JWT_CONSTANTS_SECRET` e `JWT_EXPIRES_IN`
+
+## Rodando a API
+
+Comandos para rodar a API localnente:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
+# Como desenvolvedor
 $ npm run start:dev
 
-# production mode
+# Como modo de produção
 $ npm run start:prod
 ```
 
-## Test
+## Testes
+
+Comandos para a execução dos testes da API localmente:
 
 ```bash
-# unit tests
+# Testes unitários
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
+# Testes de cobertura
 $ npm run test:cov
+
+# Testes de integração
+$ npm run test:integracao
+
+# Testes e2e - Executando os testes de integração, porém, utilizando o banco de dados configurado
+$ npm run test:integracao-e2e
 ```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).

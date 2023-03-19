@@ -2,8 +2,6 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AutenticacaoModule } from './autenticacao/autenticacao.module';
 import { ErroDetalhadoEHttpExceptionFilter } from './exception/exception-filter';
 import { MapInterceptor } from './interceptor/map.interceptor';
@@ -29,9 +27,7 @@ import { UsuarioModule } from './modulos/usuario.module';
     PedidoModule,
     GerenciadorRepositoriosModule.forRoot(),
   ],
-  controllers: [AppController],
   providers: [
-    AppService,
     {
       provide: APP_INTERCEPTOR,
       useClass: MapInterceptor,
