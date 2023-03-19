@@ -1,3 +1,4 @@
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -24,6 +25,8 @@ import {
   CreatePedidoDto,
 } from './Validation/pedido.dto';
 
+@ApiBearerAuth()
+@ApiTags('Pedidos')
 @Controller()
 export class PedidoController {
   constructor(private readonly pedidoService: PedidosService) {}

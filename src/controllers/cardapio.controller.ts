@@ -1,3 +1,4 @@
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import {
   Body,
   Controller,
@@ -25,6 +26,8 @@ import {
   UpdateProdutoCardapioDto,
 } from './Validation/produto-cardapio.dto';
 
+@ApiTags('Cardapio')
+@ApiBearerAuth()
 @Controller('cardapio')
 export class CardapioController {
   constructor(private readonly cardapioService: CardapioService) {}
