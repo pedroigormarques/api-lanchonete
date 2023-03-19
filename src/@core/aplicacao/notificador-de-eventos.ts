@@ -16,6 +16,7 @@ export class NotificadorDeEventos<T extends itemDoBancoDeDados> {
     if (!this.eventsSubjects.has(idUsuario)) {
       this.eventsSubjects.set(idUsuario, new ReplaySubject<Evento<T>>());
       this.carregarDadosIniciais(idUsuario);
+      this.iniciarAnalisadorDeUsoDoSubject(idUsuario);
     }
     return this.eventsSubjects.get(idUsuario).asObservable();
   }
@@ -76,5 +77,14 @@ export class NotificadorDeEventos<T extends itemDoBancoDeDados> {
         dadosIniciais.map((dado) => dado.id),
         dadosIniciais,
       );
+  }
+
+  private iniciarAnalisadorDeUsoDoSubject(idUsuario: string) {
+    const numeroIntervalo = setInterval(() => {
+      if (!this.eventsSubjects.get(idUsuario).observed) {
+        this.eventsSubjects.delete(idUsuario);
+        clearInterval(numeroIntervalo);
+      }
+    }, 60000);
   }
 }
