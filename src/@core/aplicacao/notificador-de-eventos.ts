@@ -45,7 +45,8 @@ export class NotificadorDeEventos<T extends itemDoBancoDeDados> {
     }
     const alteracoes = new Array<Notificacao<T>>();
     listaIds.forEach((id, index) => {
-      alteracoes.push(new Notificacao<T>(tipo, id, dados?.at(index)));
+      const dado = dados ? dados[index] : undefined;
+      alteracoes.push(new Notificacao<T>(tipo, id, dado));
     });
     const evento = { type: tipo, data: alteracoes };
     this.emitirAlteracao(idUsuario, evento);
