@@ -48,7 +48,7 @@ export function mapaPossuiDadosValidos(
     if (chaveInvalida) return true;
 
     const valorInvalido = validadoresParaValor.some(
-      (validator) => !validator(valores.at(index)),
+      (validator) => !validator(valores[index]),
     );
     return valorInvalido;
   });
