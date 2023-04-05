@@ -82,7 +82,7 @@ export class AuxiliadorTesteIntegracao {
       mesa,
     });
 
-    if (qtdParaProdutoConsumido) {
+    if (typeof qtdParaProdutoConsumido !== 'undefined') {
       const produtoCardapio = await this.gerarProdutoCardapioParaTeste(
         idUsuario,
         1,

@@ -36,7 +36,7 @@ export class ProdutoEstoqueRepository implements IProdutosEstoqueRepository {
   ): Promise<ProdutoEstoque[]> {
     let produtos: ProdutoEstoqueMongoDB[];
 
-    if (listaIds) {
+    if (typeof listaIds !== 'undefined') {
       produtos = await this.estoqueModel.find({
         _id: listaIds,
       });

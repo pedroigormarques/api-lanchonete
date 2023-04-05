@@ -32,7 +32,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
     listaIds?: string[],
   ): Promise<ProdutoCardapio[]> {
     const listaProdutos = [] as ProdutoCardapio[];
-    if (listaIds) {
+    if (typeof listaIds !== 'undefined') {
       listaIds.forEach((idProduto) => {
         const produto = this.produtos.get(idProduto);
         if (!produto) {

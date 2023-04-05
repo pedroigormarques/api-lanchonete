@@ -25,7 +25,7 @@ export class Usuario {
   constructor(dadosUsuario: DadosBaseUsuario);
   constructor(dadosUsuario: Usuario);
   constructor(dadosUsuario?: DadosBaseUsuario | Usuario) {
-    if (dadosUsuario) {
+    if (typeof dadosUsuario !== 'undefined') {
       if (dadosUsuario instanceof Usuario) {
         this.registrarDados(dadosUsuario);
       } else {
@@ -35,10 +35,13 @@ export class Usuario {
   }
 
   atualizarDados(dadosUsuario: Partial<DadosBaseUsuario>) {
-    if (dadosUsuario.email) this.email = dadosUsuario.email;
-    if (dadosUsuario.endereco) this.endereco = dadosUsuario.endereco;
-    if (dadosUsuario.senha) this.senha = dadosUsuario.senha;
-    if (dadosUsuario.nomeLanchonete)
+    if (typeof dadosUsuario.email !== 'undefined')
+      this.email = dadosUsuario.email;
+    if (typeof dadosUsuario.endereco !== 'undefined')
+      this.endereco = dadosUsuario.endereco;
+    if (typeof dadosUsuario.senha !== 'undefined')
+      this.senha = dadosUsuario.senha;
+    if (typeof dadosUsuario.nomeLanchonete !== 'undefined')
       this.nomeLanchonete = dadosUsuario.nomeLanchonete;
   }
 
@@ -58,7 +61,7 @@ export class Usuario {
   }
 
   protected registrarDados(dadosUsuario: { id?: string } & DadosBaseUsuario) {
-    if (dadosUsuario.id) this.id = dadosUsuario.id;
+    if (typeof dadosUsuario.id !== 'undefined') this.id = dadosUsuario.id;
     this.email = dadosUsuario.email;
     this.endereco = dadosUsuario.endereco;
     this.nomeLanchonete = dadosUsuario.nomeLanchonete;

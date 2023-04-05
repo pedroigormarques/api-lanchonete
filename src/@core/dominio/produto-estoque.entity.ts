@@ -22,7 +22,7 @@ export class ProdutoEstoque {
   constructor(dadosProduto: DadosBaseProdutoEstoque);
   constructor(dadosProduto: ProdutoEstoque);
   constructor(dadosProduto?: DadosBaseProdutoEstoque | ProdutoEstoque) {
-    if (dadosProduto) {
+    if (typeof dadosProduto !== 'undefined') {
       ProdutoEstoque.DadosSaoValidosParaRegistroOuErro(dadosProduto);
       this.registrarDados(dadosProduto);
     }
@@ -31,10 +31,14 @@ export class ProdutoEstoque {
   atualizarDados(
     dadosProduto: Omit<Partial<DadosBaseProdutoEstoque>, 'idUsuario'>,
   ) {
-    if (dadosProduto.nomeProduto) this.nomeProduto = dadosProduto.nomeProduto;
-    if (dadosProduto.descricao) this.descricao = dadosProduto.descricao;
-    if (dadosProduto.unidade) this.setUnidade(dadosProduto.unidade);
-    if (dadosProduto.quantidade) this.setQuantidade(dadosProduto.quantidade);
+    if (typeof dadosProduto.nomeProduto !== 'undefined')
+      this.nomeProduto = dadosProduto.nomeProduto;
+    if (typeof dadosProduto.descricao !== 'undefined')
+      this.descricao = dadosProduto.descricao;
+    if (typeof dadosProduto.unidade !== 'undefined')
+      this.setUnidade(dadosProduto.unidade);
+    if (typeof dadosProduto.quantidade !== 'undefined')
+      this.setQuantidade(dadosProduto.quantidade);
   }
 
   possuiTodosOsDadosValidos(): boolean {
@@ -62,7 +66,7 @@ export class ProdutoEstoque {
   protected registrarDados(
     dadosProduto: { id?: string } & DadosBaseProdutoEstoque,
   ) {
-    if (dadosProduto.id) this.id = dadosProduto.id;
+    if (typeof dadosProduto.id !== 'undefined') this.id = dadosProduto.id;
     this.idUsuario = dadosProduto.idUsuario;
     this.descricao = dadosProduto.descricao;
     this.nomeProduto = dadosProduto.nomeProduto;

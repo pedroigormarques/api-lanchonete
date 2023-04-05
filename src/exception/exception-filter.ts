@@ -1,12 +1,13 @@
-import { ErroDetalhado } from './../@core/custom-exception/exception-detalhado.error';
 import {
   ArgumentsHost,
+  BadRequestException,
   Catch,
   ExceptionFilter,
   HttpException,
-  BadRequestException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+
+import { ErroDetalhado } from './../@core/custom-exception/exception-detalhado.error';
 
 @Catch(ErroDetalhado, HttpException)
 export class ErroDetalhadoEHttpExceptionFilter implements ExceptionFilter {
@@ -34,7 +35,7 @@ export class ErroDetalhadoEHttpExceptionFilter implements ExceptionFilter {
       message: message,
     };
 
-    if (erro.erros) {
+    if (typeof erro.erros !== 'undefined') {
       if (typeof erro.erros === 'string') erroJson['error'] = erro.erros;
       else erroJson['errors'] = erro.erros;
     }

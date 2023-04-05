@@ -32,7 +32,7 @@ export class Pedido {
   constructor(
     dadosPedido?: Pick<DadosBasePedido, 'mesa' | 'idUsuario'> | Pedido,
   ) {
-    if (dadosPedido) {
+    if (typeof dadosPedido !== 'undefined') {
       Pedido.dadosSaoValidosParaRegistroOuErro(dadosPedido);
       this.setMesa(dadosPedido.mesa);
       this.idUsuario = dadosPedido.idUsuario;
@@ -47,10 +47,11 @@ export class Pedido {
   }
 
   atualizarDados(dadosPedido: Omit<Partial<DadosBasePedido>, 'idUsuario'>) {
-    if (dadosPedido.mesa) this.setMesa(dadosPedido.mesa);
-    if (dadosPedido.produtosVendidos)
+    if (typeof dadosPedido.mesa !== 'undefined') this.setMesa(dadosPedido.mesa);
+    if (typeof dadosPedido.produtosVendidos !== 'undefined')
       this.produtosVendidos = new Map(dadosPedido.produtosVendidos.entries());
-    if (dadosPedido.valorConta) this.setValorConta(dadosPedido.valorConta);
+    if (typeof dadosPedido.valorConta !== 'undefined')
+      this.setValorConta(dadosPedido.valorConta);
   }
 
   setMesa(mesa: number) {
@@ -88,7 +89,7 @@ export class Pedido {
   private registrarDados(
     dadosPedido: { id?: string; horaAbertura: Date } & DadosBasePedido,
   ) {
-    if (dadosPedido.id) this.id = dadosPedido.id;
+    if (typeof dadosPedido.id !== 'undefined') this.id = dadosPedido.id;
 
     this.horaAbertura = new Date(dadosPedido.horaAbertura);
     this.setValorConta(dadosPedido.valorConta);
