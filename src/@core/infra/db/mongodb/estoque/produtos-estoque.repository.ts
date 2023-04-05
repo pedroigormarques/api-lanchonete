@@ -124,7 +124,7 @@ export class ProdutoEstoqueRepository implements IProdutosEstoqueRepository {
 
     const listaAtualizada = [] as ProdutoEstoque[];
 
-    produtosEstoque.map(async (p) => {
+    for (const p of produtosEstoque) {
       let produtoAtualizado = await this.estoqueModel.findById(p.id);
 
       produtoAtualizado.nomeProduto = p.nomeProduto;
@@ -135,7 +135,7 @@ export class ProdutoEstoqueRepository implements IProdutosEstoqueRepository {
       produtoAtualizado = await produtoAtualizado.save();
 
       listaAtualizada.push(this.gerarProdutoEstoque(produtoAtualizado));
-    });
+    }
 
     return listaAtualizada;
   }
