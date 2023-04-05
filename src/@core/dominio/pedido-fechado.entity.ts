@@ -25,7 +25,7 @@ export class PedidoFechado {
   constructor(dadosPedido: DadosBasePedidoFechado);
   constructor(dadosPedido: PedidoFechado);
   constructor(dadosPedido?: DadosBasePedidoFechado | PedidoFechado) {
-    if (dadosPedido) {
+    if (typeof dadosPedido !== 'undefined') {
       PedidoFechado.dadosSaoValidosParaRegistroOuErro(dadosPedido);
       this.registrarDados(dadosPedido);
     }
@@ -40,8 +40,9 @@ export class PedidoFechado {
       horaFechamento?: Date;
     } & DadosBasePedidoFechado,
   ) {
-    if (dadosPedidoFechado.id) this.id = dadosPedidoFechado.id;
-    if (dadosPedidoFechado.horaFechamento)
+    if (typeof dadosPedidoFechado.id !== 'undefined')
+      this.id = dadosPedidoFechado.id;
+    if (typeof dadosPedidoFechado.horaFechamento !== 'undefined')
       this.horaFechamento = new Date(dadosPedidoFechado.horaFechamento);
 
     this.idUsuario = dadosPedidoFechado.idUsuario;

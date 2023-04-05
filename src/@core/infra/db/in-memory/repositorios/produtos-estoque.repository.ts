@@ -21,7 +21,7 @@ export class ProdutosEstoqueRepository implements IProdutosEstoqueRepository {
     listaIds?: string[],
   ): Promise<ProdutoEstoque[]> {
     const listaProdutos = [] as ProdutoEstoque[];
-    if (listaIds) {
+    if (typeof listaIds !== 'undefined') {
       listaIds.forEach((idProduto) => {
         const produto = this.produtos.get(idProduto);
         if (!produto) {

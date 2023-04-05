@@ -1,5 +1,5 @@
-import { BadRequestException } from './../custom-exception/bad-request-exception.error';
 import { possuiUmValorValidoParaOEnum } from '../helper/manipular-enum.function';
+import { BadRequestException } from './../custom-exception/bad-request-exception.error';
 import { CATEGORIAS } from './enums/categorias.enum';
 
 export interface DadosBaseProdutoCardapio {
@@ -24,7 +24,7 @@ export class ProdutoCardapio {
   constructor(dadosProduto: DadosBaseProdutoCardapio);
   constructor(dadosProduto: ProdutoCardapio);
   constructor(dadosProduto?: DadosBaseProdutoCardapio | ProdutoCardapio) {
-    if (dadosProduto) {
+    if (typeof dadosProduto !== 'undefined') {
       ProdutoCardapio.DadosSaoValidosParaRegistroOuErro(dadosProduto);
       this.registrarDados(dadosProduto);
     }
@@ -41,12 +41,17 @@ export class ProdutoCardapio {
   atualizarDados(
     dadosProduto: Omit<Partial<DadosBaseProdutoCardapio>, 'idUsuario'>,
   ) {
-    if (dadosProduto.descricao) this.descricao = dadosProduto.descricao;
-    if (dadosProduto.nomeProduto) this.nomeProduto = dadosProduto.nomeProduto;
+    if (typeof dadosProduto.descricao !== 'undefined')
+      this.descricao = dadosProduto.descricao;
+    if (typeof dadosProduto.nomeProduto !== 'undefined')
+      this.nomeProduto = dadosProduto.nomeProduto;
 
-    if (dadosProduto.composicao) this.setComposicao(dadosProduto.composicao);
-    if (dadosProduto.preco) this.setPreco(dadosProduto.preco);
-    if (dadosProduto.categoria) this.setCategoria(dadosProduto.categoria);
+    if (typeof dadosProduto.composicao !== 'undefined')
+      this.setComposicao(dadosProduto.composicao);
+    if (typeof dadosProduto.preco !== 'undefined')
+      this.setPreco(dadosProduto.preco);
+    if (typeof dadosProduto.categoria !== 'undefined')
+      this.setCategoria(dadosProduto.categoria);
   }
 
   setPreco(preco: number) {
@@ -76,7 +81,7 @@ export class ProdutoCardapio {
   protected registrarDados(
     dadosProduto: { id?: string } & DadosBaseProdutoCardapio,
   ) {
-    if (dadosProduto.id) this.id = dadosProduto.id;
+    if (typeof dadosProduto.id !== 'undefined') this.id = dadosProduto.id;
 
     this.idUsuario = dadosProduto.idUsuario;
     this.descricao = dadosProduto.descricao;

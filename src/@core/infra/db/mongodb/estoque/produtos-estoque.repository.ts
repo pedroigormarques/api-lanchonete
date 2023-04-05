@@ -36,7 +36,7 @@ export class ProdutoEstoqueRepository implements IProdutosEstoqueRepository {
   ): Promise<ProdutoEstoque[]> {
     let produtos: ProdutoEstoqueMongoDB[];
 
-    if (listaIds) {
+    if (typeof listaIds !== 'undefined') {
       produtos = await this.estoqueModel.find({
         _id: listaIds,
       });
@@ -87,7 +87,7 @@ export class ProdutoEstoqueRepository implements IProdutosEstoqueRepository {
 
     if (produtoAtualizado.unidade !== produto.unidade) {
       await produtoAtualizado.populate('usadoPor');
-      if (produto['usadoPor'] !== 0) {
+      if (produtoAtualizado['usadoPor'] !== 0) {
         throw new UnprocessableEntityException(
           `Produto do estoque de id ${produtoAtualizado.id} está sendo utilizado por algum produto do cardápio. Atualização cancelada`,
         );

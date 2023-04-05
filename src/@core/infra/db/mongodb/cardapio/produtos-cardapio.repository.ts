@@ -40,7 +40,7 @@ export class ProdutosCardapioRepository implements IProdutosCardapioRepository {
     listaIds?: string[],
   ): Promise<ProdutoCardapio[]> {
     let produtos;
-    if (listaIds) {
+    if (typeof listaIds !== 'undefined') {
       produtos = await this.cardapioModel.find({
         _id: listaIds,
       });
