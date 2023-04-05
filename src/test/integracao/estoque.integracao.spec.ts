@@ -118,6 +118,7 @@ describe('Estoque', () => {
       const dados = {
         descricao: 'descricaoNova',
         nomeProduto: 'nomeProdutoNovo',
+        unidade: 'kg',
       };
 
       const { body } = await request(auxiliar.httpServer)
@@ -130,7 +131,7 @@ describe('Estoque', () => {
       expect(body.descricao).toEqual(dados.descricao);
       expect(body.nomeProduto).toEqual(dados.nomeProduto);
       expect(body.quantidade).toEqual(produtoRegistrado.quantidade);
-      expect(body.unidade).toEqual(produtoRegistrado.unidade);
+      expect(body.unidade).toEqual(dados.unidade);
       expect(body.idUsuario).toEqual(produtoRegistrado.idUsuario);
 
       //para teste do GetProdutos
